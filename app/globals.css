@@ -1,26 +1,147 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* Tactical Command Center Colors */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  
+  --font-sans: "Inter", var(--font-geist-sans);
+  --font-mono: "JetBrains Mono", var(--font-geist-mono);
+
+  --color-primary: var(--primary);
+  --color-border: var(--border);
+  --color-card: var(--card);
+
+  --radius-lg: var(--radius);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  /* Default Shadcn/Tailwind Variables mapped to Tactical Colors */
+  --radius: 0; /* Tactical Sharp Corners */
+  --background: oklch(0.08 0 0); /* #050505 approx */
+  --foreground: oklch(1 0 0);    /* #ffffff */
+  
+  --card: oklch(0.12 0 0);       /* #0d0d0d */
+  --card-foreground: oklch(1 0 0);
+  
+  --primary: oklch(0.74 0.22 45); /* Tactical Orange #f97316 */
+  --primary-foreground: oklch(0 0 0); /* Black text on orange */
+  
+  --muted: oklch(0.25 0 0);
+  --muted-foreground: oklch(0.55 0 0); /* #66666e */
+  
+  --border: oklch(0.18 0.01 260); /* #1f1f23 */
+  --input: oklch(0.18 0.01 260);
+  --accent: oklch(0.74 0.22 45);
+  --accent-foreground: oklch(1 0 0);
+  
+  --ring: oklch(0.74 0.22 45);
+
+  /* Tactical Grid Constants */
+  --grid-line: #1f1f23;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  /* FIXED: Changed from 'default' to 'pointer' to show the hand icon */
+  button, 
+  [role="button"],
+  .tier-btn,
+  .tab-btn,
+  .logo-link,
+  .status-badge,
+  a {
+    cursor: pointer !important;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    background-image: 
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 40px 40px;
+    -webkit-font-smoothing: antialiased;
+    cursor: default; /* Keep the arrow for the background/text */
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Command Center Components */
+@layer components {
+  .app-container { @apply w-full p-8 box-border; }
+
+  .card-bento {
+    @apply bg-card border border-border rounded-none transition-all duration-200;
+    border-top: 2px solid var(--muted-foreground);
+  }
+
+  .card-bento:hover {
+    @apply bg-[#141414];
+    border-color: color-mix(in srgb, var(--primary), transparent 60%);
+    transform: translateY(-2px);
+  }
+
+  .input-field {
+    @apply bg-black border border-border text-white font-mono rounded-none px-4 py-2 transition-all;
+  }
+
+  .input-field:focus {
+    border-color: var(--primary);
+    @apply outline-none ring-1;
+    --tw-ring-color: var(--primary);
+  }
+
+  .btn-primary {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    @apply font-black uppercase tracking-widest rounded-none px-6 py-2 transition-all;
+  }
+
+  .btn-primary:hover {
+    @apply bg-white text-black;
+  }
+
+  .tab-btn {
+    color: var(--muted-foreground);
+    @apply font-bold transition-all duration-200 uppercase text-xs pb-2;
+  }
+
+  .tab-btn.active {
+    color: var(--primary);
+    border-bottom: 2px solid var(--primary);
+  }
+
+  .status-badge {
+    @apply flex items-center gap-2 px-3 py-1.5 text-[9px] font-black uppercase border transition-all active:scale-95;
+  }
+  
+  .status-badge:hover {
+    @apply brightness-125;
+    box-shadow: 0 0 15px var(--primary);
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: #000; }
+::-webkit-scrollbar-thumb { background: #222; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+/* Hidden scrollbar utility for terminal */
+.scrollbar-hide::-webkit-scrollbar { width: 2px; }
+.scrollbar-hide::-webkit-scrollbar-thumb { background: #1a1a1a; }
+
+/* Status select keeps the badge look but adds a subtle caret */
+.status-badge {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3'><path d='M6 9l6 6 6-6'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 8px;
+  padding-right: 22px !important;
 }
