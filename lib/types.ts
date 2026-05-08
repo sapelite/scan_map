@@ -68,6 +68,7 @@ export interface Lead {
   websiteFromMaps?: string | null;     // raw URL Maps exposed (may differ from final URL)
   websiteStatus: WebsiteStatus;
   websiteFailReason?: string | null;   // human-readable reason if unreachable
+  auditAttempts?: string[];            // per-attempt log: every URL tried + outcome
   email: string;
   tech: string;
   rating: number;

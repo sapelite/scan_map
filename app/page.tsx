@@ -33,13 +33,13 @@ function ScanFeed({
     <div className="card mb-5 overflow-hidden">
       <div className="px-5 py-3 flex items-center justify-between border-b border-border">
         <div className="flex items-center gap-2">
-          <span className={`status-dot ${isScanning ? "bg-[#ff9500] animate-pulse" : "bg-[#34c759]"}`} />
+          <span className={`status-dot ${isScanning ? "bg-[#d97706] animate-pulse" : "bg-[#2f9e44]"}`} />
           <span className="text-sm font-medium text-foreground">
-            {isScanning ? "Scanning…" : "Scan complete"}
+            {isScanning ? "Scanning" : "Done"}
           </span>
         </div>
         <span className="text-xs text-muted-foreground tabular-nums">
-          {leadCount} of {target}
+          {leadCount}/{target}
         </span>
       </div>
       {isScanning && (
@@ -55,15 +55,14 @@ function ScanFeed({
           <div
             key={i}
             className={
-              log.includes("FOUND") ? "text-[#1c7c3a]" :
-              log.includes("ERROR") ? "text-[#b1251d]" :
+              log.includes("FOUND") ? "text-[#2f9e44]" :
+              log.includes("ERROR") ? "text-[#d92d20]" :
               "text-muted-foreground"
             }
           >
             {log}
           </div>
         ))}
-        {isScanning && <div className="text-(--tertiary-foreground) animate-pulse">› working…</div>}
         <div ref={scrollRef} />
       </div>
     </div>
@@ -125,6 +124,9 @@ function CommandCenterInner() {
   const [location, setLocation] = useState("");
   const [recent, setRecent] = useState<RecentSearch[]>([]);
   const [vaultLoading, setVaultLoading] = useState(false);
+  const [bulkReaudit, setBulkReaudit] = useState<{ active: boolean; done: number; total: number; msg: string }>({
+    active: false, done: 0, total: 0, msg: "",
+  });
   const toast = useToast();
 
   useEffect(() => {
@@ -139,7 +141,7 @@ function CommandCenterInner() {
     fetch("/api/leads")
       .then((res) => res.json())
       .then((data) => setVaultLeads(data))
-      .catch(() => toast.push("Couldn't load your library", "error"))
+      .catch(() => toast.push("Failed to load", "error"))
       .finally(() => setVaultLoading(false));
   }, [toast]);
 
@@ -239,12 +241,11 @@ function CommandCenterInner() {
       if (response.ok) {
         setVaultLeads((prev) => prev.map((l) => (String(l.id) === String(id) ? { ...l, status: nextStatus } : l)));
         if (openLead && String(openLead.id) === String(id)) setOpenLead({ ...openLead, status: nextStatus });
-        toast.push(`Status updated`, "success");
       } else {
-        toast.push("Couldn't update status", "error");
+        toast.push("Update failed", "error");
       }
     } catch {
-      toast.push("Couldn't update status", "error");
+      toast.push("Update failed", "error");
     }
   };
 
@@ -254,15 +255,11 @@ function CommandCenterInner() {
 
   const handleQuickStrike = (lead: Lead) => {
     if (!lead.email || lead.email === "No email found" || lead.email === "No Email Found") {
-      toast.push("No email on file for this lead", "warn");
+      toast.push("No email on file", "warn");
       return;
     }
-    const subject = encodeURIComponent(`Quick thoughts on ${lead.name}'s site`);
-    const body = encodeURIComponent(
-      `Hi ${lead.name} team,\n\n${lead.pitch}\n\nWould you be open to a quick 15-minute call this week?\n\nBest,\n[Your Name]`
-    );
-    window.location.href = `mailto:${lead.email}?subject=${subject}&body=${body}`;
-    toast.push(`Opening email for ${lead.name}`, "info");
+    const subject = encodeURIComponent(`${lead.name}`);
+    window.location.href = `mailto:${lead.email}?subject=${subject}`;
   };
 
   const executePurge = async () => {
@@ -272,13 +269,12 @@ function CommandCenterInner() {
       if (response.ok) {
         setVaultLeads((prev) => prev.filter((l) => String(l.id) !== String(purgeId)));
         if (openLead && String(openLead.id) === purgeId) setOpenLead(null);
-        toast.push("Lead deleted", "success");
         setPurgeId(null);
       } else {
-        toast.push("Couldn't delete lead", "error");
+        toast.push("Delete failed", "error");
       }
     } catch {
-      toast.push("Couldn't delete lead", "error");
+      toast.push("Delete failed", "error");
     }
   };
 
@@ -295,14 +291,77 @@ function CommandCenterInner() {
       const json = await res.json();
       if (action === "delete") {
         setVaultLeads((prev) => prev.filter((l) => !selectedIds.has(String(l.id))));
-        toast.push(`Deleted ${json.count} lead${json.count === 1 ? "" : "s"}`, "success");
       } else if (action === "status" && status) {
         setVaultLeads((prev) => prev.map((l) => (selectedIds.has(String(l.id)) ? { ...l, status } : l)));
-        toast.push(`${json.count} updated → ${status.toLowerCase()}`, "success");
       }
       setSelectedIds(new Set());
     } catch {
       toast.push("Bulk action failed", "error");
+    }
+  };
+
+  const staleCount = useMemo(
+    () => vaultLeads.filter((l) => !l.audit || !l.websiteStatus || l.websiteStatus !== "audited").length,
+    [vaultLeads],
+  );
+
+  const runBulkReaudit = async (idsOrAll: string[] | "stale") => {
+    if (bulkReaudit.active) return;
+    const ids = idsOrAll === "stale" ? undefined : idsOrAll;
+    setBulkReaudit({ active: true, done: 0, total: 0, msg: "" });
+    try {
+      const res = await fetch("/api/leads/reaudit-bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: ids ?? [] }),
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j?.error || "Bulk re-audit failed");
+      }
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      if (!reader) throw new Error("No response stream");
+      let succeeded = 0;
+      let errored = 0;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value);
+        for (const line of chunk.split("\n\n")) {
+          if (!line.startsWith("data: ")) continue;
+          const dataStr = line.replace("data: ", "");
+          if (dataStr === "[DONE]") continue;
+          try {
+            const ev = JSON.parse(dataStr);
+            if (ev.type === "lead" && ev.lead) {
+              succeeded++;
+              setVaultLeads((prev) => prev.map((l) => (String(l.id) === String(ev.lead.id) ? ev.lead : l)));
+              setBulkReaudit({
+                active: true,
+                done: (ev.index ?? 0) + 1,
+                total: ev.total ?? 0,
+                msg: ev.lead.name,
+              });
+            } else if (ev.type === "progress") {
+              setBulkReaudit((s) => ({ ...s, total: ev.total ?? s.total, msg: ev.msg ?? s.msg }));
+            } else if (ev.type === "error") {
+              errored++;
+              setBulkReaudit((s) => ({
+                ...s,
+                done: (ev.index ?? s.done) + 1,
+                total: ev.total ?? s.total,
+                msg: ev.msg ?? "Error",
+              }));
+            }
+          } catch { /* parse error */ }
+        }
+      }
+      toast.push(`${succeeded} updated${errored ? `, ${errored} failed` : ""}`, errored > 0 ? "warn" : "success");
+    } catch (err) {
+      toast.push(err instanceof Error ? err.message : "Failed", "error");
+    } finally {
+      setBulkReaudit({ active: false, done: 0, total: 0, msg: "" });
     }
   };
 
@@ -313,11 +372,11 @@ function CommandCenterInner() {
       .map((l) => l.email)
       .filter((e) => e && e !== "No email found" && e !== "No Email Found");
     if (list.length === 0) {
-      toast.push("No valid emails in selection", "warn");
+      toast.push("No valid emails", "warn");
       return;
     }
     navigator.clipboard.writeText(list.join(", "));
-    toast.push(`Copied ${list.length} email${list.length === 1 ? "" : "s"}`, "success");
+    toast.push(`Copied ${list.length}`, "success");
   };
 
   const downloadPDF = (item: Lead) => {
@@ -472,13 +531,13 @@ function CommandCenterInner() {
 
   const runHunter = async () => {
     if (!niche.trim() || !location.trim()) {
-      toast.push("Add an industry and a location", "warn");
+      toast.push("Industry and location required", "warn");
       return;
     }
     setLeads([]);
     setScanLogs([
-      `› Searching "${niche}" in ${location}`,
-      `› Plan: ${tier} (up to ${TIER_INFO[tier].deliver} leads)`,
+      `Searching "${niche}" in ${location}`,
+      `Plan: ${tier} (up to ${TIER_INFO[tier].deliver} leads)`,
     ]);
     setIsScanning(true);
     pushRecent({ niche, location, tier, ts: Date.now() });
@@ -501,7 +560,7 @@ function CommandCenterInner() {
           if (line.startsWith("data: ")) {
             const dataStr = line.replace("data: ", "");
             if (dataStr === "[DONE]") {
-              setScanLogs((prev) => [...prev, `› Done.`]);
+              setScanLogs((prev) => [...prev, `Done`]);
               return;
             }
             try {
@@ -510,7 +569,7 @@ function CommandCenterInner() {
                 setLeads((prev) => [event.data, ...prev]);
                 setScanLogs((prev) => [...prev, `FOUND  ${event.data.name}  (score ${event.data.stats.score})`]);
               } else if (event.status === "auditing") {
-                setScanLogs((prev) => [...prev, `› ${event.msg}`]);
+                setScanLogs((prev) => [...prev, event.msg]);
               } else if (event.status === "error") {
                 setScanLogs((prev) => [...prev, `ERROR  ${event.msg}`]);
               }
@@ -520,7 +579,7 @@ function CommandCenterInner() {
       }
     } catch {
       setScanLogs((prev) => [...prev, "ERROR  Connection failure"]);
-      toast.push("Connection failure during scan", "error");
+      toast.push("Scan failed", "error");
     } finally {
       setIsScanning(false);
     }
@@ -563,12 +622,12 @@ function CommandCenterInner() {
         {view === "hunter" ? (
           <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
             {/* Hero */}
-            <section className="text-center max-w-3xl mx-auto mb-10">
-              <h1 className="text-4xl lg:text-5xl font-semibold tracking-tight text-foreground mb-3">
-                Find leads worth contacting.
+            <section className="text-center max-w-2xl mx-auto mb-8">
+              <h1 className="text-3xl lg:text-4xl font-semibold tracking-tight text-foreground mb-2">
+                Find leads.
               </h1>
-              <p className="text-lg text-muted-foreground leading-relaxed">
-                Scanmap searches local businesses by industry and location, then runs a real audit on each website — so you can prioritize who actually needs your help.
+              <p className="text-base text-muted-foreground">
+                Search local businesses, audit their websites.
               </p>
             </section>
 
@@ -579,7 +638,7 @@ function CommandCenterInner() {
                   value={niche}
                   onChange={(e) => setNiche(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && !isScanning && runHunter()}
-                  placeholder="Industry — e.g. dentist, yoga studio"
+                  placeholder="Industry"
                   className="input"
                   disabled={isScanning}
                 />
@@ -587,7 +646,7 @@ function CommandCenterInner() {
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && !isScanning && runHunter()}
-                  placeholder="Location — e.g. Austin, Bali"
+                  placeholder="Location"
                   className="input"
                   disabled={isScanning}
                 />
@@ -616,9 +675,9 @@ function CommandCenterInner() {
               <button
                 onClick={runHunter}
                 disabled={isScanning}
-                className="btn btn-accent w-full"
+                className="btn btn-primary w-full"
               >
-                {isScanning ? "Scanning…" : "Start scan"}
+                {isScanning ? "Scanning" : "Search"}
               </button>
             </section>
 
@@ -657,10 +716,7 @@ function CommandCenterInner() {
                 ))}
                 {leads.length === 0 && !isScanning && (
                   <div className="card-flat p-10 text-center">
-                    <p className="text-foreground font-medium mb-1">Nothing scanned yet</p>
-                    <p className="text-sm text-muted-foreground mb-6">
-                      Try one of these to see what an audit looks like:
-                    </p>
+                    <p className="text-sm text-muted-foreground mb-4">Try a sample search:</p>
                     <div className="flex flex-wrap justify-center gap-2">
                       {[
                         { n: "dentist", l: "Austin" },
@@ -697,6 +753,35 @@ function CommandCenterInner() {
               <ScoreDistribution leads={vaultLeads} />
             </section>
 
+            {/* Stale-data alert */}
+            {staleCount > 0 && !bulkReaudit.active && (
+              <section className="card-flat p-3 mb-4 flex items-center justify-between gap-3">
+                <div className="text-sm">
+                  <span className="text-foreground font-medium">{staleCount} not audited</span>
+                  <span className="text-muted-foreground"> · use re-audit to fetch fresh data</span>
+                </div>
+                <button onClick={() => runBulkReaudit("stale")} className="btn btn-primary btn-sm shrink-0">
+                  Re-audit all
+                </button>
+              </section>
+            )}
+
+            {/* Bulk re-audit progress */}
+            {bulkReaudit.active && (
+              <section className="card-flat p-3 mb-4">
+                <div className="flex items-center justify-between gap-3 mb-2 text-sm">
+                  <span className="text-foreground font-medium">Re-auditing</span>
+                  <span className="text-muted-foreground tabular-nums">{bulkReaudit.done}/{bulkReaudit.total}</span>
+                </div>
+                <div className="w-full h-0.5 bg-muted rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-foreground transition-all duration-300"
+                    style={{ width: bulkReaudit.total ? `${(bulkReaudit.done / bulkReaudit.total) * 100}%` : "0%" }}
+                  />
+                </div>
+              </section>
+            )}
+
             <section className="card overflow-hidden">
               <CrmToolbar
                 searchTerm={searchTerm} setSearchTerm={setSearchTerm}
@@ -720,6 +805,13 @@ function CommandCenterInner() {
                     </button>
                   ))}
                   <button onClick={copyAllEmails} className="btn btn-secondary btn-sm">Copy emails</button>
+                  <button
+                    onClick={() => runBulkReaudit([...selectedIds])}
+                    disabled={bulkReaudit.active}
+                    className="btn btn-secondary btn-sm"
+                  >
+                    Re-audit
+                  </button>
                   <button
                     onClick={() => { if (confirm(`Delete ${selectedIds.size} lead(s)?`)) bulkAction("delete"); }}
                     className="btn btn-danger btn-sm ml-auto"
@@ -791,7 +883,7 @@ function CommandCenterInner() {
                               <div className="text-xs text-(--tertiary-foreground) mt-1 italic truncate max-w-[280px]">{lead.notes}</div>
                             )}
                           </td>
-                          <td className="px-4 py-4"><span className="chip">{lead.tech || "—"}</span></td>
+                          <td className="px-4 py-4">{lead.tech ? <span className="chip">{lead.tech}</span> : <span className="text-muted-foreground text-xs">none</span>}</td>
                           <td className={`px-4 py-4 text-base font-semibold tabular-nums ${scoreColor}`}>{score}</td>
                           <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
                             <select
@@ -843,13 +935,11 @@ function CommandCenterInner() {
             className="card max-w-sm w-full p-6 animate-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-lg font-semibold text-foreground mb-1">Delete this lead?</h3>
-            <p className="text-sm text-muted-foreground mb-6">
-              This will remove the lead from your library. This can&apos;t be undone.
-            </p>
+            <h3 className="text-base font-semibold text-foreground mb-1">Delete?</h3>
+            <p className="text-sm text-muted-foreground mb-5">This cannot be undone.</p>
             <div className="flex gap-2 justify-end">
               <button onClick={() => setPurgeId(null)} className="btn btn-secondary">Cancel</button>
-              <button onClick={executePurge} className="btn" style={{ background: "var(--danger)", color: "#fff" }}>Delete</button>
+              <button onClick={executePurge} className="btn" style={{ background: "var(--bad)", color: "#fff" }}>Delete</button>
             </div>
           </div>
         </div>

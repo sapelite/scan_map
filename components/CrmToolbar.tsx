@@ -51,7 +51,7 @@ export function CrmToolbar(props: CrmToolbarProps) {
         <div className="relative flex-1 max-w-lg">
           <input
             type="text"
-            placeholder="Search by name, email, tech, or address"
+            placeholder="Search"
             className="input input-search"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -63,15 +63,12 @@ export function CrmToolbar(props: CrmToolbarProps) {
             onChange={(e) => setSort(e.target.value as SortKey)}
             className="select"
           >
-            <option value="date_desc">Newest first</option>
-            <option value="score_desc">Score, high to low</option>
-            <option value="score_asc">Score, low to high</option>
-            <option value="name_asc">Name A–Z</option>
+            <option value="date_desc">Newest</option>
+            <option value="score_desc">Score high</option>
+            <option value="score_asc">Score low</option>
+            <option value="name_asc">Name</option>
           </select>
-          <a href="/api/export" className="btn btn-secondary btn-sm">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
-            Export CSV
-          </a>
+          <a href="/api/export" className="btn btn-secondary btn-sm">Export</a>
         </div>
       </div>
 
@@ -81,13 +78,12 @@ export function CrmToolbar(props: CrmToolbarProps) {
           <Pill key={s} value={s} label={titleCase(s)} count={counts[s] ?? 0} />
         ))}
         <span className="mx-1 h-5 w-px bg-border" />
-        <span className="text-xs text-muted-foreground font-medium">Stack</span>
         <select
           value={techFilter}
           onChange={(e) => setTechFilter(e.target.value)}
           className="select"
         >
-          <option value="ALL">Any stack</option>
+          <option value="ALL">All stacks</option>
           {techOptions.map((t) => <option key={t} value={t}>{t}</option>)}
         </select>
       </div>

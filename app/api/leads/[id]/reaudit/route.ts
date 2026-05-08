@@ -17,7 +17,7 @@ export async function POST(
       return NextResponse.json({ error: 'Lead not found' }, { status: 404 });
     }
     if (!existing.mapsUrl) {
-      return NextResponse.json({ error: 'No Maps URL on this lead — cannot re-audit' }, { status: 400 });
+      return NextResponse.json({ error: 'No Maps URL on this lead. Cannot re-audit.' }, { status: 400 });
     }
 
     const refreshed = await reauditLead(existing);

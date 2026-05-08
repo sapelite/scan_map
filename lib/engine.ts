@@ -5,6 +5,19 @@ import {
   Lead, WebsiteAudit, ScoreFactor, Socials, WebsiteStatus,
 } from './types';
 
+// ==========================================================================
+// Engine v3 — accuracy-focused
+// ==========================================================================
+// Key tactics:
+//   - Maps page: wait for actions row to fully hydrate (networkidle2 + race),
+//     then try 7+ selectors before falling back to a ranked-link scan.
+//   - Audit: stealth setup (webdriver/plugins/lang/permissions/client hints),
+//     try multiple URL variants (www toggle, https toggle, tracking stripped),
+//     fall back to axios with realistic headers if puppeteer can't navigate.
+//   - Every attempt is logged into Lead.auditAttempts so you can see *why*
+//     a particular lead was flagged the way it was.
+// ==========================================================================
+
 const UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36';
 
@@ -18,47 +31,135 @@ const NOISE_EMAILS = [
   '@2x', '@3x', 'sentry-next', 'sentry@',
 ];
 
+const TRACKING_PARAMS = [
+  'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
+  'fbclid', 'gclid', 'mc_cid', 'mc_eid', 'ref', 'referrer', '_ga', 'yclid',
+];
+
 const delay = (min: number, max: number) =>
   new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * (max - min + 1) + min)));
 
-// ============ MAPS DISCOVERY ============
+// ===========================================================================
+// STEALTH: bypass basic bot detection (Cloudflare, Wix, Squarespace, etc.)
+// ===========================================================================
+
+async function setupStealth(page: Page) {
+  await page.evaluateOnNewDocument(() => {
+    // Hide that we're automated
+    Object.defineProperty(navigator, 'webdriver', { get: () => false });
+    // Realistic plugins (Chrome detection often checks plugins.length > 0)
+    Object.defineProperty(navigator, 'plugins', {
+      get: () => [
+        { name: 'Chrome PDF Plugin', filename: 'internal-pdf-viewer' },
+        { name: 'Chrome PDF Viewer', filename: 'mhjfbmdgcfjbbpaeojofohoefgiehjai' },
+        { name: 'Native Client', filename: 'internal-nacl-plugin' },
+      ],
+    });
+    Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] });
+    // Permissions API mock — many bot detectors probe Notification.permission
+    const origQuery = window.navigator.permissions?.query;
+    if (origQuery) {
+      window.navigator.permissions.query = (params: PermissionDescriptor) =>
+        params.name === 'notifications'
+          ? Promise.resolve({ state: 'default' as PermissionState, name: params.name } as PermissionStatus)
+          : origQuery.call(window.navigator.permissions, params);
+    }
+    // WebGL vendor — detectors check this
+    const getParameter = WebGLRenderingContext.prototype.getParameter;
+    WebGLRenderingContext.prototype.getParameter = function (parameter: number) {
+      if (parameter === 37445) return 'Intel Inc.';
+      if (parameter === 37446) return 'Intel Iris OpenGL Engine';
+      return getParameter.call(this, parameter);
+    };
+  });
+
+  await page.setUserAgent(UA);
+  await page.setExtraHTTPHeaders({
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+    'Sec-Ch-Ua': '"Chromium";v="122", "Google Chrome";v="122", "Not A;Brand";v="99"',
+    'Sec-Ch-Ua-Mobile': '?0',
+    'Sec-Ch-Ua-Platform': '"Windows"',
+    'Upgrade-Insecure-Requests': '1',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'none',
+    'Sec-Fetch-User': '?1',
+  });
+  await page.setViewport({ width: 1366, height: 768, deviceScaleFactor: 1 });
+}
+
+// ===========================================================================
+// MAPS DISCOVERY
+// ===========================================================================
 
 interface MapsTarget {
   name: string;
   rating: number;
   reviews: string;
-  website: string | null;          // best URL we found in Maps (after unwrapping)
-  rawWebsite: string | null;       // original href (before unwrap) — for debug
+  website: string | null;
+  rawWebsite: string | null;
   address: string;
   phone: string;
   mapsUrl: string;
   authorityScore: number;
+  extractionNotes: string[];
 }
 
-/** Decode Google's redirect wrapper (https://www.google.com/url?q=...) */
 function unwrapGoogleRedirect(href: string): string {
   try {
     const u = new URL(href);
-    if (u.hostname.endsWith('google.com') && (u.pathname === '/url' || u.pathname === '/aclk')) {
-      const q = u.searchParams.get('q') || u.searchParams.get('url');
+    if (u.hostname.endsWith('google.com') && (u.pathname === '/url' || u.pathname === '/aclk' || u.pathname === '/maps/redirect')) {
+      const q = u.searchParams.get('q') || u.searchParams.get('url') || u.searchParams.get('adurl');
       if (q && /^https?:\/\//i.test(q)) return q;
     }
   } catch { /* not a URL */ }
   return href;
 }
 
-/** Returns true if this URL points to the actual Maps page itself (not the business). */
 function isMapsInternalUrl(href: string): boolean {
-  return /(^https?:\/\/)?(www\.)?(google\.[a-z.]+|gstatic\.com|googleapis\.com|googleusercontent\.com|googlemaps\.com)/i.test(href);
+  return /(^https?:\/\/)?(www\.)?(google\.[a-z.]+|gstatic\.com|googleapis\.com|googleusercontent\.com|googlemaps\.com|goo\.gl)/i.test(href);
+}
+
+function stripTrackingParams(url: string): string {
+  try {
+    const u = new URL(url);
+    for (const p of TRACKING_PARAMS) u.searchParams.delete(p);
+    return u.toString();
+  } catch { return url; }
+}
+
+function urlVariants(url: string): string[] {
+  const out = new Set<string>();
+  out.add(url);
+  out.add(stripTrackingParams(url));
+  try {
+    const u = new URL(stripTrackingParams(url));
+    if (u.hostname.startsWith('www.')) {
+      const noWww = new URL(u.toString());
+      noWww.hostname = u.hostname.slice(4);
+      out.add(noWww.toString());
+    } else {
+      const withWww = new URL(u.toString());
+      withWww.hostname = 'www.' + u.hostname;
+      out.add(withWww.toString());
+    }
+    if (u.protocol === 'http:') {
+      const https = new URL(u.toString());
+      https.protocol = 'https:';
+      out.add(https.toString());
+    }
+  } catch { /* skip */ }
+  return [...out];
 }
 
 async function dismissConsent(page: Page) {
   try {
-    await delay(1000, 2000);
+    await delay(800, 1400);
     const buttons = await page.$$('button');
     for (const button of buttons) {
       const text = await page.evaluate((el) => (el as HTMLElement).innerText, button);
-      if (/accept all|i agree|agree|accepter/i.test(text)) {
+      if (/accept all|i agree|^agree|accepter/i.test(text)) {
         await button.click();
         await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 8000 }).catch(() => {});
         break;
@@ -76,8 +177,7 @@ async function discoverPlaceLinks(browser: Browser, niche: string, location: str
     await page.goto(searchUrl, { waitUntil: 'networkidle2', timeout: 60000 });
     await dismissConsent(page);
 
-    const resultsSelector = 'div[role="feed"], [aria-label*="Results for"]';
-    await page.waitForSelector(resultsSelector, { timeout: 20000 });
+    await page.waitForSelector('div[role="feed"], [aria-label*="Results for"]', { timeout: 20000 });
 
     let linksFound = 0;
     let sameCountCycles = 0;
@@ -100,75 +200,134 @@ async function discoverPlaceLinks(browser: Browser, niche: string, location: str
         .slice(0, limit),
     scanLimit);
   } finally {
-    await page.close();
+    await page.close().catch(() => {});
   }
 }
 
 /**
- * Multi-strategy website extraction from a Google Maps place page.
- * Tries (in order):
- *   1. Specific known selectors  (data-item-id="authority", aria-label*="Website")
- *   2. Buttons whose visible text is "Website"
- *   3. Any external link in the side panel that isn't a Google/social domain
- * Then unwraps any Google redirect wrappers.
+ * Multi-strategy Maps extraction. Waits for the actions row (which contains
+ * the website button) to actually mount, then tries 7+ specific selectors
+ * before falling back to a ranked link scan. Always returns extractionNotes
+ * so you can see what we found and didn't.
  */
 async function extractMapsTarget(browser: Browser, link: string): Promise<MapsTarget | null> {
   const page = await browser.newPage();
+  const notes: string[] = [];
   try {
     await page.setUserAgent(UA);
-    await page.goto(link, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForSelector('h1', { timeout: 10000 });
-    // Let the side panel fully populate (Maps lazy-loads details)
-    await delay(800, 1500);
+    await page.goto(link, { waitUntil: 'networkidle2', timeout: 35000 });
+
+    // Wait for ANY indicator that the place panel is hydrated. Race so we
+    // don't wait the full 12s on places that hydrate fast.
+    try {
+      await Promise.race([
+        page.waitForSelector('a[data-item-id="authority"]', { timeout: 12000 }),
+        page.waitForSelector('button[data-item-id="address"]', { timeout: 12000 }),
+        page.waitForSelector('button[data-item-id*="phone"]', { timeout: 12000 }),
+        page.waitForSelector('h1.DUwDvf', { timeout: 12000 }),
+      ]);
+    } catch { notes.push('panel-hydration-timeout'); }
+
+    // Settle additional async DOM
+    await delay(1500, 2500);
 
     const details = await page.evaluate(() => {
       const getText = (el: Element | null) => (el as HTMLElement | null)?.innerText || '';
-      const name = getText(document.querySelector('h1')) || 'Unknown Business';
 
+      // ----- Name -----
+      const name = getText(document.querySelector('h1.DUwDvf, h1')) || 'Unknown Business';
+
+      // ----- Rating / reviews -----
       const ratingStr = document.querySelector('span[role="img"][aria-label*="stars"]')
         ?.getAttribute('aria-label')?.split(' ')[0];
       const rating = parseFloat(ratingStr || '0');
       const reviews = getText(document.querySelector('button[aria-label*="reviews"]')) || '0';
 
-      // ----- Multi-strategy website extraction -----
-      const candidateSelectors = [
-        'a[data-item-id="authority"]',
-        'a[aria-label^="Website"]',
-        'a[aria-label*="ebsite"]',           // matches "Website", "website", "ebsite"
-        'a[data-tooltip*="ebsite"]',
-        'a[data-value="Website"]',
-        'a[jsaction*="placeWebsiteLink"]',
-      ];
+      // ----- Website extraction (multi-strategy) -----
+      const usedNotes: string[] = [];
       let website: string | null = null;
       let raw: string | null = null;
-      for (const sel of candidateSelectors) {
-        const el = document.querySelector(sel) as HTMLAnchorElement | null;
-        if (el?.href) { website = el.href; raw = el.getAttribute('href'); break; }
-      }
 
-      // Fallback: look for buttons/anchors whose visible text reads "Website"
-      if (!website) {
-        const all = Array.from(document.querySelectorAll('a, button')) as HTMLElement[];
-        const hit = all.find((el) => {
-          const t = (el.innerText || '').trim().toLowerCase();
-          return t === 'website' || t.startsWith('website ') || t.endsWith(' website');
-        });
-        if (hit && hit.tagName === 'A') {
-          const a = hit as HTMLAnchorElement;
-          website = a.href;
-          raw = a.getAttribute('href');
+      // Strategy 1: explicit selectors (most reliable when present)
+      const selectors = [
+        'a[data-item-id="authority"]',
+        'a[data-item-id^="authority"]',
+        'a[jsaction*="placeWebsiteLink"]',
+        'a[jsaction*="placeMenuLink"]',
+        'a[data-tooltip="Open website"]',
+        'a[data-tooltip*="ebsite"]',
+        'a[aria-label="Website"]',
+        'a[aria-label^="Website:"]',
+        'a[aria-label*="ebsite"]',
+        'a[data-value="Website"]',
+      ];
+      for (const sel of selectors) {
+        const el = document.querySelector(sel) as HTMLAnchorElement | null;
+        if (el?.href) {
+          website = el.href; raw = el.getAttribute('href');
+          usedNotes.push(`selector:${sel}`);
+          break;
         }
       }
 
-      // Last-ditch fallback: any external http link in the side panel that isn't Google/social
+      // Strategy 2: any anchor whose visible text equals the domain pattern
       if (!website) {
-        const sidePanel = document.querySelector('div[role="main"]') || document.body;
-        const links = Array.from(sidePanel.querySelectorAll('a[href^="http"]')) as HTMLAnchorElement[];
-        const isExcluded = (h: string) =>
-          /google\.[a-z.]+|gstatic|googleusercontent|googlemaps|googleapis/i.test(h) ||
-          /(maps|search|images)\.google/i.test(h);
-        const cand = links.find(a => !isExcluded(a.href));
-        if (cand) { website = cand.href; raw = cand.getAttribute('href'); }
+        const anchors = Array.from(document.querySelectorAll('a[href^="http"]')) as HTMLAnchorElement[];
+        for (const a of anchors) {
+          const txt = (a.innerText || '').trim();
+          // looks like a domain name visible inside the anchor (e.g. "realsite.com")
+          if (/^[a-z0-9][a-z0-9-]+\.[a-z]{2,}(\.[a-z]{2,})?\/?$/i.test(txt)) {
+            const href = a.href;
+            // Quick filter: skip Google/social/maps internal
+            if (!/google\.[a-z.]+|gstatic|googleusercontent|googlemaps|googleapis/i.test(href)) {
+              website = href; raw = a.getAttribute('href');
+              usedNotes.push(`domain-text-match:${txt}`);
+              break;
+            }
+          }
+        }
+      }
+
+      // Strategy 3: ranked link scan in side panel
+      if (!website) {
+        const main = document.querySelector('div[role="main"]') ||
+                     document.querySelector('div.m6QErb') ||
+                     document.body;
+        const anchors = Array.from(main.querySelectorAll('a[href^="http"]')) as HTMLAnchorElement[];
+        const scored = anchors
+          .filter(a => {
+            const h = a.href.toLowerCase();
+            if (/google\.[a-z.]+|gstatic|googleusercontent|googlemaps|googleapis|goo\.gl/i.test(h)) return false;
+            if (/(instagram|facebook|tiktok|linkedin|youtube|twitter|x)\.com\//.test(h)) return false;
+            // exclude directions/share links
+            if (h.includes('/maps/dir/') || h.includes('/maps/place/')) return false;
+            return true;
+          })
+          .map(a => {
+            // higher score = more likely the website
+            let score = 0;
+            const aria = (a.getAttribute('aria-label') || '').toLowerCase();
+            const dt = (a.getAttribute('data-tooltip') || '').toLowerCase();
+            if (aria.includes('website')) score += 10;
+            if (dt.includes('website')) score += 10;
+            if (a.querySelector('img[alt*="ebsite"]')) score += 8;
+            if (a.getAttribute('data-item-id')?.startsWith('authority')) score += 15;
+            // anchors inside the actions row are top candidates
+            if (a.closest('[role="button"], button')) score += 3;
+            return { a, score };
+          })
+          .sort((x, y) => y.score - x.score);
+
+        if (scored.length > 0 && scored[0].score > 0) {
+          website = scored[0].a.href;
+          raw = scored[0].a.getAttribute('href');
+          usedNotes.push(`ranked-scan:score=${scored[0].score}`);
+        } else if (scored.length === 1) {
+          // only one external link in panel — likely the website
+          website = scored[0].a.href;
+          raw = scored[0].a.getAttribute('href');
+          usedNotes.push(`single-external-link`);
+        }
       }
 
       const address = document.querySelector('button[data-item-id="address"]')
@@ -176,14 +335,22 @@ async function extractMapsTarget(browser: Browser, link: string): Promise<MapsTa
       const phone = document.querySelector('button[data-item-id*="phone"]')
         ?.getAttribute('aria-label')?.replace(/^Phone:\s*/i, '') || '';
 
-      return { name, rating, reviews, website, raw, address, phone };
+      return { name, rating, reviews, website, raw, address, phone, usedNotes };
     });
+
+    notes.push(...details.usedNotes);
 
     let website = details.website;
     if (website) {
+      const before = website;
       website = unwrapGoogleRedirect(website);
-      // If after unwrap it's still a Google domain, treat as no website
-      if (isMapsInternalUrl(website)) website = null;
+      if (before !== website) notes.push('unwrapped-redirect');
+      if (isMapsInternalUrl(website)) {
+        notes.push(`rejected-internal:${website.slice(0, 60)}`);
+        website = null;
+      }
+    } else {
+      notes.push('no-website-found');
     }
 
     return {
@@ -196,15 +363,19 @@ async function extractMapsTarget(browser: Browser, link: string): Promise<MapsTa
       phone: details.phone || 'No Phone',
       mapsUrl: link,
       authorityScore: (details.rating || 0) * 10,
+      extractionNotes: notes,
     };
-  } catch {
+  } catch (err) {
+    notes.push(`error:${err instanceof Error ? err.message.split('\n')[0] : 'unknown'}`);
     return null;
   } finally {
     await page.close().catch(() => {});
   }
 }
 
-// ============ HTML ANALYSIS (shared between fetch strategies) ============
+// ===========================================================================
+// HTML ANALYSIS (shared between fetch strategies)
+// ===========================================================================
 
 function findFirst(html: string, regex: RegExp): string | null {
   const m = html.match(regex);
@@ -263,6 +434,20 @@ function buildEmptyAudit(finalUrl: string): WebsiteAudit {
     socials: { instagram: null, facebook: null, linkedin: null, twitter: null, tiktok: null, youtube: null },
     isSocialOnly: false,
   };
+}
+
+function isParkingPage(html: string, audit: WebsiteAudit): boolean {
+  const lower = html.toLowerCase();
+  const parkingPhrases = [
+    'this domain is for sale',
+    'this domain may be for sale',
+    'this domain has been parked',
+    'buy this domain',
+    'domain is parked free',
+    'is this your domain',
+  ];
+  if (audit.wordCount < 80 && parkingPhrases.some(p => lower.includes(p))) return true;
+  return false;
 }
 
 function analyzeHtml(html: string, finalUrl: string): WebsiteAudit {
@@ -339,7 +524,9 @@ function analyzeHtml(html: string, finalUrl: string): WebsiteAudit {
   return audit;
 }
 
-// ============ ROBUST AUDIT (puppeteer + axios fallback) ============
+// ===========================================================================
+// ROBUST AUDIT
+// ===========================================================================
 
 async function checkRobotsAndSitemap(audit: WebsiteAudit, finalUrl: string) {
   try {
@@ -357,74 +544,161 @@ async function checkRobotsAndSitemap(audit: WebsiteAudit, finalUrl: string) {
 }
 
 interface AuditOutcome {
-  status: WebsiteStatus;        // 'audited' | 'unreachable'
+  status: WebsiteStatus;
   audit: WebsiteAudit;
   failReason: string | null;
+  attempts: string[];
 }
 
-/** Audit the website using the existing Puppeteer browser. Renders JS, follows redirects. */
-async function auditWebsiteWithPuppeteer(browser: Browser, websiteUrl: string): Promise<AuditOutcome> {
+async function tryPuppeteerAttempt(browser: Browser, url: string, attempts: string[]): Promise<{ ok: boolean; audit?: WebsiteAudit; reason: string }> {
   const page = await browser.newPage();
-  let failReason: string | null = null;
   try {
-    await page.setUserAgent(UA);
-    await page.setExtraHTTPHeaders({
-      'Accept-Language': 'en-US,en;q=0.9',
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-    });
+    await setupStealth(page);
 
     const start = Date.now();
     let response;
     try {
-      response = await page.goto(websiteUrl, { waitUntil: 'domcontentloaded', timeout: 25000 });
+      response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 25000 });
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Navigation failed';
-      failReason = msg.includes('timeout') ? 'Site took too long to load' :
-                   msg.includes('ERR_NAME_NOT_RESOLVED') ? 'Domain does not resolve' :
-                   msg.includes('ERR_CERT') ? 'SSL certificate problem' :
-                   msg.includes('ERR_CONNECTION') ? 'Connection refused' :
-                   'Could not reach the site';
-      return { status: 'unreachable', audit: { ...buildEmptyAudit(websiteUrl), loadTimeMs: Date.now() - start }, failReason };
+      const msg = err instanceof Error ? err.message : 'navigation failed';
+      const reason =
+        /timeout/i.test(msg) ? 'timeout' :
+        /ERR_NAME_NOT_RESOLVED/i.test(msg) ? 'DNS does not resolve' :
+        /ERR_CERT/i.test(msg) ? 'SSL certificate problem' :
+        /ERR_CONNECTION/i.test(msg) ? 'connection refused' :
+        msg.split('\n')[0];
+      attempts.push(`puppeteer ${url} → ${reason}`);
+      return { ok: false, reason };
     }
 
-    const loadTimeMs = Date.now() - start;
     const httpStatus = response?.status() ?? 0;
     const finalUrl = page.url();
-
+    if (finalUrl.startsWith('chrome-error://') || finalUrl === 'about:blank') {
+      attempts.push(`puppeteer ${url} → chrome error page`);
+      return { ok: false, reason: 'browser error page' };
+    }
     if (!response || httpStatus >= 400) {
-      failReason = httpStatus === 403 ? 'Site blocked our request (403)' :
-                   httpStatus === 429 ? 'Site rate-limited us (429)' :
-                   httpStatus >= 500 ? `Site returned ${httpStatus}` :
-                   httpStatus > 0 ? `Site returned ${httpStatus}` : 'No response';
-      const audit = buildEmptyAudit(finalUrl);
-      audit.httpStatus = httpStatus;
-      audit.loadTimeMs = loadTimeMs;
-      audit.httpsActive = finalUrl.startsWith('https://');
-      audit.redirected = finalUrl !== websiteUrl;
-      return { status: 'unreachable', audit, failReason };
+      const reason = httpStatus === 403 ? 'site blocked our request (403)'
+                  : httpStatus === 429 ? 'site rate-limited us (429)'
+                  : httpStatus >= 500 ? `server error (${httpStatus})`
+                  : `HTTP ${httpStatus}`;
+      attempts.push(`puppeteer ${url} → ${reason}`);
+      return { ok: false, reason };
     }
 
-    // Give JS-heavy sites a moment to render text/socials
-    await delay(400, 800);
+    // Wait for content (JS-rendered SPAs)
+    try {
+      await page.waitForFunction(
+        () => document.body && document.body.innerText.trim().length > 80,
+        { timeout: 5000 },
+      );
+    } catch { /* maybe SPA never rendered, still try */ }
+
     const html = await page.content();
+    const loadTimeMs = Date.now() - start;
 
     const audit = analyzeHtml(html, finalUrl);
     audit.httpStatus = httpStatus;
     audit.loadTimeMs = loadTimeMs;
-    audit.redirected = finalUrl !== websiteUrl;
+    audit.redirected = finalUrl !== url;
+
+    if (isParkingPage(html, audit)) {
+      attempts.push(`puppeteer ${url} → parking page`);
+      return { ok: false, reason: 'domain parked / for sale' };
+    }
+    if (audit.wordCount < 30 && audit.imageCount === 0) {
+      attempts.push(`puppeteer ${url} → empty page (${audit.wordCount} words)`);
+      return { ok: false, reason: 'page has no content' };
+    }
 
     await checkRobotsAndSitemap(audit, finalUrl);
-
-    return { status: 'audited', audit, failReason: null };
+    attempts.push(`puppeteer ${url} → OK (${httpStatus}, ${audit.wordCount}w, ${(loadTimeMs/1000).toFixed(1)}s)`);
+    return { ok: true, audit, reason: 'ok' };
   } catch (err) {
-    failReason = err instanceof Error ? err.message : 'Unknown error';
-    return { status: 'unreachable', audit: buildEmptyAudit(websiteUrl), failReason };
+    const msg = err instanceof Error ? err.message.split('\n')[0] : 'unknown';
+    attempts.push(`puppeteer ${url} → ${msg}`);
+    return { ok: false, reason: msg };
   } finally {
     await page.close().catch(() => {});
   }
 }
 
-// ============ SEO SCORE ============
+async function tryAxiosAttempt(url: string, attempts: string[]): Promise<{ ok: boolean; audit?: WebsiteAudit; reason: string }> {
+  try {
+    const start = Date.now();
+    const response = await axios.get(url, {
+      timeout: 15000,
+      maxRedirects: 5,
+      headers: {
+        'User-Agent': UA,
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      },
+      validateStatus: () => true,
+      responseType: 'text',
+      transformResponse: [(d) => d],
+    });
+    const loadTimeMs = Date.now() - start;
+    const finalUrl = response.request?.res?.responseUrl || url;
+
+    if (response.status < 200 || response.status >= 400 || typeof response.data !== 'string' || response.data.length < 100) {
+      attempts.push(`axios ${url} → HTTP ${response.status}`);
+      return { ok: false, reason: `HTTP ${response.status}` };
+    }
+
+    const audit = analyzeHtml(response.data as string, finalUrl);
+    audit.httpStatus = response.status;
+    audit.loadTimeMs = loadTimeMs;
+    audit.redirected = finalUrl !== url;
+
+    if (isParkingPage(response.data as string, audit)) {
+      attempts.push(`axios ${url} → parking page`);
+      return { ok: false, reason: 'domain parked / for sale' };
+    }
+
+    await checkRobotsAndSitemap(audit, finalUrl);
+    attempts.push(`axios ${url} → OK (${response.status}, ${audit.wordCount}w)`);
+    return { ok: true, audit, reason: 'ok' };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message.split('\n')[0] : 'unknown';
+    attempts.push(`axios ${url} → ${msg}`);
+    return { ok: false, reason: msg };
+  }
+}
+
+/** Audit with multi-variant retry + axios fallback. Logs every attempt. */
+async function auditWebsite(browser: Browser, websiteUrl: string): Promise<AuditOutcome> {
+  const attempts: string[] = [];
+  const variants = urlVariants(websiteUrl);
+  let lastReason = 'unknown';
+
+  // Phase 1: Puppeteer attempts on each variant
+  for (const url of variants) {
+    const r = await tryPuppeteerAttempt(browser, url, attempts);
+    if (r.ok && r.audit) {
+      return { status: 'audited', audit: r.audit, failReason: null, attempts };
+    }
+    lastReason = r.reason;
+  }
+
+  // Phase 2: Axios fallback on each variant
+  for (const url of variants) {
+    const r = await tryAxiosAttempt(url, attempts);
+    if (r.ok && r.audit) {
+      return { status: 'audited', audit: r.audit, failReason: null, attempts };
+    }
+    lastReason = r.reason;
+  }
+
+  // Truly unreachable
+  const audit = buildEmptyAudit(websiteUrl);
+  audit.httpsActive = websiteUrl.startsWith('https://');
+  return { status: 'unreachable', audit, failReason: lastReason, attempts };
+}
+
+// ===========================================================================
+// SEO SCORE
+// ===========================================================================
 
 export function computeSeoScore(a: WebsiteAudit): { score: number; factors: ScoreFactor[] } {
   const factors: ScoreFactor[] = [];
@@ -456,7 +730,9 @@ export function computeSeoScore(a: WebsiteAudit): { score: number; factors: Scor
   return { score, factors };
 }
 
-// ============ TOP-LEVEL FLOW ============
+// ===========================================================================
+// TOP-LEVEL FLOW
+// ===========================================================================
 
 export async function withBrowser<T>(fn: (browser: Browser) => Promise<T>): Promise<T> {
   const browser = await puppeteer.launch({
@@ -466,20 +742,15 @@ export async function withBrowser<T>(fn: (browser: Browser) => Promise<T>): Prom
       '--disable-setuid-sandbox',
       '--disable-dev-shm-usage',
       '--disable-blink-features=AutomationControlled',
+      '--disable-features=IsolateOrigins,site-per-process',
+      '--lang=en-US,en',
     ],
   });
-  try {
-    return await fn(browser);
-  } finally {
-    await browser.close().catch(() => {});
-  }
+  try { return await fn(browser); } finally { await browser.close().catch(() => {}); }
 }
 
 export async function discoverTargets(
-  browser: Browser,
-  niche: string,
-  location: string,
-  scanLimit: number,
+  browser: Browser, niche: string, location: string, scanLimit: number,
 ): Promise<MapsTarget[]> {
   const placeLinks = await discoverPlaceLinks(browser, niche, location, scanLimit);
   const targets: MapsTarget[] = [];
@@ -491,6 +762,14 @@ export async function discoverTargets(
 }
 
 export async function buildLeadFromTarget(browser: Browser, target: MapsTarget): Promise<Lead> {
+  const allAttempts: string[] = [];
+  if (target.extractionNotes.length > 0) {
+    allAttempts.push(`maps extraction: ${target.extractionNotes.join(', ')}`);
+  }
+  if (target.rawWebsite && target.website && target.rawWebsite !== target.website) {
+    allAttempts.push(`unwrapped: ${target.rawWebsite} → ${target.website}`);
+  }
+
   let websiteStatus: WebsiteStatus = 'none';
   let websiteFailReason: string | null = null;
   let audit: WebsiteAudit | undefined;
@@ -500,12 +779,13 @@ export async function buildLeadFromTarget(browser: Browser, target: MapsTarget):
   let primaryTech = 'Unknown';
 
   if (target.website) {
-    const outcome = await auditWebsiteWithPuppeteer(browser, target.website);
+    const outcome = await auditWebsite(browser, target.website);
     websiteStatus = outcome.status;
     websiteFailReason = outcome.failReason;
     audit = outcome.audit;
+    allAttempts.push(...outcome.attempts);
 
-    if (outcome.status === 'audited') {
+    if (outcome.status === 'audited' && audit) {
       const result = computeSeoScore(audit);
       score = result.score;
       factors = result.factors;
@@ -520,6 +800,8 @@ export async function buildLeadFromTarget(browser: Browser, target: MapsTarget):
       }
       primaryTech = audit.tech[0] || 'Custom';
     }
+  } else {
+    allAttempts.push('no website on Maps listing');
   }
 
   const riskLevel: Lead['stats']['riskLevel'] =
@@ -534,8 +816,6 @@ export async function buildLeadFromTarget(browser: Browser, target: MapsTarget):
     websiteStatus === 'unreachable' ? (target.website ?? 'No website detected') :
     'No website detected';
 
-  const isSocialOnly = audit?.isSocialOnly ?? false;
-
   return {
     id: Math.random().toString(36).slice(2, 11),
     name: target.name,
@@ -543,6 +823,7 @@ export async function buildLeadFromTarget(browser: Browser, target: MapsTarget):
     websiteFromMaps: target.website,
     websiteStatus,
     websiteFailReason,
+    auditAttempts: allAttempts,
     email: mainEmail,
     tech: primaryTech,
     rating: target.rating,
@@ -550,7 +831,7 @@ export async function buildLeadFromTarget(browser: Browser, target: MapsTarget):
     address: target.address,
     phone: target.phone,
     mapsUrl: target.mapsUrl,
-    isSocialUrl: isSocialOnly,
+    isSocialUrl: audit?.isSocialOnly ?? false,
     authorityScore: target.authorityScore,
     stats: { score, riskLevel },
     scoreFactors: factors,
@@ -560,16 +841,17 @@ export async function buildLeadFromTarget(browser: Browser, target: MapsTarget):
   };
 }
 
-/** Re-audit a single existing lead by going back to its Maps page. Used by the re-audit endpoint. */
 export async function reauditLead(existing: Lead): Promise<Lead> {
   return await withBrowser(async (browser) => {
     const target = await extractMapsTarget(browser, existing.mapsUrl);
     if (!target) {
-      // We can't even get the Maps page back — leave existing data, just stamp the timestamp
-      return { ...existing, lastAuditedAt: new Date().toISOString() };
+      return {
+        ...existing,
+        auditAttempts: [...(existing.auditAttempts ?? []), 'maps page not retrievable'],
+        lastAuditedAt: new Date().toISOString(),
+      };
     }
     const fresh = await buildLeadFromTarget(browser, target);
-    // Preserve user data
     return {
       ...fresh,
       id: existing.id,
@@ -580,23 +862,51 @@ export async function reauditLead(existing: Lead): Promise<Lead> {
   });
 }
 
+/** Re-audit many existing leads sequentially in one browser. Yields events. */
+export async function* reauditMany(existing: Lead[]): AsyncGenerator<{
+  type: 'progress' | 'lead' | 'error'; index?: number; total?: number; lead?: Lead; msg?: string;
+}> {
+  yield { type: 'progress', index: 0, total: existing.length, msg: `Re-auditing ${existing.length} lead(s)...` };
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: [
+      '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage',
+      '--disable-blink-features=AutomationControlled', '--lang=en-US,en',
+    ],
+  });
+  try {
+    for (let i = 0; i < existing.length; i++) {
+      const e = existing[i];
+      try {
+        const target = await extractMapsTarget(browser, e.mapsUrl);
+        if (!target) {
+          yield { type: 'error', index: i, total: existing.length, msg: `${e.name}: Maps page not retrievable` };
+          continue;
+        }
+        const fresh = await buildLeadFromTarget(browser, target);
+        const refreshed: Lead = {
+          ...fresh,
+          id: e.id,
+          status: e.status,
+          notes: e.notes,
+          date: e.date,
+        };
+        yield { type: 'lead', index: i, total: existing.length, lead: refreshed };
+      } catch (err) {
+        yield { type: 'error', index: i, total: existing.length, msg: `${e.name}: ${err instanceof Error ? err.message : 'unknown'}` };
+      }
+    }
+  } finally {
+    await browser.close().catch(() => {});
+  }
+}
+
 function buildPitch(
-  name: string,
-  status: WebsiteStatus,
-  tech: string,
-  factors: ScoreFactor[],
-  failReason: string | null,
+  _name: string, status: WebsiteStatus, _tech: string, factors: ScoreFactor[], failReason: string | null,
 ): string {
-  if (status === 'none') {
-    return `Hi ${name} — I noticed you don't have a website that's discoverable from Google Maps. A simple landing page can capture searches that currently slip through to competitors.`;
-  }
-  if (status === 'unreachable') {
-    return `Hi ${name} — I tried to audit your site but couldn't reach it (${failReason ?? 'unknown reason'}). If your site has been intermittent, that alone is hurting search rankings. Happy to take a closer look if useful.`;
-  }
-  const failures = factors.filter(f => !f.ok).map(f => f.label.toLowerCase());
-  const top = failures.slice(0, 2);
-  const lead = top.length
-    ? `I ran a quick audit on your site and found a few quick wins — ${top.join(' and ')}.`
-    : `I ran a quick audit on your site and it's solid — there's still room to push it further.`;
-  return `Hi ${name} — ${lead} Happy to share the full breakdown if useful. (Stack: ${tech}.)`;
+  if (status === 'none') return 'No website on Google Maps listing.';
+  if (status === 'unreachable') return `Site unreachable: ${failReason ?? 'unknown'}.`;
+  const fails = factors.filter(f => !f.ok).map(f => f.label);
+  if (fails.length === 0) return 'Site passes all audit checks.';
+  return `Issues found: ${fails.slice(0, 4).join(', ')}${fails.length > 4 ? `, and ${fails.length - 4} more` : ''}.`;
 }

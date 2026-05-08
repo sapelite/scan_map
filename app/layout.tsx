@@ -9,9 +9,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Scanmap — find leads, audit websites",
-  description:
-    "Scanmap discovers local businesses by industry and location, then runs a real SEO and tech audit on their websites so you can prioritize outreach.",
+  title: "Scanmap",
+  description: "Local business lead finder with website audit.",
   icons: { icon: "/favicon.ico" },
 };
 

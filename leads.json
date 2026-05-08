@@ -1,5 +1,405 @@
 [
   {
+    "id": "jkxw3qkdq",
+    "name": "BYCO LAW - Bali Office - Lawyer and Legal Consultant - Pusat Jasa Hukum dan Pengacara di Bali",
+    "url": "https://www.bycolaw.com/",
+    "websiteFromMaps": "https://bycolaw.com/",
+    "websiteStatus": "audited",
+    "websiteFailReason": null,
+    "auditAttempts": [
+      "maps extraction: selector:a[data-item-id=\"authority\"]",
+      "puppeteer https://bycolaw.com/ → OK (200, 1052w, 1.4s)"
+    ],
+    "email": "resmiinfo@bycolaw.comjam",
+    "tech": "Custom",
+    "rating": 4.9,
+    "reviews": "",
+    "address": "BTS Business Park, BOffice Building, Jl. Dewi Sartika No.2, Tuban, Kec. Kuta Sel., Kabupaten Badung, Bali 80361 ",
+    "phone": "0813-2830-101 ",
+    "mapsUrl": "https://www.google.com/maps/place/BYCO+LAW+-+Bali+Office+-+Lawyer+and+Legal+Consultant+-+Pusat+Jasa+Hukum+dan+Pengacara+di+Bali/data=!4m7!3m6!1s0x2dd247007423cce1:0xb39bd0f419d2df89!8m2!3d-8.739882!4d115.1671904!16s%2Fg%2F11lf11tcc1!19sChIJ4cwjdABH0i0Rid_SGfTQm7M?authuser=0&hl=en&rclk=1",
+    "isSocialUrl": false,
+    "authorityScore": 49,
+    "stats": {
+      "score": 56,
+      "riskLevel": "High Risk"
+    },
+    "scoreFactors": [
+      {
+        "label": "HTTPS enabled",
+        "weight": 8,
+        "awarded": 8,
+        "ok": true
+      },
+      {
+        "label": "Page reachable",
+        "weight": 6,
+        "awarded": 6,
+        "ok": true,
+        "value": "200"
+      },
+      {
+        "label": "Title tag (10–65 chars)",
+        "weight": 10,
+        "awarded": 10,
+        "ok": true,
+        "value": "23 chars"
+      },
+      {
+        "label": "Meta description (50–160)",
+        "weight": 10,
+        "awarded": 0,
+        "ok": false,
+        "value": "0 chars"
+      },
+      {
+        "label": "Single H1",
+        "weight": 6,
+        "awarded": 6,
+        "ok": true,
+        "value": "1"
+      },
+      {
+        "label": "Mobile viewport",
+        "weight": 12,
+        "awarded": 12,
+        "ok": true
+      },
+      {
+        "label": "Open Graph tags (≥3)",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false,
+        "value": "0"
+      },
+      {
+        "label": "Schema.org JSON-LD",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false
+      },
+      {
+        "label": "Canonical URL",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false
+      },
+      {
+        "label": "Sitemap.xml present",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false
+      },
+      {
+        "label": "Robots.txt present",
+        "weight": 3,
+        "awarded": 0,
+        "ok": false
+      },
+      {
+        "label": "Image alt text (≥80%)",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false,
+        "value": "no images"
+      },
+      {
+        "label": "Substantial content (>300 words)",
+        "weight": 6,
+        "awarded": 6,
+        "ok": true,
+        "value": "1052 words"
+      },
+      {
+        "label": "Page speed (<3s)",
+        "weight": 8,
+        "awarded": 8,
+        "ok": true,
+        "value": "1.41s"
+      },
+      {
+        "label": "Analytics installed",
+        "weight": 4,
+        "awarded": 0,
+        "ok": false
+      },
+      {
+        "label": "Social presence linked",
+        "weight": 2,
+        "awarded": 0,
+        "ok": false
+      }
+    ],
+    "audit": {
+      "httpStatus": 200,
+      "httpsActive": true,
+      "finalUrl": "https://www.bycolaw.com/",
+      "redirected": true,
+      "loadTimeMs": 1411,
+      "reachable": true,
+      "title": "My Google AI Studio App",
+      "titleLength": 23,
+      "metaDescription": null,
+      "metaDescriptionLength": 0,
+      "canonical": null,
+      "h1Count": 1,
+      "h2Count": 13,
+      "wordCount": 1052,
+      "imageCount": 0,
+      "imagesWithAlt": 0,
+      "internalLinks": 43,
+      "externalLinks": 4,
+      "mobileViewport": true,
+      "ogTagCount": 0,
+      "twitterCard": false,
+      "jsonLd": false,
+      "hasRobotsTxt": false,
+      "hasSitemap": false,
+      "hasGoogleAnalytics": false,
+      "hasGoogleTagManager": false,
+      "hasFacebookPixel": false,
+      "hasHubSpot": false,
+      "tech": [],
+      "emails": [
+        "resmiinfo@bycolaw.comjam",
+        "80361+628132830101info@bycolaw.comsenin"
+      ],
+      "phones": [
+        "+628132830101"
+      ],
+      "socials": {
+        "instagram": null,
+        "facebook": null,
+        "linkedin": null,
+        "twitter": null,
+        "tiktok": null,
+        "youtube": null
+      },
+      "isSocialOnly": false
+    },
+    "pitch": "Issues found: Meta description (50–160), Open Graph tags (≥3), Schema.org JSON-LD, Canonical URL, and 5 more.",
+    "lastAuditedAt": "2026-05-08T09:27:19.551Z",
+    "status": "NEW",
+    "date": "2026-05-08"
+  },
+  {
+    "id": "hcwrfemze",
+    "name": "Bali Legals",
+    "url": "https://balilegals.com/",
+    "websiteFromMaps": "https://balilegals.com/",
+    "websiteStatus": "audited",
+    "websiteFailReason": null,
+    "auditAttempts": [
+      "maps extraction: selector:a[data-item-id=\"authority\"]",
+      "puppeteer https://balilegals.com/ → OK (200, 1877w, 7.4s)"
+    ],
+    "email": "info@balilegals.com",
+    "tech": "WordPress",
+    "rating": 4.9,
+    "reviews": "",
+    "address": "Jl. Sunset Road Number 29b, Seminyak, Kec. Kuta, Kabupaten Badung, Bali 80361 ",
+    "phone": "0812-2880-8010 ",
+    "mapsUrl": "https://www.google.com/maps/place/Bali+Legals/data=!4m7!3m6!1s0x2dd2471af16bd24f:0x3fe83c33ef5d59c3!8m2!3d-8.6877259!4d115.170936!16s%2Fg%2F11h6pvq0f6!19sChIJT9Jr8RpH0i0Rw1ld7zM86D8?authuser=0&hl=en&rclk=1",
+    "isSocialUrl": false,
+    "authorityScore": 49,
+    "stats": {
+      "score": 87,
+      "riskLevel": "Low"
+    },
+    "scoreFactors": [
+      {
+        "label": "HTTPS enabled",
+        "weight": 8,
+        "awarded": 8,
+        "ok": true
+      },
+      {
+        "label": "Page reachable",
+        "weight": 6,
+        "awarded": 6,
+        "ok": true,
+        "value": "200"
+      },
+      {
+        "label": "Title tag (10–65 chars)",
+        "weight": 10,
+        "awarded": 10,
+        "ok": true,
+        "value": "62 chars"
+      },
+      {
+        "label": "Meta description (50–160)",
+        "weight": 10,
+        "awarded": 10,
+        "ok": true,
+        "value": "142 chars"
+      },
+      {
+        "label": "Single H1",
+        "weight": 6,
+        "awarded": 6,
+        "ok": true,
+        "value": "1"
+      },
+      {
+        "label": "Mobile viewport",
+        "weight": 12,
+        "awarded": 12,
+        "ok": true
+      },
+      {
+        "label": "Open Graph tags (≥3)",
+        "weight": 5,
+        "awarded": 5,
+        "ok": true,
+        "value": "5"
+      },
+      {
+        "label": "Schema.org JSON-LD",
+        "weight": 5,
+        "awarded": 5,
+        "ok": true
+      },
+      {
+        "label": "Canonical URL",
+        "weight": 5,
+        "awarded": 5,
+        "ok": true
+      },
+      {
+        "label": "Sitemap.xml present",
+        "weight": 5,
+        "awarded": 5,
+        "ok": true
+      },
+      {
+        "label": "Robots.txt present",
+        "weight": 3,
+        "awarded": 3,
+        "ok": true
+      },
+      {
+        "label": "Image alt text (≥80%)",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false,
+        "value": "39%"
+      },
+      {
+        "label": "Substantial content (>300 words)",
+        "weight": 6,
+        "awarded": 6,
+        "ok": true,
+        "value": "1877 words"
+      },
+      {
+        "label": "Page speed (<3s)",
+        "weight": 8,
+        "awarded": 0,
+        "ok": false,
+        "value": "7.37s"
+      },
+      {
+        "label": "Analytics installed",
+        "weight": 4,
+        "awarded": 4,
+        "ok": true
+      },
+      {
+        "label": "Social presence linked",
+        "weight": 2,
+        "awarded": 2,
+        "ok": true
+      }
+    ],
+    "audit": {
+      "httpStatus": 200,
+      "httpsActive": true,
+      "finalUrl": "https://balilegals.com/",
+      "redirected": false,
+      "loadTimeMs": 7371,
+      "reachable": true,
+      "title": "Bali Legal & Migration Advisory Firm for International Clients",
+      "titleLength": 62,
+      "metaDescription": "Bali-based legal & migration advisory firm specialising in property due diligence, visa processing, & legal services for international clients",
+      "metaDescriptionLength": 142,
+      "canonical": "https://balilegals.com/",
+      "h1Count": 1,
+      "h2Count": 23,
+      "wordCount": 1877,
+      "imageCount": 38,
+      "imagesWithAlt": 15,
+      "internalLinks": 128,
+      "externalLinks": 5,
+      "mobileViewport": true,
+      "ogTagCount": 5,
+      "twitterCard": true,
+      "jsonLd": true,
+      "hasRobotsTxt": true,
+      "hasSitemap": true,
+      "hasGoogleAnalytics": true,
+      "hasGoogleTagManager": true,
+      "hasFacebookPixel": false,
+      "hasHubSpot": false,
+      "tech": [
+        "WordPress",
+        "jQuery",
+        "Bootstrap"
+      ],
+      "emails": [
+        "info@balilegals.com",
+        "info@balilegals.comfacebook"
+      ],
+      "phones": [
+        "2020-05-07",
+        "2026-03-22",
+        "255 255 255"
+      ],
+      "socials": {
+        "instagram": "https://www.instagram.com/balilegals",
+        "facebook": "https://www.facebook.com/balilegals",
+        "linkedin": null,
+        "twitter": null,
+        "tiktok": null,
+        "youtube": null
+      },
+      "isSocialOnly": false
+    },
+    "pitch": "Issues found: Image alt text (≥80%), Page speed (<3s).",
+    "lastAuditedAt": "2026-05-08T09:27:17.704Z",
+    "status": "NEW",
+    "date": "2026-05-08"
+  },
+  {
+    "id": "nzcr8srv8",
+    "name": "Maha Dewangga Bali Law Office - Bankruptcy Lawyers & Immigration Issues",
+    "url": "No website detected",
+    "websiteFromMaps": null,
+    "websiteStatus": "none",
+    "websiteFailReason": null,
+    "auditAttempts": [
+      "maps extraction: no-website-found",
+      "no website on Maps listing"
+    ],
+    "email": "No email found",
+    "tech": "Unknown",
+    "rating": 4.9,
+    "reviews": "",
+    "address": "Jalan Gunung Patas, Blk. I Gang Maha Asri No.88, Padangsambian Klod, Kec. Denpasar Bar., Kota Denpasar, Bali 80117 ",
+    "phone": "0812-4652-9914 ",
+    "mapsUrl": "https://www.google.com/maps/place/Maha+Dewangga+Bali+Law+Office+-+Bankruptcy+Lawyers+%26+Immigration+Issues/data=!4m7!3m6!1s0x2dd2410c45481345:0xf868c69563c6caf8!8m2!3d-8.6624214!4d115.1781846!16s%2Fg%2F11r9v7wwn1!19sChIJRRNIRQxB0i0R-MrGY5XGaPg?authuser=0&hl=en&rclk=1",
+    "isSocialUrl": false,
+    "authorityScore": 49,
+    "stats": {
+      "score": 0,
+      "riskLevel": "Critical"
+    },
+    "scoreFactors": [],
+    "pitch": "No website on Google Maps listing.",
+    "lastAuditedAt": "2026-05-08T09:27:07.605Z",
+    "status": "NEW",
+    "date": "2026-05-08"
+  },
+  {
     "id": "9o23hsihw",
     "name": "Casa Tua Canggu",
     "url": "https://casa-tua-canggu.qr2order.net/",
