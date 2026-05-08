@@ -1,33 +1,32 @@
 "use client";
 
-import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import React, { createContext, useCallback, useContext, useRef, useState } from "react";
 
 type ToastKind = "info" | "success" | "warn" | "error";
-interface Toast {
-  id: number;
-  kind: ToastKind;
-  msg: string;
-}
+interface Toast { id: number; kind: ToastKind; msg: string; }
 
-interface ToastApi {
-  push: (msg: string, kind?: ToastKind) => void;
-}
+interface ToastApi { push: (msg: string, kind?: ToastKind) => void; }
 
 const ToastContext = createContext<ToastApi | null>(null);
 
 export const useToast = (): ToastApi => {
   const ctx = useContext(ToastContext);
-  if (!ctx) {
-    return { push: (m: string) => console.warn("[toast not mounted]", m) };
-  }
+  if (!ctx) return { push: (m: string) => console.warn("[toast not mounted]", m) };
   return ctx;
 };
 
-const KIND_STYLES: Record<ToastKind, { border: string; bar: string; label: string; tag: string }> = {
-  info:    { border: "border-zinc-500",   bar: "bg-zinc-400",    label: "text-zinc-200",   tag: "INFO" },
-  success: { border: "border-emerald-500", bar: "bg-emerald-500", label: "text-emerald-300", tag: "OK" },
-  warn:    { border: "border-amber-500",  bar: "bg-amber-500",   label: "text-amber-300",  tag: "WARN" },
-  error:   { border: "border-rose-500",   bar: "bg-rose-500",    label: "text-rose-300",   tag: "FAIL" },
+const ICON: Record<ToastKind, React.ReactNode> = {
+  success: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>,
+  warn:    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>,
+  error:   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" /></svg>,
+  info:    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>,
+};
+
+const KIND_COLOR: Record<ToastKind, string> = {
+  success: "text-[#34c759]",
+  warn:    "text-[#ff9500]",
+  error:   "text-[#ff3b30]",
+  info:    "text-[#007aff]",
 };
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
@@ -37,9 +36,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const push = useCallback((msg: string, kind: ToastKind = "info") => {
     const id = ++idRef.current;
     setToasts((prev) => [...prev, { id, kind, msg }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 3500);
+    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3500);
   }, []);
 
   const dismiss = (id: number) => setToasts((prev) => prev.filter((t) => t.id !== id));
@@ -47,40 +44,24 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ push }}>
       {children}
-      <div className="fixed bottom-6 right-6 z-[300] flex flex-col gap-2 pointer-events-none">
-        {toasts.map((t) => {
-          const s = KIND_STYLES[t.kind];
-          return (
-            <div
-              key={t.id}
-              className={`pointer-events-auto bg-zinc-950/95 backdrop-blur-md border ${s.border} shadow-[0_10px_40px_rgba(0,0,0,0.7)] flex items-stretch min-w-[280px] max-w-md animate-in slide-in-from-right-4 fade-in duration-200`}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-300 flex flex-col gap-2 pointer-events-none items-center">
+        {toasts.map((t) => (
+          <div
+            key={t.id}
+            className="pointer-events-auto bg-white border border-border shadow-(--shadow-lg) rounded-full pl-4 pr-2 py-2 flex items-center gap-3 max-w-md animate-in slide-in-from-bottom-4 fade-in duration-200"
+          >
+            <span className={KIND_COLOR[t.kind]}>{ICON[t.kind]}</span>
+            <span className="text-sm text-foreground font-medium">{t.msg}</span>
+            <button
+              onClick={() => dismiss(t.id)}
+              className="ml-1 w-7 h-7 rounded-full hover:bg-muted flex items-center justify-center text-(--tertiary-foreground) transition-colors"
+              aria-label="Dismiss"
             >
-              <div className={`w-1 ${s.bar}`} />
-              <div className="flex-1 p-3 flex items-start gap-3">
-                <span className={`text-[9px] font-black uppercase tracking-widest ${s.label} font-mono pt-0.5`}>
-                  {s.tag}
-                </span>
-                <span className="text-[11px] text-zinc-300 font-mono leading-relaxed flex-1 break-words">
-                  {t.msg}
-                </span>
-                <button
-                  onClick={() => dismiss(t.id)}
-                  className="text-zinc-600 hover:text-white text-[10px] font-black"
-                  aria-label="Dismiss"
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-          );
-        })}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+            </button>
+          </div>
+        ))}
       </div>
     </ToastContext.Provider>
   );
-}
-
-export function ToastEscDismiss() {
-  // unused convenience hook placeholder
-  useEffect(() => {}, []);
-  return null;
 }

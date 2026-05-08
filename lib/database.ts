@@ -86,6 +86,21 @@ export const updateStatus = async (id: string, currentStatus: string): Promise<s
 };
 
 /**
+ * Replaces a lead in place by id (used by re-audit). Preserves position.
+ */
+export const replaceLead = async (next: Lead): Promise<void> => {
+    const leads = await getLeads();
+    const targetId = next.id.toString().trim();
+    const index = leads.findIndex(l => l.id.toString().trim() === targetId);
+    if (index === -1) {
+        leads.unshift(next);
+    } else {
+        leads[index] = next;
+    }
+    await fs.writeFile(DB_PATH, JSON.stringify(leads, null, 2));
+};
+
+/**
  * Sets the status to a specific value (no cycling)
  */
 export const setStatus = async (id: string, nextStatus: string): Promise<string> => {

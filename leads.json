@@ -1,5 +1,1835 @@
 [
   {
+    "id": "9o23hsihw",
+    "name": "Casa Tua Canggu",
+    "url": "https://casa-tua-canggu.qr2order.net/",
+    "email": "ygani0595@gmail.com",
+    "tech": "Custom",
+    "rating": 4.7,
+    "reviews": "",
+    "address": "Jl. Pantai Batu Bolong No.10, Canggu, Kec. Kuta Utara, Kabupaten Badung, Bali 80361 ",
+    "phone": "0896-2296-5413 ",
+    "mapsUrl": "https://www.google.com/maps/place/Casa+Tua+Canggu/data=!4m7!3m6!1s0x2dd2387d68668157:0xa688ec311b77b7a9!8m2!3d-8.6465482!4d115.1407623!16s%2Fg%2F11bccmt2w7!19sChIJV4FmaH040i0Rqbd3GzHsiKY?authuser=0&hl=en&rclk=1",
+    "isSocialUrl": false,
+    "authorityScore": 47,
+    "stats": {
+      "score": 71,
+      "riskLevel": "Medium"
+    },
+    "scoreFactors": [
+      {
+        "label": "HTTPS enabled",
+        "weight": 8,
+        "awarded": 8,
+        "ok": true
+      },
+      {
+        "label": "Page reachable",
+        "weight": 6,
+        "awarded": 6,
+        "ok": true,
+        "value": "200"
+      },
+      {
+        "label": "Title tag (10–65 chars)",
+        "weight": 10,
+        "awarded": 10,
+        "ok": true,
+        "value": "26 chars"
+      },
+      {
+        "label": "Meta description (50–160)",
+        "weight": 10,
+        "awarded": 0,
+        "ok": false,
+        "value": "27 chars"
+      },
+      {
+        "label": "Single H1",
+        "weight": 6,
+        "awarded": 0,
+        "ok": false,
+        "value": "0"
+      },
+      {
+        "label": "Mobile viewport",
+        "weight": 12,
+        "awarded": 12,
+        "ok": true
+      },
+      {
+        "label": "Open Graph tags (≥3)",
+        "weight": 5,
+        "awarded": 5,
+        "ok": true,
+        "value": "6"
+      },
+      {
+        "label": "Schema.org JSON-LD",
+        "weight": 5,
+        "awarded": 5,
+        "ok": true
+      },
+      {
+        "label": "Canonical URL",
+        "weight": 5,
+        "awarded": 5,
+        "ok": true
+      },
+      {
+        "label": "Sitemap.xml present",
+        "weight": 5,
+        "awarded": 5,
+        "ok": true
+      },
+      {
+        "label": "Robots.txt present",
+        "weight": 3,
+        "awarded": 3,
+        "ok": true
+      },
+      {
+        "label": "Image alt text (≥80%)",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false,
+        "value": "0%"
+      },
+      {
+        "label": "Substantial content (>300 words)",
+        "weight": 6,
+        "awarded": 0,
+        "ok": false,
+        "value": "11 words"
+      },
+      {
+        "label": "Page speed (<3s)",
+        "weight": 8,
+        "awarded": 8,
+        "ok": true,
+        "value": "1.17s"
+      },
+      {
+        "label": "Analytics installed",
+        "weight": 4,
+        "awarded": 4,
+        "ok": true
+      },
+      {
+        "label": "Social presence linked",
+        "weight": 2,
+        "awarded": 0,
+        "ok": false
+      }
+    ],
+    "audit": {
+      "httpStatus": 200,
+      "httpsActive": true,
+      "finalUrl": "https://casa-tua-canggu.qr2order.net/",
+      "redirected": false,
+      "loadTimeMs": 1169,
+      "title": "Casa Tua Canggu - Homepage",
+      "titleLength": 26,
+      "metaDescription": "Autentic indonesian cuisine",
+      "metaDescriptionLength": 27,
+      "canonical": "https://casa-tua-canggu.qr2order.net",
+      "h1Count": 0,
+      "h2Count": 0,
+      "wordCount": 11,
+      "imageCount": 1,
+      "imagesWithAlt": 0,
+      "internalLinks": 0,
+      "externalLinks": 2,
+      "mobileViewport": true,
+      "ogTagCount": 6,
+      "twitterCard": false,
+      "jsonLd": true,
+      "hasRobotsTxt": true,
+      "hasSitemap": true,
+      "hasGoogleAnalytics": true,
+      "hasGoogleTagManager": true,
+      "hasFacebookPixel": false,
+      "hasHubSpot": false,
+      "tech": [],
+      "emails": [
+        "ygani0595@gmail.com"
+      ],
+      "phones": [
+        "+6289622965413",
+        "2026-05-07 12"
+      ],
+      "socials": {
+        "instagram": null,
+        "facebook": null,
+        "linkedin": null,
+        "twitter": null,
+        "tiktok": null,
+        "youtube": null
+      },
+      "isSocialOnly": false,
+      "reachable": true
+    },
+    "pitch": "Hi Casa Tua Canggu — I ran a quick audit on your site and found a few quick wins — meta description (50–160) and single h1. Happy to share the full breakdown if useful. (Stack: Custom.)",
+    "status": "NEW",
+    "date": "2026-05-07"
+  },
+  {
+    "id": "lgo9sniuk",
+    "name": "Te'amo",
+    "url": "https://teamobali.com/",
+    "email": "teamorest.bali@gmail.com",
+    "tech": "jQuery",
+    "rating": 4.7,
+    "reviews": "",
+    "address": "84WH+5VW, Jl. Munduk Catu, Canggu, Kec. Kuta Utara, Kabupaten Badung, Bali 80361 ",
+    "phone": "0889-8710-2886 ",
+    "mapsUrl": "https://www.google.com/maps/place/Te%27amo/data=!4m7!3m6!1s0x2dd2395509237293:0xb5878e5bb34200c!8m2!3d-8.6544698!4d115.1297474!16s%2Fg%2F11styd1pwk!19sChIJk3IjCVU50i0RDCA0u-V4WAs?authuser=0&hl=en&rclk=1",
+    "isSocialUrl": false,
+    "authorityScore": 47,
+    "stats": {
+      "score": 95,
+      "riskLevel": "Low"
+    },
+    "scoreFactors": [
+      {
+        "label": "HTTPS enabled",
+        "weight": 8,
+        "awarded": 8,
+        "ok": true
+      },
+      {
+        "label": "Page reachable",
+        "weight": 6,
+        "awarded": 6,
+        "ok": true,
+        "value": "200"
+      },
+      {
+        "label": "Title tag (10–65 chars)",
+        "weight": 10,
+        "awarded": 10,
+        "ok": true,
+        "value": "52 chars"
+      },
+      {
+        "label": "Meta description (50–160)",
+        "weight": 10,
+        "awarded": 10,
+        "ok": true,
+        "value": "142 chars"
+      },
+      {
+        "label": "Single H1",
+        "weight": 6,
+        "awarded": 6,
+        "ok": true,
+        "value": "1"
+      },
+      {
+        "label": "Mobile viewport",
+        "weight": 12,
+        "awarded": 12,
+        "ok": true
+      },
+      {
+        "label": "Open Graph tags (≥3)",
+        "weight": 5,
+        "awarded": 5,
+        "ok": true,
+        "value": "5"
+      },
+      {
+        "label": "Schema.org JSON-LD",
+        "weight": 5,
+        "awarded": 5,
+        "ok": true
+      },
+      {
+        "label": "Canonical URL",
+        "weight": 5,
+        "awarded": 5,
+        "ok": true
+      },
+      {
+        "label": "Sitemap.xml present",
+        "weight": 5,
+        "awarded": 5,
+        "ok": true
+      },
+      {
+        "label": "Robots.txt present",
+        "weight": 3,
+        "awarded": 3,
+        "ok": true
+      },
+      {
+        "label": "Image alt text (≥80%)",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false,
+        "value": "0%"
+      },
+      {
+        "label": "Substantial content (>300 words)",
+        "weight": 6,
+        "awarded": 6,
+        "ok": true,
+        "value": "620 words"
+      },
+      {
+        "label": "Page speed (<3s)",
+        "weight": 8,
+        "awarded": 8,
+        "ok": true,
+        "value": "1.91s"
+      },
+      {
+        "label": "Analytics installed",
+        "weight": 4,
+        "awarded": 4,
+        "ok": true
+      },
+      {
+        "label": "Social presence linked",
+        "weight": 2,
+        "awarded": 2,
+        "ok": true
+      }
+    ],
+    "audit": {
+      "httpStatus": 200,
+      "httpsActive": true,
+      "finalUrl": "https://teamobali.com/",
+      "redirected": false,
+      "loadTimeMs": 1906,
+      "title": "Contemporary European Bistro in Canggu | Te’Amo Bali",
+      "titleLength": 52,
+      "metaDescription": "Discover Te’Amo Bistro in Canggu—Contemporary European dining meets Balinese spirit. Enjoy fresh seafood, pasta, wood-fired pizza & cocktails.",
+      "metaDescriptionLength": 142,
+      "canonical": "https://teamobali.com",
+      "h1Count": 1,
+      "h2Count": 19,
+      "wordCount": 620,
+      "imageCount": 1,
+      "imagesWithAlt": 0,
+      "internalLinks": 13,
+      "externalLinks": 11,
+      "mobileViewport": true,
+      "ogTagCount": 5,
+      "twitterCard": false,
+      "jsonLd": true,
+      "hasRobotsTxt": true,
+      "hasSitemap": true,
+      "hasGoogleAnalytics": true,
+      "hasGoogleTagManager": true,
+      "hasFacebookPixel": true,
+      "hasHubSpot": false,
+      "tech": [
+        "jQuery"
+      ],
+      "emails": [
+        "teamorest.bali@gmail.com"
+      ],
+      "phones": [
+        "100094355914977",
+        "+62 889 8710 2886",
+        "11351330799"
+      ],
+      "socials": {
+        "instagram": "https://www.instagram.com/teamo.bali",
+        "facebook": "https://www.facebook.com/people/Teamo/100094355914977/",
+        "linkedin": null,
+        "twitter": null,
+        "tiktok": null,
+        "youtube": "https://www.youtube.com/@TeAmoRestaurantBali"
+      },
+      "isSocialOnly": false,
+      "reachable": true
+    },
+    "pitch": "Hi Te'amo — I ran a quick audit on your site and found a few quick wins — image alt text (≥80%). Happy to share the full breakdown if useful. (Stack: jQuery.)",
+    "status": "NEW",
+    "date": "2026-05-07"
+  },
+  {
+    "id": "4jq09hpej",
+    "name": "Rice Republic Canggu",
+    "url": "https://www.instagram.com/ricerepublicbali/",
+    "email": "No email found",
+    "tech": "jQuery",
+    "rating": 4.7,
+    "reviews": "",
+    "address": "Jl. Canggu Padang Linjong No.65A, Canggu, Kec. Kuta Utara, Kabupaten Badung, Bali 80363 ",
+    "phone": "0813-3760-0955 ",
+    "mapsUrl": "https://www.google.com/maps/place/Rice+Republic+Canggu/data=!4m7!3m6!1s0x2dd239ebc833a2ff:0xa51a4dd52360f011!8m2!3d-8.6457512!4d115.1348536!16s%2Fg%2F11tt0rj_cl!19sChIJ_6IzyOs50i0REfBgI9VNGqU?authuser=0&hl=en&rclk=1",
+    "isSocialUrl": true,
+    "authorityScore": 47,
+    "stats": {
+      "score": 42,
+      "riskLevel": "High Risk"
+    },
+    "scoreFactors": [
+      {
+        "label": "HTTPS enabled",
+        "weight": 8,
+        "awarded": 8,
+        "ok": true
+      },
+      {
+        "label": "Page reachable",
+        "weight": 6,
+        "awarded": 6,
+        "ok": true,
+        "value": "200"
+      },
+      {
+        "label": "Title tag (10–65 chars)",
+        "weight": 10,
+        "awarded": 0,
+        "ok": false,
+        "value": "9 chars"
+      },
+      {
+        "label": "Meta description (50–160)",
+        "weight": 10,
+        "awarded": 0,
+        "ok": false,
+        "value": "0 chars"
+      },
+      {
+        "label": "Single H1",
+        "weight": 6,
+        "awarded": 0,
+        "ok": false,
+        "value": "0"
+      },
+      {
+        "label": "Mobile viewport",
+        "weight": 12,
+        "awarded": 12,
+        "ok": true
+      },
+      {
+        "label": "Open Graph tags (≥3)",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false,
+        "value": "0"
+      },
+      {
+        "label": "Schema.org JSON-LD",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false
+      },
+      {
+        "label": "Canonical URL",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false
+      },
+      {
+        "label": "Sitemap.xml present",
+        "weight": 5,
+        "awarded": 5,
+        "ok": true
+      },
+      {
+        "label": "Robots.txt present",
+        "weight": 3,
+        "awarded": 3,
+        "ok": true
+      },
+      {
+        "label": "Image alt text (≥80%)",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false,
+        "value": "0%"
+      },
+      {
+        "label": "Substantial content (>300 words)",
+        "weight": 6,
+        "awarded": 0,
+        "ok": false,
+        "value": "0 words"
+      },
+      {
+        "label": "Page speed (<3s)",
+        "weight": 8,
+        "awarded": 8,
+        "ok": true,
+        "value": "0.47s"
+      },
+      {
+        "label": "Analytics installed",
+        "weight": 4,
+        "awarded": 0,
+        "ok": false
+      },
+      {
+        "label": "Social presence linked",
+        "weight": 2,
+        "awarded": 0,
+        "ok": false
+      }
+    ],
+    "audit": {
+      "httpStatus": 200,
+      "httpsActive": true,
+      "finalUrl": "https://www.instagram.com/ricerepublicbali/",
+      "redirected": false,
+      "loadTimeMs": 466,
+      "title": "Instagram",
+      "titleLength": 9,
+      "metaDescription": null,
+      "metaDescriptionLength": 0,
+      "canonical": null,
+      "h1Count": 0,
+      "h2Count": 0,
+      "wordCount": 0,
+      "imageCount": 2,
+      "imagesWithAlt": 0,
+      "internalLinks": 0,
+      "externalLinks": 0,
+      "mobileViewport": true,
+      "ogTagCount": 0,
+      "twitterCard": false,
+      "jsonLd": false,
+      "hasRobotsTxt": true,
+      "hasSitemap": true,
+      "hasGoogleAnalytics": false,
+      "hasGoogleTagManager": false,
+      "hasFacebookPixel": false,
+      "hasHubSpot": false,
+      "tech": [
+        "jQuery"
+      ],
+      "emails": [],
+      "phones": [
+        "1039005220",
+        "1778168166",
+        "936619743392459"
+      ],
+      "socials": {
+        "instagram": null,
+        "facebook": null,
+        "linkedin": null,
+        "twitter": null,
+        "tiktok": null,
+        "youtube": null
+      },
+      "isSocialOnly": true,
+      "reachable": true
+    },
+    "pitch": "Hi Rice Republic Canggu — I ran a quick audit on your site and found a few quick wins — title tag (10–65 chars) and meta description (50–160). Happy to share the full breakdown if useful. (Stack: jQuery.)",
+    "status": "NEW",
+    "date": "2026-05-07"
+  },
+  {
+    "id": "ki1zk5h7e",
+    "name": "Entrecôte Brasserie Canggu",
+    "url": "https://entrecotebrasserie.com/",
+    "email": "entrecotebrasseriecanggu@gmail.com",
+    "tech": "WordPress",
+    "rating": 4.6,
+    "reviews": "",
+    "address": "Jl. Nelayan No.23A, Canggu, Kec. Kuta Utara, Kabupaten Badung, Bali 80361 ",
+    "phone": "0822-2753-6665 ",
+    "mapsUrl": "https://www.google.com/maps/place/Entrec%C3%B4te+Brasserie+Canggu/data=!4m7!3m6!1s0x2dd2476672565139:0xf7dd3fb5b572e6b2!8m2!3d-8.6557348!4d115.1350078!16s%2Fg%2F11wx0n5g6y!19sChIJOVFWcmZH0i0RsuZytbU_3fc?authuser=0&hl=en&rclk=1",
+    "isSocialUrl": false,
+    "authorityScore": 46,
+    "stats": {
+      "score": 88,
+      "riskLevel": "Low"
+    },
+    "scoreFactors": [
+      {
+        "label": "HTTPS enabled",
+        "weight": 8,
+        "awarded": 8,
+        "ok": true
+      },
+      {
+        "label": "Page reachable",
+        "weight": 6,
+        "awarded": 6,
+        "ok": true,
+        "value": "200"
+      },
+      {
+        "label": "Title tag (10–65 chars)",
+        "weight": 10,
+        "awarded": 10,
+        "ok": true,
+        "value": "62 chars"
+      },
+      {
+        "label": "Meta description (50–160)",
+        "weight": 10,
+        "awarded": 10,
+        "ok": true,
+        "value": "138 chars"
+      },
+      {
+        "label": "Single H1",
+        "weight": 6,
+        "awarded": 6,
+        "ok": true,
+        "value": "1"
+      },
+      {
+        "label": "Mobile viewport",
+        "weight": 12,
+        "awarded": 12,
+        "ok": true
+      },
+      {
+        "label": "Open Graph tags (≥3)",
+        "weight": 5,
+        "awarded": 5,
+        "ok": true,
+        "value": "10"
+      },
+      {
+        "label": "Schema.org JSON-LD",
+        "weight": 5,
+        "awarded": 5,
+        "ok": true
+      },
+      {
+        "label": "Canonical URL",
+        "weight": 5,
+        "awarded": 5,
+        "ok": true
+      },
+      {
+        "label": "Sitemap.xml present",
+        "weight": 5,
+        "awarded": 5,
+        "ok": true
+      },
+      {
+        "label": "Robots.txt present",
+        "weight": 3,
+        "awarded": 3,
+        "ok": true
+      },
+      {
+        "label": "Image alt text (≥80%)",
+        "weight": 5,
+        "awarded": 5,
+        "ok": true,
+        "value": "83%"
+      },
+      {
+        "label": "Substantial content (>300 words)",
+        "weight": 6,
+        "awarded": 6,
+        "ok": true,
+        "value": "713 words"
+      },
+      {
+        "label": "Page speed (<3s)",
+        "weight": 8,
+        "awarded": 0,
+        "ok": false,
+        "value": "4.83s"
+      },
+      {
+        "label": "Analytics installed",
+        "weight": 4,
+        "awarded": 0,
+        "ok": false
+      },
+      {
+        "label": "Social presence linked",
+        "weight": 2,
+        "awarded": 2,
+        "ok": true
+      }
+    ],
+    "audit": {
+      "httpStatus": 200,
+      "httpsActive": true,
+      "finalUrl": "https://entrecotebrasserie.com/",
+      "redirected": true,
+      "loadTimeMs": 4828,
+      "title": "Enrecote Brasserie - French inspired restaurant in Canggu Bali",
+      "titleLength": 62,
+      "metaDescription": "Experience the charm of Paris in the heart of Canggu. Our Parisian-inspired restaurant blends classic French flavours with a modern twist.",
+      "metaDescriptionLength": 138,
+      "canonical": "https://entrecotebrasserie.com/",
+      "h1Count": 1,
+      "h2Count": 21,
+      "wordCount": 713,
+      "imageCount": 6,
+      "imagesWithAlt": 5,
+      "internalLinks": 12,
+      "externalLinks": 9,
+      "mobileViewport": true,
+      "ogTagCount": 10,
+      "twitterCard": true,
+      "jsonLd": true,
+      "hasRobotsTxt": true,
+      "hasSitemap": true,
+      "hasGoogleAnalytics": false,
+      "hasGoogleTagManager": false,
+      "hasFacebookPixel": false,
+      "hasHubSpot": false,
+      "tech": [
+        "WordPress",
+        "Elementor",
+        "jQuery"
+      ],
+      "emails": [
+        "entrecotebrasseriecanggu@gmail.com"
+      ],
+      "phones": [
+        "2025-02-10",
+        "2025-06-03",
+        "00000057"
+      ],
+      "socials": {
+        "instagram": "https://www.instagram.com/entrecotebrasserie",
+        "facebook": "https://www.facebook.com/entrecotebrasserie/",
+        "linkedin": null,
+        "twitter": null,
+        "tiktok": null,
+        "youtube": null
+      },
+      "isSocialOnly": false,
+      "reachable": true
+    },
+    "pitch": "Hi Entrecôte Brasserie Canggu — I ran a quick audit on your site and found a few quick wins — page speed (<3s) and analytics installed. Happy to share the full breakdown if useful. (Stack: WordPress.)",
+    "status": "NEW",
+    "date": "2026-05-07"
+  },
+  {
+    "id": "1l9piuskx",
+    "name": "Milk & Madu Beach Road",
+    "url": "https://milkandmadu.com/location/canggu?utm_source=google&utm_medium=organic&utm_campaign=gbp_milkandmadu_canggu",
+    "email": "No email found",
+    "tech": "Custom",
+    "rating": 4.6,
+    "reviews": "",
+    "address": "Jl. Pantai Batu Bolong No.92, Canggu, Kec. Kuta Utara, Kabupaten Badung, Bali 80361 ",
+    "phone": "0813-5389-6153 ",
+    "mapsUrl": "https://www.google.com/maps/place/Milk+%26+Madu+Beach+Road/data=!4m7!3m6!1s0x2dd239f749fe722f:0x6f0a500e7b1550c2!8m2!3d-8.6555247!4d115.1320801!16s%2Fg%2F11nndr0tp5!19sChIJL3L-Sfc50i0RwlAVew5QCm8?authuser=0&hl=en&rclk=1",
+    "isSocialUrl": false,
+    "authorityScore": 46,
+    "stats": {
+      "score": 16,
+      "riskLevel": "Critical"
+    },
+    "scoreFactors": [
+      {
+        "label": "HTTPS enabled",
+        "weight": 8,
+        "awarded": 8,
+        "ok": true
+      },
+      {
+        "label": "Page reachable",
+        "weight": 6,
+        "awarded": 0,
+        "ok": false,
+        "value": "404"
+      },
+      {
+        "label": "Title tag (10–65 chars)",
+        "weight": 10,
+        "awarded": 0,
+        "ok": false,
+        "value": "0 chars"
+      },
+      {
+        "label": "Meta description (50–160)",
+        "weight": 10,
+        "awarded": 0,
+        "ok": false,
+        "value": "0 chars"
+      },
+      {
+        "label": "Single H1",
+        "weight": 6,
+        "awarded": 0,
+        "ok": false,
+        "value": "0"
+      },
+      {
+        "label": "Mobile viewport",
+        "weight": 12,
+        "awarded": 0,
+        "ok": false
+      },
+      {
+        "label": "Open Graph tags (≥3)",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false,
+        "value": "0"
+      },
+      {
+        "label": "Schema.org JSON-LD",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false
+      },
+      {
+        "label": "Canonical URL",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false
+      },
+      {
+        "label": "Sitemap.xml present",
+        "weight": 5,
+        "awarded": 5,
+        "ok": true
+      },
+      {
+        "label": "Robots.txt present",
+        "weight": 3,
+        "awarded": 3,
+        "ok": true
+      },
+      {
+        "label": "Image alt text (≥80%)",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false,
+        "value": "no images"
+      },
+      {
+        "label": "Substantial content (>300 words)",
+        "weight": 6,
+        "awarded": 0,
+        "ok": false,
+        "value": "0 words"
+      },
+      {
+        "label": "Page speed (<3s)",
+        "weight": 8,
+        "awarded": 0,
+        "ok": false,
+        "value": "3.50s"
+      },
+      {
+        "label": "Analytics installed",
+        "weight": 4,
+        "awarded": 0,
+        "ok": false
+      },
+      {
+        "label": "Social presence linked",
+        "weight": 2,
+        "awarded": 0,
+        "ok": false
+      }
+    ],
+    "audit": {
+      "httpStatus": 404,
+      "httpsActive": true,
+      "finalUrl": "https://milkandmadu.com/location/canggu?utm_source=google&utm_medium=organic&utm_campaign=gbp_milkandmadu_canggu",
+      "redirected": true,
+      "loadTimeMs": 3501,
+      "title": null,
+      "titleLength": 0,
+      "metaDescription": null,
+      "metaDescriptionLength": 0,
+      "canonical": null,
+      "h1Count": 0,
+      "h2Count": 0,
+      "wordCount": 0,
+      "imageCount": 0,
+      "imagesWithAlt": 0,
+      "internalLinks": 0,
+      "externalLinks": 0,
+      "mobileViewport": false,
+      "ogTagCount": 0,
+      "twitterCard": false,
+      "jsonLd": false,
+      "hasRobotsTxt": true,
+      "hasSitemap": true,
+      "hasGoogleAnalytics": false,
+      "hasGoogleTagManager": false,
+      "hasFacebookPixel": false,
+      "hasHubSpot": false,
+      "tech": [],
+      "emails": [],
+      "phones": [],
+      "socials": {
+        "instagram": null,
+        "facebook": null,
+        "linkedin": null,
+        "twitter": null,
+        "tiktok": null,
+        "youtube": null
+      },
+      "isSocialOnly": false,
+      "reachable": false
+    },
+    "pitch": "Hi Milk & Madu Beach Road — I noticed you don't have a discoverable website right now. A simple landing page can capture searches that currently slip through to competitors.",
+    "status": "NEW",
+    "date": "2026-05-07"
+  },
+  {
+    "id": "0ms8qyk2o",
+    "name": "Mosto | Berawa",
+    "url": "https://mostobali.com/",
+    "email": "info@mostobali.com",
+    "tech": "WordPress",
+    "rating": 4.6,
+    "reviews": "",
+    "address": "Jl. Pantai Berawa No.8, Tibubeneng, Kec. Kuta, Kabupaten Badung, Bali 80361 ",
+    "phone": "0813-5615-2611 ",
+    "mapsUrl": "https://www.google.com/maps/place/Mosto+%7C+Berawa/data=!4m7!3m6!1s0x2dd24731faaa870f:0xdcb8f4270cb6023a!8m2!3d-8.6614138!4d115.1394382!16s%2Fg%2F11rmnzcxv9!19sChIJD4eq-jFH0i0ROgK2DCf0uNw?authuser=0&hl=en&rclk=1",
+    "isSocialUrl": false,
+    "authorityScore": 46,
+    "stats": {
+      "score": 81,
+      "riskLevel": "Low"
+    },
+    "scoreFactors": [
+      {
+        "label": "HTTPS enabled",
+        "weight": 8,
+        "awarded": 8,
+        "ok": true
+      },
+      {
+        "label": "Page reachable",
+        "weight": 6,
+        "awarded": 6,
+        "ok": true,
+        "value": "200"
+      },
+      {
+        "label": "Title tag (10–65 chars)",
+        "weight": 10,
+        "awarded": 10,
+        "ok": true,
+        "value": "52 chars"
+      },
+      {
+        "label": "Meta description (50–160)",
+        "weight": 10,
+        "awarded": 10,
+        "ok": true,
+        "value": "135 chars"
+      },
+      {
+        "label": "Single H1",
+        "weight": 6,
+        "awarded": 0,
+        "ok": false,
+        "value": "0"
+      },
+      {
+        "label": "Mobile viewport",
+        "weight": 12,
+        "awarded": 12,
+        "ok": true
+      },
+      {
+        "label": "Open Graph tags (≥3)",
+        "weight": 5,
+        "awarded": 5,
+        "ok": true,
+        "value": "10"
+      },
+      {
+        "label": "Schema.org JSON-LD",
+        "weight": 5,
+        "awarded": 5,
+        "ok": true
+      },
+      {
+        "label": "Canonical URL",
+        "weight": 5,
+        "awarded": 5,
+        "ok": true
+      },
+      {
+        "label": "Sitemap.xml present",
+        "weight": 5,
+        "awarded": 5,
+        "ok": true
+      },
+      {
+        "label": "Robots.txt present",
+        "weight": 3,
+        "awarded": 3,
+        "ok": true
+      },
+      {
+        "label": "Image alt text (≥80%)",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false,
+        "value": "0%"
+      },
+      {
+        "label": "Substantial content (>300 words)",
+        "weight": 6,
+        "awarded": 6,
+        "ok": true,
+        "value": "846 words"
+      },
+      {
+        "label": "Page speed (<3s)",
+        "weight": 8,
+        "awarded": 0,
+        "ok": false,
+        "value": "3.09s"
+      },
+      {
+        "label": "Analytics installed",
+        "weight": 4,
+        "awarded": 4,
+        "ok": true
+      },
+      {
+        "label": "Social presence linked",
+        "weight": 2,
+        "awarded": 2,
+        "ok": true
+      }
+    ],
+    "audit": {
+      "httpStatus": 200,
+      "httpsActive": true,
+      "finalUrl": "https://mostobali.com/",
+      "redirected": true,
+      "loadTimeMs": 3093,
+      "title": "Mosto - Natural Wine Bar | Neo Bistro | Canggu, Bali",
+      "titleLength": 52,
+      "metaDescription": "Indonesia's first natural wine bar in Canggu. European neo-bistro cuisine, curated natural wines, intimate atmosphere. Open 5 pm daily.",
+      "metaDescriptionLength": 135,
+      "canonical": "https://mostobali.com/",
+      "h1Count": 0,
+      "h2Count": 3,
+      "wordCount": 846,
+      "imageCount": 6,
+      "imagesWithAlt": 0,
+      "internalLinks": 11,
+      "externalLinks": 7,
+      "mobileViewport": true,
+      "ogTagCount": 10,
+      "twitterCard": true,
+      "jsonLd": true,
+      "hasRobotsTxt": true,
+      "hasSitemap": true,
+      "hasGoogleAnalytics": true,
+      "hasGoogleTagManager": true,
+      "hasFacebookPixel": true,
+      "hasHubSpot": false,
+      "tech": [
+        "WordPress",
+        "Elementor",
+        "jQuery"
+      ],
+      "emails": [
+        "info@mostobali.com"
+      ],
+      "phones": [
+        "+628113980909",
+        "2023-05-30",
+        "2026-01-13"
+      ],
+      "socials": {
+        "instagram": "https://www.instagram.com/mostobali",
+        "facebook": "https://www.facebook.com/tr",
+        "linkedin": null,
+        "twitter": null,
+        "tiktok": null,
+        "youtube": null
+      },
+      "isSocialOnly": false,
+      "reachable": true
+    },
+    "pitch": "Hi Mosto | Berawa — I ran a quick audit on your site and found a few quick wins — single h1 and image alt text (≥80%). Happy to share the full breakdown if useful. (Stack: WordPress.)",
+    "status": "NEW",
+    "date": "2026-05-07"
+  },
+  {
+    "id": "8lzeoo31j",
+    "name": "BELLA. Canggu",
+    "url": "http://bellacanggu.com/",
+    "email": "No email found",
+    "tech": "Custom",
+    "rating": 4.6,
+    "reviews": "",
+    "address": "Jl. Pantai Berawa No.99, Canggu, Kec. Kuta Utara, Kabupaten Badung, Bali 80361 ",
+    "phone": "0811-3988-2777 ",
+    "mapsUrl": "https://www.google.com/maps/place/BELLA.+Canggu/data=!4m7!3m6!1s0x2dd247422a802a7b:0xd52484c73fc5993a!8m2!3d-8.6600068!4d115.1407312!16s%2Fg%2F11khrcv89x!19sChIJeyqAKkJH0i0ROpnFP8eEJNU?authuser=0&hl=en&rclk=1",
+    "isSocialUrl": false,
+    "authorityScore": 46,
+    "stats": {
+      "score": 8,
+      "riskLevel": "Critical"
+    },
+    "scoreFactors": [
+      {
+        "label": "HTTPS enabled",
+        "weight": 8,
+        "awarded": 0,
+        "ok": false
+      },
+      {
+        "label": "Page reachable",
+        "weight": 6,
+        "awarded": 0,
+        "ok": false,
+        "value": "403"
+      },
+      {
+        "label": "Title tag (10–65 chars)",
+        "weight": 10,
+        "awarded": 0,
+        "ok": false,
+        "value": "0 chars"
+      },
+      {
+        "label": "Meta description (50–160)",
+        "weight": 10,
+        "awarded": 0,
+        "ok": false,
+        "value": "0 chars"
+      },
+      {
+        "label": "Single H1",
+        "weight": 6,
+        "awarded": 0,
+        "ok": false,
+        "value": "0"
+      },
+      {
+        "label": "Mobile viewport",
+        "weight": 12,
+        "awarded": 0,
+        "ok": false
+      },
+      {
+        "label": "Open Graph tags (≥3)",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false,
+        "value": "0"
+      },
+      {
+        "label": "Schema.org JSON-LD",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false
+      },
+      {
+        "label": "Canonical URL",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false
+      },
+      {
+        "label": "Sitemap.xml present",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false
+      },
+      {
+        "label": "Robots.txt present",
+        "weight": 3,
+        "awarded": 0,
+        "ok": false
+      },
+      {
+        "label": "Image alt text (≥80%)",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false,
+        "value": "no images"
+      },
+      {
+        "label": "Substantial content (>300 words)",
+        "weight": 6,
+        "awarded": 0,
+        "ok": false,
+        "value": "0 words"
+      },
+      {
+        "label": "Page speed (<3s)",
+        "weight": 8,
+        "awarded": 8,
+        "ok": true,
+        "value": "0.61s"
+      },
+      {
+        "label": "Analytics installed",
+        "weight": 4,
+        "awarded": 0,
+        "ok": false
+      },
+      {
+        "label": "Social presence linked",
+        "weight": 2,
+        "awarded": 0,
+        "ok": false
+      }
+    ],
+    "audit": {
+      "httpStatus": 403,
+      "httpsActive": false,
+      "finalUrl": "http://bellacanggu.com/",
+      "redirected": false,
+      "loadTimeMs": 615,
+      "title": null,
+      "titleLength": 0,
+      "metaDescription": null,
+      "metaDescriptionLength": 0,
+      "canonical": null,
+      "h1Count": 0,
+      "h2Count": 0,
+      "wordCount": 0,
+      "imageCount": 0,
+      "imagesWithAlt": 0,
+      "internalLinks": 0,
+      "externalLinks": 0,
+      "mobileViewport": false,
+      "ogTagCount": 0,
+      "twitterCard": false,
+      "jsonLd": false,
+      "hasRobotsTxt": false,
+      "hasSitemap": false,
+      "hasGoogleAnalytics": false,
+      "hasGoogleTagManager": false,
+      "hasFacebookPixel": false,
+      "hasHubSpot": false,
+      "tech": [],
+      "emails": [],
+      "phones": [],
+      "socials": {
+        "instagram": null,
+        "facebook": null,
+        "linkedin": null,
+        "twitter": null,
+        "tiktok": null,
+        "youtube": null
+      },
+      "isSocialOnly": false,
+      "reachable": false
+    },
+    "pitch": "Hi BELLA. Canggu — I noticed you don't have a discoverable website right now. A simple landing page can capture searches that currently slip through to competitors.",
+    "status": "NEW",
+    "date": "2026-05-07"
+  },
+  {
+    "id": "zkr63wvpz",
+    "name": "Motel Mexicola | Canggu",
+    "url": "https://motelmexicola.info/canggu/",
+    "email": "canggu@motelmexicola.info",
+    "tech": "WordPress",
+    "rating": 4.6,
+    "reviews": "",
+    "address": "84RJ+C58, Jl. Pantai Batu Bolong No.117X, Canggu, Kec. Kuta Utara, Kabupaten Badung, Bali 80361 ",
+    "phone": "0811-3889-8000 ",
+    "mapsUrl": "https://www.google.com/maps/place/Motel+Mexicola+%7C+Canggu/data=!4m7!3m6!1s0x2dd247ec6ad17bfb:0xb599b069341d8512!8m2!3d-8.6589419!4d115.1303954!16s%2Fg%2F11v1385ymr!19sChIJ-3vRauxH0i0REoUdNGmwmbU?authuser=0&hl=en&rclk=1",
+    "isSocialUrl": false,
+    "authorityScore": 46,
+    "stats": {
+      "score": 78,
+      "riskLevel": "Medium"
+    },
+    "scoreFactors": [
+      {
+        "label": "HTTPS enabled",
+        "weight": 8,
+        "awarded": 8,
+        "ok": true
+      },
+      {
+        "label": "Page reachable",
+        "weight": 6,
+        "awarded": 6,
+        "ok": true,
+        "value": "200"
+      },
+      {
+        "label": "Title tag (10–65 chars)",
+        "weight": 10,
+        "awarded": 10,
+        "ok": true,
+        "value": "62 chars"
+      },
+      {
+        "label": "Meta description (50–160)",
+        "weight": 10,
+        "awarded": 10,
+        "ok": true,
+        "value": "126 chars"
+      },
+      {
+        "label": "Single H1",
+        "weight": 6,
+        "awarded": 0,
+        "ok": false,
+        "value": "0"
+      },
+      {
+        "label": "Mobile viewport",
+        "weight": 12,
+        "awarded": 12,
+        "ok": true
+      },
+      {
+        "label": "Open Graph tags (≥3)",
+        "weight": 5,
+        "awarded": 5,
+        "ok": true,
+        "value": "6"
+      },
+      {
+        "label": "Schema.org JSON-LD",
+        "weight": 5,
+        "awarded": 5,
+        "ok": true
+      },
+      {
+        "label": "Canonical URL",
+        "weight": 5,
+        "awarded": 5,
+        "ok": true
+      },
+      {
+        "label": "Sitemap.xml present",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false
+      },
+      {
+        "label": "Robots.txt present",
+        "weight": 3,
+        "awarded": 3,
+        "ok": true
+      },
+      {
+        "label": "Image alt text (≥80%)",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false,
+        "value": "no images"
+      },
+      {
+        "label": "Substantial content (>300 words)",
+        "weight": 6,
+        "awarded": 0,
+        "ok": false,
+        "value": "0 words"
+      },
+      {
+        "label": "Page speed (<3s)",
+        "weight": 8,
+        "awarded": 8,
+        "ok": true,
+        "value": "1.18s"
+      },
+      {
+        "label": "Analytics installed",
+        "weight": 4,
+        "awarded": 4,
+        "ok": true
+      },
+      {
+        "label": "Social presence linked",
+        "weight": 2,
+        "awarded": 2,
+        "ok": true
+      }
+    ],
+    "audit": {
+      "httpStatus": 200,
+      "httpsActive": true,
+      "finalUrl": "https://motelmexicola.info/canggu/",
+      "redirected": false,
+      "loadTimeMs": 1181,
+      "title": "Motel Mexicola | Mexican Restaurant Canggu | Tacos & Cocktails",
+      "titleLength": 62,
+      "metaDescription": "Motel Mexicola Canggu is now open! Click to book at our new Motel Mexicola Canggu location or email canggu@motelmexicola.info.",
+      "metaDescriptionLength": 126,
+      "canonical": "https://motelmexicola.info/canggu/",
+      "h1Count": 0,
+      "h2Count": 0,
+      "wordCount": 0,
+      "imageCount": 0,
+      "imagesWithAlt": 0,
+      "internalLinks": 0,
+      "externalLinks": 0,
+      "mobileViewport": true,
+      "ogTagCount": 6,
+      "twitterCard": true,
+      "jsonLd": true,
+      "hasRobotsTxt": true,
+      "hasSitemap": false,
+      "hasGoogleAnalytics": true,
+      "hasGoogleTagManager": true,
+      "hasFacebookPixel": true,
+      "hasHubSpot": false,
+      "tech": [
+        "WordPress",
+        "jQuery"
+      ],
+      "emails": [
+        "canggu@motelmexicola.info"
+      ],
+      "phones": [
+        "695026191981068",
+        "2023-07-20",
+        "2026-04-06"
+      ],
+      "socials": {
+        "instagram": null,
+        "facebook": "https://www.facebook.com/tr",
+        "linkedin": null,
+        "twitter": null,
+        "tiktok": null,
+        "youtube": null
+      },
+      "isSocialOnly": false,
+      "reachable": true
+    },
+    "pitch": "Hi Motel Mexicola | Canggu — I ran a quick audit on your site and found a few quick wins — single h1 and sitemap.xml present. Happy to share the full breakdown if useful. (Stack: WordPress.)",
+    "status": "NEW",
+    "date": "2026-05-07"
+  },
+  {
+    "id": "4h6sudg65",
+    "name": "Ele Restaurant, Bar and Terrace",
+    "url": "https://expireddomains.com/domain/ele.restaurant",
+    "email": "No email found",
+    "tech": "Custom",
+    "rating": 4.6,
+    "reviews": "",
+    "address": "Jl. Pantai Batu Bolong No.12, Canggu, Kec. Kuta Utara, Kabupaten Badung, Bali 80361 ",
+    "phone": "0823-4006-4601 ",
+    "mapsUrl": "https://www.google.com/maps/place/Ele+Restaurant,+Bar+and+Terrace/data=!4m7!3m6!1s0x2dd239c4b95f7eeb:0x6541a472d4665167!8m2!3d-8.6472847!4d115.1400926!16s%2Fg%2F11vlr6__8c!19sChIJ635fucQ50i0RZ1Fm1HKkQWU?authuser=0&hl=en&rclk=1",
+    "isSocialUrl": false,
+    "authorityScore": 46,
+    "stats": {
+      "score": 69,
+      "riskLevel": "Medium"
+    },
+    "scoreFactors": [
+      {
+        "label": "HTTPS enabled",
+        "weight": 8,
+        "awarded": 8,
+        "ok": true
+      },
+      {
+        "label": "Page reachable",
+        "weight": 6,
+        "awarded": 6,
+        "ok": true,
+        "value": "200"
+      },
+      {
+        "label": "Title tag (10–65 chars)",
+        "weight": 10,
+        "awarded": 0,
+        "ok": false,
+        "value": "87 chars"
+      },
+      {
+        "label": "Meta description (50–160)",
+        "weight": 10,
+        "awarded": 10,
+        "ok": true,
+        "value": "160 chars"
+      },
+      {
+        "label": "Single H1",
+        "weight": 6,
+        "awarded": 0,
+        "ok": false,
+        "value": "0"
+      },
+      {
+        "label": "Mobile viewport",
+        "weight": 12,
+        "awarded": 12,
+        "ok": true
+      },
+      {
+        "label": "Open Graph tags (≥3)",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false,
+        "value": "0"
+      },
+      {
+        "label": "Schema.org JSON-LD",
+        "weight": 5,
+        "awarded": 5,
+        "ok": true
+      },
+      {
+        "label": "Canonical URL",
+        "weight": 5,
+        "awarded": 5,
+        "ok": true
+      },
+      {
+        "label": "Sitemap.xml present",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false
+      },
+      {
+        "label": "Robots.txt present",
+        "weight": 3,
+        "awarded": 3,
+        "ok": true
+      },
+      {
+        "label": "Image alt text (≥80%)",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false,
+        "value": "no images"
+      },
+      {
+        "label": "Substantial content (>300 words)",
+        "weight": 6,
+        "awarded": 6,
+        "ok": true,
+        "value": "1249 words"
+      },
+      {
+        "label": "Page speed (<3s)",
+        "weight": 8,
+        "awarded": 8,
+        "ok": true,
+        "value": "2.05s"
+      },
+      {
+        "label": "Analytics installed",
+        "weight": 4,
+        "awarded": 4,
+        "ok": true
+      },
+      {
+        "label": "Social presence linked",
+        "weight": 2,
+        "awarded": 2,
+        "ok": true
+      }
+    ],
+    "audit": {
+      "httpStatus": 200,
+      "httpsActive": true,
+      "finalUrl": "https://expireddomains.com/domain/ele.restaurant",
+      "redirected": true,
+      "loadTimeMs": 2048,
+      "title": "Buy ele.restaurant – Premium Expired .restaurant Domain on GoDaddy | ExpiredDomains.com",
+      "titleLength": 87,
+      "metaDescription": "Buy ele.restaurant for 100 on GoDaddy via ExpiredDomains.com. This premium expired .restaurant domain is ideal for Chinese Restaurant projects. Secure it today!",
+      "metaDescriptionLength": 160,
+      "canonical": "https://expireddomains.com/domain/ele.restaurant",
+      "h1Count": 0,
+      "h2Count": 0,
+      "wordCount": 1249,
+      "imageCount": 0,
+      "imagesWithAlt": 0,
+      "internalLinks": 42,
+      "externalLinks": 1,
+      "mobileViewport": true,
+      "ogTagCount": 0,
+      "twitterCard": true,
+      "jsonLd": true,
+      "hasRobotsTxt": true,
+      "hasSitemap": false,
+      "hasGoogleAnalytics": true,
+      "hasGoogleTagManager": false,
+      "hasFacebookPixel": false,
+      "hasHubSpot": false,
+      "tech": [],
+      "emails": [],
+      "phones": [
+        "0 0 1138 874",
+        "234 859 0 669 0 437",
+        "232 420-526 437"
+      ],
+      "socials": {
+        "instagram": "https://www.instagram.com/expireddomainscom",
+        "facebook": "https://www.facebook.com/expireddomainscom/",
+        "linkedin": "https://www.linkedin.com/company/expireddomainscom",
+        "twitter": "https://x.com/ExpiredDomainHQ",
+        "tiktok": "https://www.tiktok.com/@expireddomainscom",
+        "youtube": "https://www.youtube.com/@ExpiredDomainscom"
+      },
+      "isSocialOnly": false,
+      "reachable": true
+    },
+    "pitch": "Hi Ele Restaurant, Bar and Terrace — I ran a quick audit on your site and found a few quick wins — title tag (10–65 chars) and single h1. Happy to share the full breakdown if useful. (Stack: Custom.)",
+    "status": "NEW",
+    "date": "2026-05-07"
+  },
+  {
+    "id": "vk7l0o1qn",
+    "name": "Penny Lane",
+    "url": "http://pennylanebali.com/",
+    "email": "No email found",
+    "tech": "Custom",
+    "rating": 4.5,
+    "reviews": "",
+    "address": "Jl. Munduk Catu No.9, Canggu, Kec. Kuta Utara, Kabupaten Badung, Bali ",
+    "phone": "0851-7442-7085 ",
+    "mapsUrl": "https://www.google.com/maps/place/Penny+Lane/data=!4m7!3m6!1s0x2dd239280ce521ed:0x38561eb161bdcd68!8m2!3d-8.6533563!4d115.1305667!16s%2Fg%2F11fmkx1lvh!19sChIJ7SHlDCg50i0RaM29YbEeVjg?authuser=0&hl=en&rclk=1",
+    "isSocialUrl": false,
+    "authorityScore": 45,
+    "stats": {
+      "score": 8,
+      "riskLevel": "Critical"
+    },
+    "scoreFactors": [
+      {
+        "label": "HTTPS enabled",
+        "weight": 8,
+        "awarded": 0,
+        "ok": false
+      },
+      {
+        "label": "Page reachable",
+        "weight": 6,
+        "awarded": 0,
+        "ok": false,
+        "value": "503"
+      },
+      {
+        "label": "Title tag (10–65 chars)",
+        "weight": 10,
+        "awarded": 0,
+        "ok": false,
+        "value": "0 chars"
+      },
+      {
+        "label": "Meta description (50–160)",
+        "weight": 10,
+        "awarded": 0,
+        "ok": false,
+        "value": "0 chars"
+      },
+      {
+        "label": "Single H1",
+        "weight": 6,
+        "awarded": 0,
+        "ok": false,
+        "value": "0"
+      },
+      {
+        "label": "Mobile viewport",
+        "weight": 12,
+        "awarded": 0,
+        "ok": false
+      },
+      {
+        "label": "Open Graph tags (≥3)",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false,
+        "value": "0"
+      },
+      {
+        "label": "Schema.org JSON-LD",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false
+      },
+      {
+        "label": "Canonical URL",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false
+      },
+      {
+        "label": "Sitemap.xml present",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false
+      },
+      {
+        "label": "Robots.txt present",
+        "weight": 3,
+        "awarded": 0,
+        "ok": false
+      },
+      {
+        "label": "Image alt text (≥80%)",
+        "weight": 5,
+        "awarded": 0,
+        "ok": false,
+        "value": "no images"
+      },
+      {
+        "label": "Substantial content (>300 words)",
+        "weight": 6,
+        "awarded": 0,
+        "ok": false,
+        "value": "0 words"
+      },
+      {
+        "label": "Page speed (<3s)",
+        "weight": 8,
+        "awarded": 8,
+        "ok": true,
+        "value": "0.58s"
+      },
+      {
+        "label": "Analytics installed",
+        "weight": 4,
+        "awarded": 0,
+        "ok": false
+      },
+      {
+        "label": "Social presence linked",
+        "weight": 2,
+        "awarded": 0,
+        "ok": false
+      }
+    ],
+    "audit": {
+      "httpStatus": 503,
+      "httpsActive": false,
+      "finalUrl": "http://pennylanebali.com/",
+      "redirected": false,
+      "loadTimeMs": 579,
+      "title": null,
+      "titleLength": 0,
+      "metaDescription": null,
+      "metaDescriptionLength": 0,
+      "canonical": null,
+      "h1Count": 0,
+      "h2Count": 0,
+      "wordCount": 0,
+      "imageCount": 0,
+      "imagesWithAlt": 0,
+      "internalLinks": 0,
+      "externalLinks": 0,
+      "mobileViewport": false,
+      "ogTagCount": 0,
+      "twitterCard": false,
+      "jsonLd": false,
+      "hasRobotsTxt": false,
+      "hasSitemap": false,
+      "hasGoogleAnalytics": false,
+      "hasGoogleTagManager": false,
+      "hasFacebookPixel": false,
+      "hasHubSpot": false,
+      "tech": [],
+      "emails": [],
+      "phones": [],
+      "socials": {
+        "instagram": null,
+        "facebook": null,
+        "linkedin": null,
+        "twitter": null,
+        "tiktok": null,
+        "youtube": null
+      },
+      "isSocialOnly": false,
+      "reachable": false
+    },
+    "pitch": "Hi Penny Lane — I noticed you don't have a discoverable website right now. A simple landing page can capture searches that currently slip through to competitors.",
+    "status": "NEW",
+    "date": "2026-05-07"
+  },
+  {
+    "name": "La Baracca",
+    "rating": 4.6,
+    "reviews": "",
+    "website": "https://labaraccabali.com/",
+    "address": "Jl. Tanah Barak No.51, Canggu, Kec. Kuta Utara, Kabupaten Badung, Bali 80351 ",
+    "phone": "0823-3978-5155 ",
+    "mapsUrl": "https://www.google.com/maps/place/La+Baracca/data=!4m7!3m6!1s0x2dd238798fc241ff:0x3b5ce069ba2c219f!8m2!3d-8.6513075!4d115.131708!16s%2Fg%2F11bwgw0qj3!19sChIJ_0HCj3k40i0RnyEsumngXDs?authuser=0&hl=en&rclk=1",
+    "authorityScore": 46,
+    "id": "5s790adyk",
+    "url": "https://labaraccabali.com/",
+    "email": "Info@labaraccabali.com",
+    "tech": "Custom Code",
+    "isSocialUrl": false,
+    "stats": {
+      "score": 64,
+      "riskLevel": "Medium"
+    },
+    "pitch": "Hello La Baracca, I noticed your digital presence could be optimized to capture more market share...",
+    "status": "NEW",
+    "date": "2026-05-07"
+  },
+  {
+    "name": "Chow Chow Bali",
+    "rating": 4.7,
+    "reviews": "",
+    "website": "http://chowchowbali.com/",
+    "address": "Gg. Nyepi No.22, Canggu, Kec. Kuta Utara, Kabupaten Badung, Bali 80361 ",
+    "phone": "0817-6065-633 ",
+    "mapsUrl": "https://www.google.com/maps/place/Chow+Chow+Bali/data=!4m7!3m6!1s0x2dd239abfc420421:0xc37c698bbc36d7a1!8m2!3d-8.6532722!4d115.1318266!16s%2Fg%2F11pdw9l1w0!19sChIJIQRC_Ks50i0Rodc2vItpfMM?authuser=0&hl=en&rclk=1",
+    "authorityScore": 47,
+    "id": "7agn1ek0w",
+    "url": "https://chowchowbali.com/",
+    "email": "No Email Found",
+    "tech": "Custom Code",
+    "isSocialUrl": false,
+    "stats": {
+      "score": 67,
+      "riskLevel": "Medium"
+    },
+    "pitch": "Hello Chow Chow Bali, I noticed your digital presence could be optimized to capture more market share...",
+    "status": "NEW",
+    "date": "2026-05-07"
+  },
+  {
+    "name": "YUKI Canggu",
+    "rating": 4.6,
+    "reviews": "",
+    "website": "https://www.yuki-bali.com/?utm_source=gmb&utm_medium=organic&utm_campaign=gmb_canggu",
+    "address": "84RH+RM2, Jl. Pura Dalem, Canggu, Kec. Kuta Utara, Kabupaten Badung, Bali 80361 ",
+    "phone": "0811-3960-8556 ",
+    "mapsUrl": "https://www.google.com/maps/place/YUKI+Canggu/data=!4m7!3m6!1s0x2dd2473b3bf9638f:0xf0f6001bb4d64e79!8m2!3d-8.6579185!4d115.1292907!16s%2Fg%2F11pk9dq8dj!19sChIJj2P5OztH0i0ReU7WtBsA9vA?authuser=0&hl=en&rclk=1",
+    "authorityScore": 46,
+    "id": "5yd8u4lff",
+    "url": "https://www.yuki-bali.com/?utm_source=gmb&utm_medium=organic&utm_campaign=gmb_canggu",
+    "email": "rspack@1.6.6",
+    "tech": "Wix",
+    "isSocialUrl": false,
+    "stats": {
+      "score": 61,
+      "riskLevel": "Medium"
+    },
+    "pitch": "Hello YUKI Canggu, I noticed your digital presence could be optimized to capture more market share...",
+    "status": "NEW",
+    "date": "2026-05-07"
+  },
+  {
+    "name": "Luma",
+    "rating": 4.5,
+    "reviews": "",
+    "website": "https://www.lumabali.com/",
+    "address": "Jl. Pantai Batu Bolong No.91, Canggu, Kec. Kuta Utara, Kabupaten Badung, Bali 80361 ",
+    "phone": "0811-3941-4999 ",
+    "mapsUrl": "https://www.google.com/maps/place/Luma/data=!4m7!3m6!1s0x2dd23959c42abf01:0xbb892de61d118aa5!8m2!3d-8.654911!4d115.1316098!16s%2Fg%2F11sy17lxdn!19sChIJAb8qxFk50i0RpYoRHeYtibs?authuser=0&hl=en&rclk=1",
+    "authorityScore": 45,
+    "id": "zhtlucowi",
+    "url": "https://www.lumabali.com/",
+    "email": "No Email Found",
+    "tech": "WordPress",
+    "isSocialUrl": false,
+    "stats": {
+      "score": 53,
+      "riskLevel": "High Risk"
+    },
+    "pitch": "Hello Luma, I noticed your digital presence could be optimized to capture more market share...",
+    "status": "NEW",
+    "date": "2026-05-07"
+  },
+  {
     "name": "Kajin Japanese Contemporary Sushi",
     "rating": 4.8,
     "reviews": "",
