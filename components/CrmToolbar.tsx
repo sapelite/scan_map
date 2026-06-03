@@ -1,9 +1,80 @@
 "use client";
 
 import React from "react";
-import { LeadStatus, STATUS_OPTIONS } from "@/lib/types";
+import { Lead, LeadStatus, STATUS_OPTIONS } from "@/lib/types";
 
 export type SortKey = "date_desc" | "score_desc" | "score_asc" | "name_asc";
+
+export type QuickFilterKey =
+  | "no_website"
+  | "broken"
+  | "high_opp"
+  | "no_instagram"
+  | "no_marketing"
+  | "no_social"
+  | "low_reviews"
+  | "has_email"
+  | "has_whatsapp"
+  | "outdated_stack";
+
+export interface QuickFilter {
+  key: QuickFilterKey;
+  label: string;
+}
+
+export const QUICK_FILTERS: QuickFilter[] = [
+  { key: "high_opp",       label: "High opportunity" },
+  { key: "no_website",     label: "No website" },
+  { key: "broken",         label: "Site down" },
+  { key: "no_instagram",   label: "No Instagram" },
+  { key: "no_marketing",   label: "Weak marketing" },
+  { key: "no_social",      label: "No socials" },
+  { key: "low_reviews",    label: "Few reviews" },
+  { key: "outdated_stack", label: "Wix / Squarespace" },
+  { key: "has_email",      label: "Has email" },
+  { key: "has_whatsapp",   label: "Has WhatsApp" },
+];
+
+// ---- Accurate, data-driven predicates (independent of the opportunities array,
+//      so they work for old leads too and stay precise) -----------------------
+const hasRealWebsite = (l: Lead) => {
+  if (l.websiteFromMaps) return true;
+  const u = (l.url || "").toLowerCase();
+  return /^https?:/.test(u) && !u.startsWith("no website");
+};
+const realEmail = (l: Lead) => !!l.email && !/^no email/i.test(l.email);
+const reviewCountOf = (l: Lead) => l.reviewCount ?? (parseInt(String(l.reviews || "").replace(/[^\d]/g, ""), 10) || 0);
+const igOf = (l: Lead) => l.audit?.socials?.instagram;
+const socialCountOf = (l: Lead) =>
+  l.audit?.socialCount ?? (l.audit?.socials ? Object.values(l.audit.socials).filter(Boolean).length : 0);
+
+export function matchesQuickFilter(l: Lead, key: QuickFilterKey): boolean {
+  switch (key) {
+    case "high_opp":       return (l.stats?.score ?? 0) < 40;
+    case "no_website":     return l.websiteStatus === "none" || (!l.websiteStatus && !hasRealWebsite(l));
+    case "broken":         return l.websiteStatus === "unreachable";
+    case "no_instagram":   return !igOf(l);
+    case "no_marketing": {
+      const m = l.stats?.dimensions?.marketing;
+      if (typeof m === "number") return m < 30;
+      const a = l.audit;
+      return a ? (!a.hasGoogleAnalytics && !a.hasGoogleTagManager && (a.adPixels?.length ?? 0) === 0) : false;
+    }
+    case "no_social":      return socialCountOf(l) === 0;
+    case "low_reviews":    return reviewCountOf(l) < 10;
+    case "outdated_stack": return l.tech === "Wix" || l.tech === "Squarespace";
+    case "has_email":      return realEmail(l);
+    case "has_whatsapp":   return !!(l.whatsapp || l.audit?.whatsapp);
+    default:               return true;
+  }
+}
+
+/** Count how many leads match each quick filter (for the chip badges). */
+export function quickFilterCounts(leads: Lead[]): Record<QuickFilterKey, number> {
+  const counts = Object.fromEntries(QUICK_FILTERS.map((q) => [q.key, 0])) as Record<QuickFilterKey, number>;
+  for (const l of leads) for (const q of QUICK_FILTERS) if (matchesQuickFilter(l, q.key)) counts[q.key]++;
+  return counts;
+}
 
 interface CrmToolbarProps {
   searchTerm: string;
@@ -17,6 +88,13 @@ interface CrmToolbarProps {
   techOptions: string[];
   counts: Record<string, number>;
   total: number;
+  quickFilters: Set<QuickFilterKey>;
+  toggleQuickFilter: (k: QuickFilterKey) => void;
+  clearQuickFilters: () => void;
+  filteredCount: number;
+  quickCounts: Record<QuickFilterKey, number>;
+  onExport: () => void;
+  selectedCount: number;
 }
 
 const titleCase = (s: string) => s.charAt(0) + s.slice(1).toLowerCase();
@@ -28,9 +106,11 @@ export function CrmToolbar(props: CrmToolbarProps) {
     techFilter, setTechFilter,
     sort, setSort,
     techOptions, counts, total,
+    quickFilters, toggleQuickFilter, clearQuickFilters,
+    filteredCount, quickCounts, onExport, selectedCount,
   } = props;
 
-  const Pill = ({ value, label, count }: { value: "ALL" | LeadStatus; label: string; count: number }) => {
+  const StatusPill = ({ value, label, count }: { value: "ALL" | LeadStatus; label: string; count: number }) => {
     const active = statusFilter === value;
     return (
       <button
@@ -46,9 +126,9 @@ export function CrmToolbar(props: CrmToolbarProps) {
   };
 
   return (
-    <div className="flex flex-col gap-4 p-6 border-b border-border">
+    <div className="flex flex-col gap-3 p-5 border-b border-border">
       <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-3">
-        <div className="relative flex-1 max-w-lg">
+        <div className="flex-1 max-w-lg">
           <input
             type="text"
             placeholder="Search"
@@ -58,34 +138,58 @@ export function CrmToolbar(props: CrmToolbarProps) {
           />
         </div>
         <div className="flex gap-2 items-center">
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value as SortKey)}
-            className="select"
-          >
+          <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)} className="select">
             <option value="date_desc">Newest</option>
             <option value="score_desc">Score high</option>
             <option value="score_asc">Score low</option>
             <option value="name_asc">Name</option>
           </select>
-          <a href="/api/export" className="btn btn-secondary btn-sm">Export</a>
+          <button
+            onClick={onExport}
+            className="btn btn-secondary btn-sm"
+            title={selectedCount > 0 ? `Export ${selectedCount} selected as CSV` : "Export the current filtered list as CSV"}
+          >
+            {selectedCount > 0 ? `Export ${selectedCount}` : "Export"}
+          </button>
         </div>
       </div>
 
       <div className="flex flex-wrap gap-2 items-center">
-        <Pill value="ALL" label="All" count={total} />
+        <StatusPill value="ALL" label="All" count={total} />
         {STATUS_OPTIONS.map((s) => (
-          <Pill key={s} value={s} label={titleCase(s)} count={counts[s] ?? 0} />
+          <StatusPill key={s} value={s} label={titleCase(s)} count={counts[s] ?? 0} />
         ))}
         <span className="mx-1 h-5 w-px bg-border" />
-        <select
-          value={techFilter}
-          onChange={(e) => setTechFilter(e.target.value)}
-          className="select"
-        >
+        <select value={techFilter} onChange={(e) => setTechFilter(e.target.value)} className="select">
           <option value="ALL">All stacks</option>
           {techOptions.map((t) => <option key={t} value={t}>{t}</option>)}
         </select>
+      </div>
+
+      <div className="flex flex-wrap gap-2 items-center">
+        <span className="label-overline mr-1">Quick filters</span>
+        {QUICK_FILTERS.map(qf => {
+          const active = quickFilters.has(qf.key);
+          const n = quickCounts[qf.key] ?? 0;
+          return (
+            <button
+              key={qf.key}
+              onClick={() => toggleQuickFilter(qf.key)}
+              disabled={n === 0 && !active}
+              title={n === 0 ? "No leads match this filter" : `${n} lead${n === 1 ? "" : "s"} match`}
+              className={`chip chip-interactive ${active ? "chip-active" : ""} ${n === 0 && !active ? "opacity-40 cursor-not-allowed" : ""}`}
+            >
+              {qf.label}
+              <span className={`text-[10px] tabular-nums ${active ? "opacity-70" : "text-(--tertiary-foreground)"}`}>{n}</span>
+            </button>
+          );
+        })}
+        {quickFilters.size > 0 && (
+          <button onClick={clearQuickFilters} className="btn btn-ghost btn-sm">Clear</button>
+        )}
+        <span className="ml-auto text-xs text-muted-foreground tabular-nums">
+          {filteredCount} of {total}
+        </span>
       </div>
     </div>
   );

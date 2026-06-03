@@ -2,7 +2,8 @@ import puppeteer, { Browser, Page } from 'puppeteer';
 import * as cheerio from 'cheerio';
 import axios from 'axios';
 import {
-  Lead, WebsiteAudit, ScoreFactor, Socials, WebsiteStatus,
+  Lead, WebsiteAudit, ScoreFactor, Socials, WebsiteStatus, Opportunity,
+  PresenceDimensions, DimensionBreakdown, OPPORTUNITY_META, DeepReport, SocialCheck,
 } from './types';
 
 // ==========================================================================
@@ -97,6 +98,7 @@ interface MapsTarget {
   name: string;
   rating: number;
   reviews: string;
+  reviewCount: number;
   website: string | null;
   rawWebsite: string | null;
   address: string;
@@ -168,13 +170,15 @@ async function dismissConsent(page: Page) {
   } catch { /* ignore */ }
 }
 
-async function discoverPlaceLinks(browser: Browser, niche: string, location: string, scanLimit: number): Promise<string[]> {
+export async function discoverPlaceLinks(browser: Browser, niche: string, location: string, scanLimit: number): Promise<string[]> {
   const page = await browser.newPage();
   try {
     await page.setUserAgent(UA);
     const query = encodeURIComponent(`${niche} in ${location}`);
     const searchUrl = `https://www.google.com/maps/search/${query}?hl=en`;
-    await page.goto(searchUrl, { waitUntil: 'networkidle2', timeout: 60000 });
+    // domcontentloaded + an explicit waitForSelector below is far faster and more
+    // reliable than networkidle2 on Maps, which has constant background traffic.
+    await page.goto(searchUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await dismissConsent(page);
 
     await page.waitForSelector('div[role="feed"], [aria-label*="Results for"]', { timeout: 20000 });
@@ -210,26 +214,27 @@ async function discoverPlaceLinks(browser: Browser, niche: string, location: str
  * before falling back to a ranked link scan. Always returns extractionNotes
  * so you can see what we found and didn't.
  */
-async function extractMapsTarget(browser: Browser, link: string): Promise<MapsTarget | null> {
+export async function extractMapsTarget(browser: Browser, link: string): Promise<MapsTarget | null> {
   const page = await browser.newPage();
   const notes: string[] = [];
   try {
     await page.setUserAgent(UA);
-    await page.goto(link, { waitUntil: 'networkidle2', timeout: 35000 });
+    await page.goto(link, { waitUntil: 'domcontentloaded', timeout: 20000 });
 
     // Wait for ANY indicator that the place panel is hydrated. Race so we
-    // don't wait the full 12s on places that hydrate fast.
+    // don't wait the full timeout on places that hydrate fast.
     try {
       await Promise.race([
-        page.waitForSelector('a[data-item-id="authority"]', { timeout: 12000 }),
-        page.waitForSelector('button[data-item-id="address"]', { timeout: 12000 }),
-        page.waitForSelector('button[data-item-id*="phone"]', { timeout: 12000 }),
-        page.waitForSelector('h1.DUwDvf', { timeout: 12000 }),
+        page.waitForSelector('a[data-item-id="authority"]', { timeout: 8000 }),
+        page.waitForSelector('button[data-item-id="address"]', { timeout: 8000 }),
+        page.waitForSelector('button[data-item-id*="phone"]', { timeout: 8000 }),
+        page.waitForSelector('h1.DUwDvf', { timeout: 8000 }),
       ]);
     } catch { notes.push('panel-hydration-timeout'); }
 
-    // Settle additional async DOM
-    await delay(1500, 2500);
+    // Brief settle for trailing async DOM (the selector race above already
+    // confirms the panel is mounted, so this just needs to be short).
+    await delay(400, 700);
 
     const details = await page.evaluate(() => {
       const getText = (el: Element | null) => (el as HTMLElement | null)?.innerText || '';
@@ -241,7 +246,16 @@ async function extractMapsTarget(browser: Browser, link: string): Promise<MapsTa
       const ratingStr = document.querySelector('span[role="img"][aria-label*="stars"]')
         ?.getAttribute('aria-label')?.split(' ')[0];
       const rating = parseFloat(ratingStr || '0');
-      const reviews = getText(document.querySelector('button[aria-label*="reviews"]')) || '0';
+      // Review count can live in aria-label or inner text of several elements.
+      const reviewEl = document.querySelector(
+        'button[aria-label*="reviews" i], button[jsaction*="reviewChart"], span[aria-label*="reviews" i], [aria-label*="reviews" i]',
+      );
+      const reviewsRaw = (reviewEl?.getAttribute('aria-label') || (reviewEl as HTMLElement | null)?.innerText || '').trim();
+      // Pull the number that precedes "review(s)" so we don't also grab the rating
+      // digits (e.g. "4.8 stars 1,616 reviews" must read 1616, not 481616).
+      const reviewMatch = reviewsRaw.match(/([\d.,]+)\s*reviews?/i);
+      const reviewCount = parseInt((reviewMatch ? reviewMatch[1] : reviewsRaw).replace(/[^\d]/g, ''), 10) || 0;
+      const reviews = reviewsRaw || (reviewCount ? `${reviewCount} reviews` : '0');
 
       // ----- Website extraction (multi-strategy) -----
       const usedNotes: string[] = [];
@@ -335,7 +349,7 @@ async function extractMapsTarget(browser: Browser, link: string): Promise<MapsTa
       const phone = document.querySelector('button[data-item-id*="phone"]')
         ?.getAttribute('aria-label')?.replace(/^Phone:\s*/i, '') || '';
 
-      return { name, rating, reviews, website, raw, address, phone, usedNotes };
+      return { name, rating, reviews, reviewCount, website, raw, address, phone, usedNotes };
     });
 
     notes.push(...details.usedNotes);
@@ -357,6 +371,7 @@ async function extractMapsTarget(browser: Browser, link: string): Promise<MapsTa
       name: details.name,
       rating: details.rating,
       reviews: details.reviews,
+      reviewCount: details.reviewCount || 0,
       website,
       rawWebsite: details.raw,
       address: details.address || 'No Address',
@@ -429,11 +444,29 @@ function buildEmptyAudit(finalUrl: string): WebsiteAudit {
     hasRobotsTxt: false, hasSitemap: false,
     hasGoogleAnalytics: false, hasGoogleTagManager: false,
     hasFacebookPixel: false, hasHubSpot: false,
+    adPixels: [],
+    hasEmailCapture: false, hasBooking: false, hasLiveChat: false,
+    hasBlog: false,
     tech: [],
     emails: [], phones: [],
+    whatsapp: null,
     socials: { instagram: null, facebook: null, linkedin: null, twitter: null, tiktok: null, youtube: null },
+    socialCount: 0,
     isSocialOnly: false,
   };
+}
+
+function extractWhatsApp(html: string): string | null {
+  // wa.me/<digits>
+  let m = html.match(/https?:\/\/(?:www\.)?wa\.me\/(\+?\d{6,15})/i);
+  if (m) return m[1].replace(/^\+?/, '+');
+  // api.whatsapp.com/send?phone=<digits>
+  m = html.match(/https?:\/\/(?:api\.)?whatsapp\.com\/send\?[^"'\s]*phone=(\+?\d{6,15})/i);
+  if (m) return m[1].replace(/^\+?/, '+');
+  // wa.link
+  m = html.match(/https?:\/\/wa\.link\/[A-Za-z0-9]+/i);
+  if (m) return m[0];
+  return null;
 }
 
 function isParkingPage(html: string, audit: WebsiteAudit): boolean {
@@ -503,25 +536,122 @@ function analyzeHtml(html: string, finalUrl: string): WebsiteAudit {
   audit.hasFacebookPixel = lower.includes('connect.facebook.net') || lower.includes('fbq(');
   audit.hasHubSpot = lower.includes('hs-scripts') || lower.includes('hubspot.com');
 
+  // ---- Marketing maturity: ad pixels ----
+  const pixels = new Set<string>();
+  if (audit.hasFacebookPixel) pixels.add('Meta Pixel');
+  if (lower.includes('googleadservices') || lower.includes('google_conversion') || lower.includes('aw-')) pixels.add('Google Ads');
+  if (lower.includes('analytics.tiktok.com') || lower.includes('ttq.')) pixels.add('TikTok Pixel');
+  if (lower.includes('snap.licdn.com') || lower.includes('_linkedin_partner_id')) pixels.add('LinkedIn Insight');
+  if (lower.includes('static.ads-twitter.com') || lower.includes('twq(')) pixels.add('X/Twitter Pixel');
+  if (lower.includes('sc-static.net') || lower.includes('snaptr(')) pixels.add('Snap Pixel');
+  audit.adPixels = [...pixels];
+
+  // ---- Email / lead capture ----
+  audit.hasEmailCapture =
+    $('input[type="email"]').length > 0 ||
+    $('form[action*="mailchimp" i], form[action*="klaviyo" i], form[action*="subscribe" i]').length > 0 ||
+    /newsletter|subscribe|sign\s?up|join our list|get updates/i.test(lower);
+
+  // ---- Online booking / ordering / reservation ----
+  audit.hasBooking =
+    /calendly\.com|opentable|resy\.com|booking\.com|hotjar|book now|book a table|reserve|reservation|order online|order now|buy tickets|appointment|schedule/i.test(lower) ||
+    $('a[href*="calendly" i], a[href*="opentable" i], a[href*="resy" i], a[href*="booking" i], a[href*="book" i], a[href*="reserv" i], a[href*="order" i]').length > 0;
+
+  // ---- Live chat widgets ----
+  audit.hasLiveChat =
+    /intercom|tawk\.to|crisp\.chat|drift\.com|zendesk|livechatinc|tidio|hubspot.*messages|wa\.me|api\.whatsapp/i.test(lower);
+
+  // ---- Content: blog / news section ----
+  audit.hasBlog =
+    $('a[href*="/blog" i], a[href*="/news" i], a[href*="/articles" i], a[href*="/journal" i], a[href*="/stories" i]').length > 0 ||
+    /\/blog|\/news|\/articles/i.test(lower);
+
   audit.tech = detectTech(lower, $);
 
   const bodyText = $.root().text();
   const emailMatches = bodyText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g) || [];
+  // Guard against text-with-no-spaces concatenation (e.g. "...786whatsapp...@gmail.comopen"):
+  // real emails have a short local part and a sane TLD.
+  const isPlausibleEmail = (e: string) => {
+    const at = e.split("@");
+    if (at.length !== 2) return false;
+    const [local, domain] = at;
+    if (local.length < 1 || local.length > 30) return false;
+    const labels = domain.split(".");
+    if (labels.some((l) => l.length === 0)) return false;
+    const tld = labels[labels.length - 1];
+    return tld.length >= 2 && tld.length <= 8;
+  };
   audit.emails = [...new Set(emailMatches.map(e => e.toLowerCase()))]
-    .filter(e => !NOISE_EMAILS.some(n => e.includes(n)))
+    .filter(e => isPlausibleEmail(e) && !NOISE_EMAILS.some(n => e.includes(n)))
     .slice(0, 5);
 
-  const phoneMatches = bodyText.match(/\+?\d[\d\s().-]{6,}\d/g) || [];
-  audit.phones = [...new Set(
-    phoneMatches.map(p => p.trim()).filter(p => {
-      const digits = p.replace(/\D/g, '');
-      return digits.length >= 8 && digits.length <= 15;
-    }),
-  )].slice(0, 3);
+  // Phones: only trust explicit `tel:` links. Scraping phone-like strings out of
+  // raw body text is hopelessly noisy — SVG path data ("20 20 160 160"), element
+  // IDs, dates ("2024-06-07") and sizes all look like phones once formatted. The
+  // Google listing already gives each lead a clean primary phone, so on-site phones
+  // are a bonus and accuracy matters more than coverage here.
+  const telLinks = $('a[href^="tel:"]')
+    .map((_, el) => ($(el).attr('href') || '').replace(/^tel:/i, '').replace(/\s+/g, ' ').trim())
+    .get();
+  const validPhone = (p: string) => {
+    const digits = p.replace(/\D/g, '');
+    return digits.length >= 8 && digits.length <= 15;
+  };
+  audit.phones = [...new Set(telLinks.filter(validPhone))].slice(0, 3);
 
   audit.socials = extractSocials(html);
+  audit.socialCount = Object.values(audit.socials).filter(Boolean).length;
+  audit.whatsapp = extractWhatsApp(html);
 
   return audit;
+}
+
+function detectOpportunities(o: {
+  websiteStatus: WebsiteStatus;
+  tech: string;
+  audit?: WebsiteAudit;
+  dimensions: PresenceDimensions;
+  rating: number;
+  reviewCount: number;
+  isSocialOnly: boolean;
+}): Opportunity[] {
+  const opps: Opportunity[] = [];
+  const a = o.audit;
+
+  if (o.websiteStatus === "none") opps.push("needs_website");
+  if (o.websiteStatus === "unreachable") opps.push("broken_website");
+  if (o.isSocialOnly) opps.push("social_only");
+
+  if (a && o.websiteStatus === "audited") {
+    // website
+    if (o.tech === "Wix" || o.tech === "Squarespace") opps.push("outdated_stack");
+    if (!a.mobileViewport) opps.push("no_mobile");
+    if (!a.httpsActive) opps.push("no_https");
+    if (a.loadTimeMs > 5000) opps.push("slow_site");
+    if (o.dimensions.site < 40) opps.push("weak_seo");
+    if (a.wordCount < 200) opps.push("thin_content");
+    // content
+    if (!a.hasBlog && a.wordCount < 400) opps.push("no_content");
+    // marketing — fire the broad pitch when weak, the specific one otherwise
+    if (o.dimensions.marketing < 30) opps.push("no_marketing");
+    else if (!a.hasGoogleAnalytics && !a.hasGoogleTagManager) opps.push("no_analytics");
+    if (!a.hasEmailCapture) opps.push("no_email_capture");
+    if (!a.hasBooking) opps.push("no_booking");
+    if (a.emails.length === 0 && a.phones.length === 0 && !a.whatsapp) opps.push("no_contact_capture");
+    // social
+    if (a.socialCount === 0) opps.push("no_social");
+    else {
+      if (!a.socials.instagram) opps.push("no_instagram");
+      if (a.socialCount === 1) opps.push("dormant_social");
+    }
+  }
+
+  // reputation — available from the Maps listing even without a website
+  if (o.reviewCount > 0 && o.reviewCount < 10) opps.push("low_reviews");
+  if (o.rating > 0 && o.rating < 4.0) opps.push("weak_reputation");
+
+  return opps;
 }
 
 // ===========================================================================
@@ -548,6 +678,7 @@ interface AuditOutcome {
   audit: WebsiteAudit;
   failReason: string | null;
   attempts: string[];
+  deepReport?: DeepReport;
 }
 
 async function tryPuppeteerAttempt(browser: Browser, url: string, attempts: string[]): Promise<{ ok: boolean; audit?: WebsiteAudit; reason: string }> {
@@ -697,6 +828,196 @@ async function auditWebsite(browser: Browser, websiteUrl: string): Promise<Audit
 }
 
 // ===========================================================================
+// DEEP AUDIT — crawl key internal pages to find more contacts, socials, signals
+// ===========================================================================
+
+/** Fold a sub-page's findings into the homepage audit (fill gaps, OR booleans). */
+function mergeAudit(base: WebsiteAudit, sub: WebsiteAudit) {
+  (Object.keys(base.socials) as Array<keyof Socials>).forEach((k) => {
+    if (!base.socials[k] && sub.socials[k]) base.socials[k] = sub.socials[k];
+  });
+  base.emails = [...new Set([...base.emails, ...sub.emails])].slice(0, 8);
+  base.phones = [...new Set([...base.phones, ...sub.phones])].slice(0, 5);
+  if (!base.whatsapp && sub.whatsapp) base.whatsapp = sub.whatsapp;
+  base.hasBlog = base.hasBlog || sub.hasBlog;
+  base.hasEmailCapture = base.hasEmailCapture || sub.hasEmailCapture;
+  base.hasBooking = base.hasBooking || sub.hasBooking;
+  base.hasLiveChat = base.hasLiveChat || sub.hasLiveChat;
+  base.hasGoogleAnalytics = base.hasGoogleAnalytics || sub.hasGoogleAnalytics;
+  base.hasGoogleTagManager = base.hasGoogleTagManager || sub.hasGoogleTagManager;
+  base.hasFacebookPixel = base.hasFacebookPixel || sub.hasFacebookPixel;
+  base.hasHubSpot = base.hasHubSpot || sub.hasHubSpot;
+  base.jsonLd = base.jsonLd || sub.jsonLd;
+  base.adPixels = [...new Set([...base.adPixels, ...sub.adPixels])];
+  base.tech = [...new Set([...base.tech, ...sub.tech])];
+  // a content-rich subpage demonstrates they do have substantial content
+  base.wordCount = Math.max(base.wordCount, sub.wordCount);
+  base.imageCount = Math.max(base.imageCount, sub.imageCount);
+  base.h2Count = Math.max(base.h2Count, sub.h2Count);
+}
+
+/**
+ * Audit the homepage robustly, then crawl up to 4 key internal pages
+ * (about / contact / services / booking / blog) and merge what they reveal —
+ * surfacing extra emails, phone numbers, social links, booking + content signals
+ * that often live off the homepage.
+ */
+const PLATFORM_LABEL: Record<string, string> = {
+  instagram: 'Instagram', facebook: 'Facebook', linkedin: 'LinkedIn',
+  twitter: 'Twitter / X', tiktok: 'TikTok', youtube: 'YouTube',
+};
+
+/** Best-effort check of each social account. Platforms gate public data behind
+ *  login walls, so we report liveness + whatever public meta renders, honestly. */
+async function checkSocials(socials: Socials): Promise<SocialCheck[]> {
+  const entries = (Object.entries(socials) as [string, string | null][]).filter(([, u]) => !!u) as [string, string][];
+  const out: SocialCheck[] = [];
+  for (const [key, url] of entries) {
+    const platform = PLATFORM_LABEL[key] || key;
+    try {
+      const r = await axios.get(url, {
+        timeout: 9000, maxRedirects: 4,
+        headers: { 'User-Agent': UA, 'Accept-Language': 'en-US,en;q=0.9' },
+        validateStatus: () => true, responseType: 'text', transformResponse: [(d) => d],
+      });
+      const live = r.status >= 200 && r.status < 400;
+      let title: string | null = null;
+      let note = '';
+      if (live && typeof r.data === 'string') {
+        const head = r.data.slice(0, 6000);
+        const m = head.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["']/i) || head.match(/<title[^>]*>([^<]+)<\/title>/i);
+        title = m ? m[1].trim().replace(/\s+/g, ' ').slice(0, 120) : null;
+        if (/log in|login|sign up|create an account|see posts/i.test(head) && /(instagram|facebook|tiktok|linkedin)\./i.test(url)) {
+          note = 'public data limited (login wall)';
+        }
+      } else if (!live) {
+        note = `HTTP ${r.status}`;
+      }
+      out.push({ platform, url, live, title, note });
+    } catch {
+      out.push({ platform, url, live: false, title: null, note: 'unreachable' });
+    }
+  }
+  return out;
+}
+
+/** Crawl the site (sitemap + nav), merge contact/social signals into the audit,
+ *  and build a dossier: SEO health, broken links, freshness, page weight. */
+async function buildDeepReport(origin: string, audit: WebsiteAudit, navLinks: string[]): Promise<DeepReport> {
+  let sitemapFound = false;
+  let sitemapUrls: string[] = [];
+  try {
+    const r = await axios.get(`${origin}/sitemap.xml`, {
+      timeout: 8000, headers: { 'User-Agent': UA }, maxRedirects: 4,
+      validateStatus: () => true, responseType: 'text', transformResponse: [(d) => d],
+    });
+    if (r.status >= 200 && r.status < 400 && typeof r.data === 'string' && /<loc>/i.test(r.data)) {
+      sitemapFound = true;
+      sitemapUrls = [...(r.data as string).matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/gi)].map((m) => m[1]).filter((u) => u.startsWith(origin));
+    }
+  } catch { /* no sitemap */ }
+
+  const candidates = [...new Set([audit.finalUrl, ...sitemapUrls, ...navLinks])].slice(0, 15);
+  let pagesCrawled = 0, pagesMissingTitle = 0, pagesMissingMeta = 0, totalImages = 0, pageWeightKb = 0, scriptCount = 0;
+  let latest: Date | null = null;
+  const broken = new Set<string>();
+  const internalLinks = new Set<string>();
+
+  for (const url of candidates) {
+    try {
+      const r = await axios.get(url, {
+        timeout: 8000, maxRedirects: 4,
+        headers: { 'User-Agent': UA, 'Accept-Language': 'en-US,en;q=0.9' },
+        validateStatus: () => true, responseType: 'text', transformResponse: [(d) => d],
+      });
+      if (r.status >= 400) { broken.add(url); continue; }
+      if (typeof r.data !== 'string' || r.data.length < 100) continue;
+      pagesCrawled++;
+      const html = r.data as string;
+      const $ = cheerio.load(html);
+      if (!$('head title').first().text().trim()) pagesMissingTitle++;
+      if (!$('meta[name="description"]').attr('content')?.trim()) pagesMissingMeta++;
+      totalImages += $('img').length;
+      mergeAudit(audit, analyzeHtml(html, url));
+      if (url === audit.finalUrl) { pageWeightKb = Math.round(html.length / 1024); scriptCount = $('script').length; }
+      $('time[datetime]').each((_, el) => {
+        const d = new Date($(el).attr('datetime') || '');
+        if (!isNaN(+d) && (!latest || d > latest)) latest = d;
+      });
+      $('a[href]').each((_, el) => {
+        const h = $(el).attr('href') || '';
+        try { const u = new URL(h, url); if (u.origin === origin) internalLinks.add(u.origin + u.pathname); } catch { /* ignore */ }
+      });
+    } catch { /* skip page */ }
+  }
+
+  // sample internal links we haven't already fetched, and HEAD-check for breakage
+  const sample = [...internalLinks].filter((u) => !candidates.includes(u)).slice(0, 12);
+  for (const u of sample) {
+    try {
+      const r = await axios.head(u, { timeout: 6000, maxRedirects: 4, headers: { 'User-Agent': UA }, validateStatus: () => true });
+      if (r.status >= 400) broken.add(u);
+    } catch { /* HEAD blocked or network blip: don't penalise */ }
+  }
+
+  const latestMs = latest ? +(latest as Date) : 0;
+  return {
+    ranAt: new Date().toISOString(),
+    sitemapFound,
+    pagesDiscovered: candidates.length,
+    pagesCrawled, pagesMissingTitle, pagesMissingMeta, totalImages, pageWeightKb, scriptCount,
+    brokenLinks: [...broken].slice(0, 20),
+    hasFreshContent: latestMs > 0 && (Date.now() - latestMs < 1000 * 60 * 60 * 24 * 120),
+    latestContentDate: latest ? (latest as Date).toISOString().slice(0, 10) : null,
+    socials: [],
+  };
+}
+
+/**
+ * Deep dossier: robust homepage audit, then a full site crawl (sitemap + nav)
+ * that merges extra contacts/socials into the audit and produces SEO-health,
+ * broken-link, freshness and page-weight findings, plus a best-effort check of
+ * each social account.
+ */
+export async function deepAuditWebsite(browser: Browser, websiteUrl: string): Promise<AuditOutcome> {
+  const outcome = await auditWebsite(browser, websiteUrl);
+  if (outcome.status !== 'audited' || !outcome.audit) return outcome;
+  const audit = outcome.audit;
+  const attempts = outcome.attempts;
+
+  let origin = '';
+  try { origin = new URL(audit.finalUrl).origin; } catch { return outcome; }
+
+  // Discover nav links from the rendered homepage (catches JS-built menus).
+  const page = await browser.newPage();
+  let navLinks: string[] = [];
+  try {
+    await setupStealth(page);
+    await page.goto(audit.finalUrl, { waitUntil: 'domcontentloaded', timeout: 20000 });
+    await delay(400, 700);
+    navLinks = await page.evaluate((org: string) => {
+      const skip = /\.(jpg|jpeg|png|webp|gif|svg|pdf|zip|mp4|ico|css|js)$/i;
+      const out = new Set<string>();
+      document.querySelectorAll('a[href]').forEach((a) => {
+        try {
+          const u = new URL((a as HTMLAnchorElement).href, location.href);
+          if (u.origin === org && !skip.test(u.pathname)) out.add(u.origin + u.pathname);
+        } catch { /* ignore */ }
+      });
+      return [...out];
+    }, origin);
+  } catch { /* ignore */ } finally { await page.close().catch(() => {}); }
+
+  const report = await buildDeepReport(origin, audit, navLinks);
+  report.socials = await checkSocials(audit.socials);
+
+  audit.socialCount = Object.values(audit.socials).filter(Boolean).length;
+  audit.pagesCrawled = report.pagesCrawled;
+  attempts.push(`deep dossier: crawled ${report.pagesCrawled}/${report.pagesDiscovered} pages, ${report.brokenLinks.length} broken link(s), ${report.socials.length} social(s) checked`);
+  return { status: 'audited', audit, failReason: null, attempts, deepReport: report };
+}
+
+// ===========================================================================
 // SEO SCORE
 // ===========================================================================
 
@@ -706,9 +1027,9 @@ export function computeSeoScore(a: WebsiteAudit): { score: number; factors: Scor
     factors.push({ label, weight, awarded: ok ? weight : 0, ok, value });
 
   add('HTTPS enabled', 8, a.httpsActive);
-  add('Page reachable', 6, a.reachable, `${a.httpStatus || '—'}`);
-  add('Title tag (10–65 chars)', 10, a.titleLength >= 10 && a.titleLength <= 65, `${a.titleLength} chars`);
-  add('Meta description (50–160)', 10, a.metaDescriptionLength >= 50 && a.metaDescriptionLength <= 160, `${a.metaDescriptionLength} chars`);
+  add('Page reachable', 6, a.reachable, `${a.httpStatus || 'n/a'}`);
+  add('Title tag (10-65 chars)', 10, a.titleLength >= 10 && a.titleLength <= 65, `${a.titleLength} chars`);
+  add('Meta description (50-160)', 10, a.metaDescriptionLength >= 50 && a.metaDescriptionLength <= 160, `${a.metaDescriptionLength} chars`);
   add('Single H1', 6, a.h1Count === 1, `${a.h1Count}`);
   add('Mobile viewport', 12, a.mobileViewport);
   add('Open Graph tags (≥3)', 5, a.ogTagCount >= 3, `${a.ogTagCount}`);
@@ -722,12 +1043,131 @@ export function computeSeoScore(a: WebsiteAudit): { score: number; factors: Scor
 
   add('Substantial content (>300 words)', 6, a.wordCount > 300, `${a.wordCount} words`);
   const fast = a.loadTimeMs > 0 && a.loadTimeMs < 3000;
-  add('Page speed (<3s)', 8, fast, a.loadTimeMs > 0 ? `${(a.loadTimeMs / 1000).toFixed(2)}s` : '—');
+  add('Page speed (<3s)', 8, fast, a.loadTimeMs > 0 ? `${(a.loadTimeMs / 1000).toFixed(2)}s` : 'n/a');
   add('Analytics installed', 4, a.hasGoogleAnalytics || a.hasGoogleTagManager);
   add('Social presence linked', 2, Object.values(a.socials).some(Boolean));
 
   const score = factors.reduce((acc, f) => acc + f.awarded, 0);
   return { score, factors };
+}
+
+// ===========================================================================
+// DIGITAL PRESENCE SCORE — five dimensions rolled into one 0-100 figure
+// ===========================================================================
+
+const PRESENCE_WEIGHTS: Record<keyof PresenceDimensions, number> = {
+  site: 0.30, social: 0.22, marketing: 0.20, reputation: 0.14, content: 0.14,
+};
+
+const DIMENSION_BLURBS: Record<keyof PresenceDimensions, string> = {
+  site:       "How good their website is across security, speed, mobile, and on-page SEO.",
+  social:     "Whether they're on the social platforms that matter (Instagram especially).",
+  marketing:  "Do they run real marketing like tracking pixels, ads, lead capture, and booking.",
+  reputation: "Their Google rating and how many reviews they've earned.",
+  content:    "Do they publish substantial, fresh content (copy, blog, structured data).",
+};
+
+const DIMENSION_LABELS: Record<keyof PresenceDimensions, string> = {
+  site: "Website", social: "Social", marketing: "Marketing", reputation: "Reputation", content: "Content",
+};
+
+function buildFactors(rows: Array<[string, number, boolean, string?]>, awardedOverride?: number[]): { score: number; factors: ScoreFactor[] } {
+  const factors: ScoreFactor[] = rows.map(([label, weight, ok, value], i) => ({
+    label, weight, ok, value,
+    awarded: awardedOverride ? awardedOverride[i] : (ok ? weight : 0),
+  }));
+  return { score: Math.round(factors.reduce((a, f) => a + f.awarded, 0)), factors };
+}
+
+export interface PresenceResult {
+  overall: number;
+  dimensions: PresenceDimensions;
+  siteFactors: ScoreFactor[];
+  dimensionFactors: DimensionBreakdown[];
+}
+
+export function computePresence(o: {
+  audit?: WebsiteAudit;
+  websiteStatus: WebsiteStatus;
+  rating: number;
+  reviewCount: number;
+}): PresenceResult {
+  const a = o.audit;
+  const audited = o.websiteStatus === "audited" && !!a;
+
+  // ---- SITE ----
+  const site = audited
+    ? computeSeoScore(a!)
+    : buildFactors([["Website reachable", 100, false, o.websiteStatus === "none" ? "no website" : "unreachable"]]);
+
+  // ---- SOCIAL ----
+  const social = audited
+    ? buildFactors([
+        ["Any social profile linked", 30, a!.socialCount >= 1, `${a!.socialCount} linked`],
+        ["Instagram", 30, !!a!.socials.instagram],
+        ["Facebook", 20, !!a!.socials.facebook],
+        ["Multiple platforms (2+)", 20, a!.socialCount >= 2],
+      ])
+    : buildFactors([["Detected from website", 100, false, "no website to scan"]]);
+
+  // ---- MARKETING ----
+  const marketing = audited
+    ? buildFactors([
+        ["Analytics installed", 25, a!.hasGoogleAnalytics || a!.hasGoogleTagManager],
+        ["Ad pixel installed", 25, a!.adPixels.length > 0, a!.adPixels.join(", ") || undefined],
+        ["Email / lead capture", 20, a!.hasEmailCapture],
+        ["Online booking / ordering", 20, a!.hasBooking],
+        ["Live chat", 10, a!.hasLiveChat],
+      ])
+    : buildFactors([["Detected from website", 100, false, "no website to scan"]]);
+
+  // ---- REPUTATION (works without a website — comes from the Maps listing) ----
+  const ratingAwarded = Math.round(Math.min(o.rating, 5) / 5 * 50);
+  const revAwarded = Math.round(Math.min(o.reviewCount, 200) / 200 * 50);
+  const reputation = buildFactors(
+    [
+      ["Star rating", 50, o.rating >= 4.0, o.rating ? `${o.rating.toFixed(1)}★` : "no rating"],
+      ["Review volume", 50, o.reviewCount >= 20, `${o.reviewCount} reviews`],
+    ],
+    [ratingAwarded, revAwarded],
+  );
+
+  // ---- CONTENT ----
+  const content = audited
+    ? buildFactors([
+        ["Substantial copy (300+ words)", 30, a!.wordCount >= 300, `${a!.wordCount} words`],
+        ["Section headings (3+ H2)", 15, a!.h2Count >= 3, `${a!.h2Count} H2`],
+        ["Blog / news section", 25, a!.hasBlog],
+        ["Images present (5+)", 15, a!.imageCount >= 5, `${a!.imageCount} images`],
+        ["Structured data (schema)", 15, a!.jsonLd],
+      ])
+    : buildFactors([["Detected from website", 100, false, "no website to scan"]]);
+
+  const dimensions: PresenceDimensions = {
+    site: site.score,
+    social: social.score,
+    marketing: marketing.score,
+    reputation: reputation.score,
+    content: content.score,
+  };
+
+  const overall = Math.round(
+    (Object.keys(PRESENCE_WEIGHTS) as Array<keyof PresenceDimensions>)
+      .reduce((sum, k) => sum + PRESENCE_WEIGHTS[k] * dimensions[k], 0),
+  );
+
+  const byKey = { site, social, marketing, reputation, content };
+  const dimensionFactors: DimensionBreakdown[] =
+    (Object.keys(PRESENCE_WEIGHTS) as Array<keyof PresenceDimensions>).map((k) => ({
+      key: k,
+      label: DIMENSION_LABELS[k],
+      score: dimensions[k],
+      weight: Math.round(PRESENCE_WEIGHTS[k] * 100),
+      blurb: DIMENSION_BLURBS[k],
+      factors: byKey[k].factors,
+    }));
+
+  return { overall, dimensions, siteFactors: site.factors, dimensionFactors };
 }
 
 // ===========================================================================
@@ -751,17 +1191,26 @@ export async function withBrowser<T>(fn: (browser: Browser) => Promise<T>): Prom
 
 export async function discoverTargets(
   browser: Browser, niche: string, location: string, scanLimit: number,
+  onProgress?: (done: number, total: number, name: string) => void,
+  skipLink?: (link: string) => boolean,
 ): Promise<MapsTarget[]> {
   const placeLinks = await discoverPlaceLinks(browser, niche, location, scanLimit);
   const targets: MapsTarget[] = [];
-  for (const link of placeLinks) {
+  for (let i = 0; i < placeLinks.length; i++) {
+    const link = placeLinks[i];
+    // Skip businesses already in the library — don't waste an audit on them.
+    if (skipLink?.(link)) {
+      onProgress?.(i + 1, placeLinks.length, 'already in library, skipped');
+      continue;
+    }
     const t = await extractMapsTarget(browser, link);
     if (t) targets.push(t);
+    onProgress?.(i + 1, placeLinks.length, t?.name ?? '…');
   }
   return targets;
 }
 
-export async function buildLeadFromTarget(browser: Browser, target: MapsTarget): Promise<Lead> {
+export async function buildLeadFromTarget(browser: Browser, target: MapsTarget, category?: string, opts?: { deep?: boolean }): Promise<Lead> {
   const allAttempts: string[] = [];
   if (target.extractionNotes.length > 0) {
     allAttempts.push(`maps extraction: ${target.extractionNotes.join(', ')}`);
@@ -773,23 +1222,21 @@ export async function buildLeadFromTarget(browser: Browser, target: MapsTarget):
   let websiteStatus: WebsiteStatus = 'none';
   let websiteFailReason: string | null = null;
   let audit: WebsiteAudit | undefined;
-  let factors: ScoreFactor[] = [];
-  let score = 0;
+  let deepReport: DeepReport | undefined;
   let mainEmail = 'No email found';
   let primaryTech = 'Unknown';
 
   if (target.website) {
-    const outcome = await auditWebsite(browser, target.website);
+    const outcome = opts?.deep
+      ? await deepAuditWebsite(browser, target.website)
+      : await auditWebsite(browser, target.website);
     websiteStatus = outcome.status;
     websiteFailReason = outcome.failReason;
     audit = outcome.audit;
+    deepReport = outcome.deepReport;
     allAttempts.push(...outcome.attempts);
 
     if (outcome.status === 'audited' && audit) {
-      const result = computeSeoScore(audit);
-      score = result.score;
-      factors = result.factors;
-
       if (audit.emails.length > 0) {
         const ranked = [...audit.emails].sort((a, b) => {
           const ap = /(contact|hello|info|sales|admin|office)@/i.test(a) ? 0 : 1;
@@ -804,6 +1251,12 @@ export async function buildLeadFromTarget(browser: Browser, target: MapsTarget):
     allAttempts.push('no website on Maps listing');
   }
 
+  // ---- combined Digital Presence score across all five dimensions ----
+  const presence = computePresence({
+    audit, websiteStatus, rating: target.rating, reviewCount: target.reviewCount,
+  });
+  const score = presence.overall;
+
   const riskLevel: Lead['stats']['riskLevel'] =
     websiteStatus === 'none'         ? 'Critical' :
     websiteStatus === 'unreachable'  ? 'High Risk' :
@@ -816,7 +1269,17 @@ export async function buildLeadFromTarget(browser: Browser, target: MapsTarget):
     websiteStatus === 'unreachable' ? (target.website ?? 'No website detected') :
     'No website detected';
 
-  return {
+  const opportunities = detectOpportunities({
+    websiteStatus,
+    tech: primaryTech,
+    audit,
+    dimensions: presence.dimensions,
+    rating: target.rating,
+    reviewCount: target.reviewCount,
+    isSocialOnly: audit?.isSocialOnly ?? false,
+  });
+
+  const lead: Lead = {
     id: Math.random().toString(36).slice(2, 11),
     name: target.name,
     url: finalUrl,
@@ -825,23 +1288,30 @@ export async function buildLeadFromTarget(browser: Browser, target: MapsTarget):
     websiteFailReason,
     auditAttempts: allAttempts,
     email: mainEmail,
+    whatsapp: audit?.whatsapp ?? null,
+    opportunities,
     tech: primaryTech,
+    category,
     rating: target.rating,
     reviews: target.reviews,
+    reviewCount: target.reviewCount,
     address: target.address,
     phone: target.phone,
     mapsUrl: target.mapsUrl,
     isSocialUrl: audit?.isSocialOnly ?? false,
     authorityScore: target.authorityScore,
-    stats: { score, riskLevel },
-    scoreFactors: factors,
+    stats: { score, riskLevel, dimensions: presence.dimensions },
+    scoreFactors: presence.siteFactors,
+    dimensionFactors: presence.dimensionFactors,
     audit,
-    pitch: buildPitch(target.name, websiteStatus, primaryTech, factors, websiteFailReason),
+    deepReport,
+    pitch: buildPitch(websiteStatus, opportunities, websiteFailReason),
     lastAuditedAt: new Date().toISOString(),
   };
+  return lead;
 }
 
-export async function reauditLead(existing: Lead): Promise<Lead> {
+export async function reauditLead(existing: Lead, opts?: { deep?: boolean }): Promise<Lead> {
   return await withBrowser(async (browser) => {
     const target = await extractMapsTarget(browser, existing.mapsUrl);
     if (!target) {
@@ -851,7 +1321,7 @@ export async function reauditLead(existing: Lead): Promise<Lead> {
         lastAuditedAt: new Date().toISOString(),
       };
     }
-    const fresh = await buildLeadFromTarget(browser, target);
+    const fresh = await buildLeadFromTarget(browser, target, existing.category, opts);
     return {
       ...fresh,
       id: existing.id,
@@ -883,7 +1353,7 @@ export async function* reauditMany(existing: Lead[]): AsyncGenerator<{
           yield { type: 'error', index: i, total: existing.length, msg: `${e.name}: Maps page not retrievable` };
           continue;
         }
-        const fresh = await buildLeadFromTarget(browser, target);
+        const fresh = await buildLeadFromTarget(browser, target, e.category);
         const refreshed: Lead = {
           ...fresh,
           id: e.id,
@@ -902,11 +1372,18 @@ export async function* reauditMany(existing: Lead[]): AsyncGenerator<{
 }
 
 function buildPitch(
-  _name: string, status: WebsiteStatus, _tech: string, factors: ScoreFactor[], failReason: string | null,
+  status: WebsiteStatus, opportunities: Opportunity[], failReason: string | null,
 ): string {
-  if (status === 'none') return 'No website on Google Maps listing.';
-  if (status === 'unreachable') return `Site unreachable: ${failReason ?? 'unknown'}.`;
-  const fails = factors.filter(f => !f.ok).map(f => f.label);
-  if (fails.length === 0) return 'Site passes all audit checks.';
-  return `Issues found: ${fails.slice(0, 4).join(', ')}${fails.length > 4 ? `, and ${fails.length - 4} more` : ''}.`;
+  if (status === 'none') {
+    return 'Not online with a real website. Prime candidate for a website build plus full digital presence.';
+  }
+  if (status === 'unreachable') {
+    return `Their website is down (${failReason ?? 'unreachable'}). Rebuild plus recovery opportunity.`;
+  }
+  if (opportunities.length === 0) {
+    return 'Already a strong digital presence. Approach as a premium optimisation or retainer client.';
+  }
+  // Lead with the distinct services these gaps map to (what you can sell them).
+  const sells = [...new Set(opportunities.map(o => OPPORTUNITY_META[o].sell))].slice(0, 3);
+  return `Best angles to sell: ${sells.join(' · ')}.`;
 }

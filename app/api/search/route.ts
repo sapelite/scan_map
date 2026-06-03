@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { withBrowser, discoverTargets, buildLeadFromTarget } from '@/lib/engine';
-import { saveLead } from '@/lib/database';
+import { getLeads, saveLead } from '@/lib/database';
 import { Lead } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -12,7 +12,9 @@ type StreamEvent = {
 };
 
 export async function POST(req: NextRequest) {
-  const { niche, location, tier } = await req.json();
+  const { niche, location, tier, websiteFilter: rawFilter } = await req.json();
+  const websiteFilter: 'none_only' | 'with_only' | 'any' =
+    rawFilter === 'with_only' || rawFilter === 'any' ? rawFilter : 'none_only';
 
   if (!niche || !location) {
     return new Response(JSON.stringify({ error: 'Params required' }), { status: 400 });
@@ -38,22 +40,62 @@ export async function POST(req: NextRequest) {
       try {
         send({ status: 'hunting', msg: `Initializing scan (depth: ${scanLimit})...` });
 
+        // Load the library once so we can skip businesses we already have —
+        // no point spending an audit on a lead that's already saved.
+        const existing = await getLeads();
+        const seenMaps = new Set(existing.map((l) => l.mapsUrl).filter(Boolean));
+        const seenNames = new Set(existing.map((l) => l.name.toLowerCase().trim()));
+
         await withBrowser(async (browser) => {
           send({ status: 'hunting', msg: 'Searching Google Maps...' });
-          const targets = await discoverTargets(browser, niche, location, scanLimit);
+          const targets = await discoverTargets(
+            browser, niche, location, scanLimit,
+            (done, total, name) =>
+              send({ status: 'hunting', msg: `Discovering ${done}/${total}: ${name}` }),
+            (link) => seenMaps.has(link),
+          );
 
-          if (targets.length === 0) {
-            send({ status: 'error', msg: 'No targets found.' });
+          // Also drop any whose name already exists in the library (catches the
+          // same business found via a slightly different Maps link).
+          const fresh = targets.filter((t) => !seenNames.has(t.name.toLowerCase().trim()));
+          const skipped = targets.length - fresh.length;
+
+          if (fresh.length === 0) {
+            send({
+              status: 'error',
+              msg: existing.length > 0
+                ? 'No new businesses. Everything found is already in your library.'
+                : 'No targets found.',
+            });
             return;
           }
+          if (skipped > 0) {
+            send({ status: 'hunting', msg: `Skipped ${skipped} already in your library.` });
+          }
 
-          // Apply tier-based ordering: lower authority first means juicier leads at the top
-          const sorted = [...targets].sort((a, b) => (a.authorityScore || 0) - (b.authorityScore || 0));
-          const finalTargets = sorted.slice(0, returnLimit);
+          // Lower authority first means juicier leads at the top.
+          const byAuthority = (a: typeof fresh[number], b: typeof fresh[number]) => (a.authorityScore || 0) - (b.authorityScore || 0);
+          const noWeb = fresh.filter((t) => !t.website).sort(byAuthority);
+          const withWeb = fresh.filter((t) => t.website).sort(byAuthority);
+
+          // Website focus chosen up front, so we only audit what's actually wanted.
+          let finalTargets;
+          if (websiteFilter === 'none_only') finalTargets = noWeb.slice(0, returnLimit);
+          else if (websiteFilter === 'with_only') finalTargets = withWeb.slice(0, returnLimit);
+          else finalTargets = [...fresh].sort(byAuthority).slice(0, returnLimit);
+
+          if (finalTargets.length === 0) {
+            const what = websiteFilter === 'none_only' ? 'with no website' : websiteFilter === 'with_only' ? 'with a website' : '';
+            send({ status: 'error', msg: `No new businesses ${what} found here. Try a different niche or area.` });
+            return;
+          }
+          const kindLabel = websiteFilter === 'none_only' ? 'no-website ' : websiteFilter === 'with_only' ? 'with-website ' : '';
+          send({ status: 'hunting', msg: `Auditing ${finalTargets.length} ${kindLabel}lead(s).` });
 
           send({ status: 'hunting', msg: `Discovered ${finalTargets.length} businesses. Auditing now...` });
 
           for (let i = 0; i < finalTargets.length; i++) {
+            if (req.signal.aborted) break; // user hit Stop, halt further audits
             const target = finalTargets[i];
             send({
               status: 'auditing',

@@ -3,7 +3,10 @@ import { existsSync, writeFileSync } from 'fs';
 import path from 'path';
 import { Lead } from './types';
 
-const DB_PATH = path.join(process.cwd(), 'leads.json');
+// Where leads.json lives. Set SCANMAP_DATA_DIR to a mounted volume in production
+// so saved leads survive redeploys; defaults to the app directory locally.
+const DATA_DIR = process.env.SCANMAP_DATA_DIR || process.cwd();
+const DB_PATH = path.join(DATA_DIR, 'leads.json');
 
 // Initialize DB if missing using sync check at startup
 if (!existsSync(DB_PATH)) {
@@ -23,20 +26,32 @@ export const getLeads = async (): Promise<Lead[]> => {
 };
 
 /**
+ * Atomically persists the full lead list: write a temp file, then rename over
+ * the real one. A rename is atomic on the same filesystem, so an interrupted or
+ * overlapping write can never leave leads.json half-written (which would make
+ * getLeads read it as empty and the whole library look wiped).
+ */
+const writeLeads = async (leads: Lead[]): Promise<void> => {
+    const tmp = `${DB_PATH}.${process.pid}.tmp`;
+    await fs.writeFile(tmp, JSON.stringify(leads, null, 2));
+    await fs.rename(tmp, DB_PATH);
+};
+
+/**
  * Persists a new lead to the database if it doesn't already exist
  */
 export const saveLead = async (lead: Lead): Promise<boolean> => {
     try {
         const leads = await getLeads();
-        
-        const uniqueKey = lead.url && lead.url !== "No Website Detected" 
-            ? lead.url.toLowerCase().trim() 
-            : `${lead.name}-${lead.phone}`.toLowerCase().trim();
-        
-        const exists = leads.find(l => {
-            const lKey = l.url && l.url !== "No Website Detected" ? l.url.toLowerCase().trim() : `${l.name}-${l.phone}`.toLowerCase().trim();
-            return lKey === uniqueKey;
-        });
+
+        // No-website leads carry a placeholder url ("No website detected"), so they
+        // must be deduped by name+phone. Only a real http(s) url is a safe unique key.
+        const keyFor = (l: Lead): string => {
+            const u = (l.url || "").trim();
+            return /^https?:\/\//i.test(u) ? u.toLowerCase() : `${l.name}-${l.phone}`.toLowerCase().trim();
+        };
+        const uniqueKey = keyFor(lead);
+        const exists = leads.find((l) => keyFor(l) === uniqueKey);
 
         if (!exists) {
             const newLead: Lead = { 
@@ -47,7 +62,7 @@ export const saveLead = async (lead: Lead): Promise<boolean> => {
             };
             
             leads.unshift(newLead);
-            await fs.writeFile(DB_PATH, JSON.stringify(leads, null, 2));
+            await writeLeads(leads);
             return true;
         }
         return false;
@@ -75,7 +90,7 @@ export const updateStatus = async (id: string, currentStatus: string): Promise<s
         
         if (index !== -1) {
             leads[index].status = nextStatus;
-            await fs.writeFile(DB_PATH, JSON.stringify(leads, null, 2));
+            await writeLeads(leads);
             return nextStatus;
         }
         throw new Error("Target not found");
@@ -97,7 +112,7 @@ export const replaceLead = async (next: Lead): Promise<void> => {
     } else {
         leads[index] = next;
     }
-    await fs.writeFile(DB_PATH, JSON.stringify(leads, null, 2));
+    await writeLeads(leads);
 };
 
 /**
@@ -114,7 +129,7 @@ export const setStatus = async (id: string, nextStatus: string): Promise<string>
     if (index === -1) throw new Error("Target not found");
 
     leads[index].status = status;
-    await fs.writeFile(DB_PATH, JSON.stringify(leads, null, 2));
+    await writeLeads(leads);
     return status;
 };
 
@@ -128,7 +143,7 @@ export const updateNotes = async (id: string, notes: string): Promise<void> => {
     if (index === -1) throw new Error("Target not found");
 
     leads[index].notes = notes;
-    await fs.writeFile(DB_PATH, JSON.stringify(leads, null, 2));
+    await writeLeads(leads);
 };
 
 /**
@@ -148,7 +163,7 @@ export const bulkSetStatus = async (ids: string[], nextStatus: string): Promise<
             count++;
         }
     }
-    await fs.writeFile(DB_PATH, JSON.stringify(leads, null, 2));
+    await writeLeads(leads);
     return count;
 };
 
@@ -161,7 +176,7 @@ export const bulkDelete = async (ids: string[]): Promise<number> => {
     const remaining = leads.filter(l => !idSet.has(l.id.toString().trim()));
     const removed = leads.length - remaining.length;
     if (removed > 0) {
-        await fs.writeFile(DB_PATH, JSON.stringify(remaining, null, 2));
+        await writeLeads(remaining);
     }
     return removed;
 };
@@ -180,7 +195,7 @@ export const deleteLead = async (id: string): Promise<void> => {
             return;
         }
 
-        await fs.writeFile(DB_PATH, JSON.stringify(filteredLeads, null, 2));
+        await writeLeads(filteredLeads);
     } catch (error) {
         console.error("Database Delete Error:", error);
         throw error;
