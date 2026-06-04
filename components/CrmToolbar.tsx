@@ -2,8 +2,9 @@
 
 import React from "react";
 import { Lead, LeadStatus, STATUS_OPTIONS } from "@/lib/types";
+import { contactChannels, followUpDue } from "@/lib/leadValue";
 
-export type SortKey = "date_desc" | "score_desc" | "score_asc" | "name_asc";
+export type SortKey = "value_desc" | "date_desc" | "score_desc" | "score_asc" | "name_asc";
 
 export type QuickFilterKey =
   | "no_website"
@@ -13,6 +14,8 @@ export type QuickFilterKey =
   | "no_marketing"
   | "no_social"
   | "low_reviews"
+  | "reachable"
+  | "follow_up"
   | "has_email"
   | "has_whatsapp"
   | "outdated_stack";
@@ -31,6 +34,8 @@ export const QUICK_FILTERS: QuickFilter[] = [
   { key: "no_social",      label: "No socials" },
   { key: "low_reviews",    label: "Few reviews" },
   { key: "outdated_stack", label: "Wix / Squarespace" },
+  { key: "reachable",      label: "Reachable" },
+  { key: "follow_up",      label: "Follow up due" },
   { key: "has_email",      label: "Has email" },
   { key: "has_whatsapp",   label: "Has WhatsApp" },
 ];
@@ -44,9 +49,14 @@ const hasRealWebsite = (l: Lead) => {
 };
 const realEmail = (l: Lead) => !!l.email && !/^no email/i.test(l.email);
 const reviewCountOf = (l: Lead) => l.reviewCount ?? (parseInt(String(l.reviews || "").replace(/[^\d]/g, ""), 10) || 0);
-const igOf = (l: Lead) => l.audit?.socials?.instagram;
-const socialCountOf = (l: Lead) =>
-  l.audit?.socialCount ?? (l.audit?.socials ? Object.values(l.audit.socials).filter(Boolean).length : 0);
+// Use the merged socials (website + Maps + search), so no-website leads whose
+// Instagram we found aren't wrongly flagged "No Instagram" / "No socials".
+const socialsOf = (l: Lead) => l.socials ?? l.audit?.socials;
+const igOf = (l: Lead) => socialsOf(l)?.instagram;
+const socialCountOf = (l: Lead) => {
+  const s = socialsOf(l);
+  return s ? Object.values(s).filter(Boolean).length : 0;
+};
 
 export function matchesQuickFilter(l: Lead, key: QuickFilterKey): boolean {
   switch (key) {
@@ -63,6 +73,8 @@ export function matchesQuickFilter(l: Lead, key: QuickFilterKey): boolean {
     case "no_social":      return socialCountOf(l) === 0;
     case "low_reviews":    return reviewCountOf(l) < 10;
     case "outdated_stack": return l.tech === "Wix" || l.tech === "Squarespace";
+    case "reachable":      return contactChannels(l) > 0;
+    case "follow_up":      return followUpDue(l);
     case "has_email":      return realEmail(l);
     case "has_whatsapp":   return !!(l.whatsapp || l.audit?.whatsapp);
     default:               return true;
@@ -139,6 +151,7 @@ export function CrmToolbar(props: CrmToolbarProps) {
         </div>
         <div className="flex gap-2 items-center">
           <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)} className="select">
+            <option value="value_desc">Hottest leads</option>
             <option value="date_desc">Newest</option>
             <option value="score_desc">Score high</option>
             <option value="score_asc">Score low</option>

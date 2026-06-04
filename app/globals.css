@@ -21,42 +21,41 @@
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
 
-  /* terminal aesthetic = tighter corners */
-  --radius-sm: 4px;
-  --radius:    6px;
-  --radius-lg: 10px;
-  --radius-xl: 14px;
+  /* Customy: soft, rounded surfaces */
+  --radius-sm: 6px;
+  --radius:    10px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
 }
 
 :root {
-  /* ---- canvas ---- */
-  --background: #F3F5F3;
-  --foreground: #131C1A;
+  /* ---- canvas (Customy: off-white + ink) ---- */
+  --background: #FBFBFD;
+  --foreground: #1D1D1F;
   --card: #FFFFFF;
-  --card-foreground: #131C1A;
-  --card-elev: #FAFBFA;
+  --card-foreground: #1D1D1F;
+  --card-elev: #F5F5F7;
 
-  --muted: rgba(19, 28, 26, 0.045);
-  --muted-foreground: #57635E;
-  --tertiary-foreground: #8A948F;
+  --muted: rgba(29, 29, 31, 0.045);
+  --muted-foreground: #565659;
+  --tertiary-foreground: #8E8E93;
 
-  --border: rgba(19, 28, 26, 0.12);
-  --border-strong: rgba(19, 28, 26, 0.22);
-  --border-tick: rgba(13, 148, 136, 0.55);
+  --border: rgba(29, 29, 31, 0.11);
+  --border-strong: rgba(29, 29, 31, 0.20);
+  --border-tick: rgba(52, 199, 89, 0.5);
 
-  /* primary fill (dark, used for CTAs / active nav like an intel console) */
-  --primary: #0F1A18;
-  --primary-foreground: #F3F5F3;
-  --primary-soft: rgba(13, 148, 136, 0.10);
+  /* primary fill = ink (Customy's black pill buttons / active nav) */
+  --primary: #1D1D1F;
+  --primary-foreground: #FBFBFD;
+  --primary-soft: rgba(52, 199, 89, 0.10);
 
-  /* ---- accent: teal family ---- */
-  --teal:        #0D9488;
-  --teal-deep:   #0F766E;
-  --teal-bright: #14B8A6;
-  --mint:        #5EEAD4;
+  /* ---- accent: Customy green ---- */
+  --teal:        #34C759;
+  --teal-deep:   #248A3D;
+  --teal-bright: #5FD27D;
+  --mint:        #B7F0C9;
 
-  /* legacy accent aliases repointed onto the teal system so older
-     class/var references keep rendering sensibly during the rebuild */
+  /* legacy aliases kept pointing at the accent so older refs still render */
   --orange: var(--teal);
   --gold:   #C2710C;
   --violet: var(--teal-deep);
@@ -64,18 +63,18 @@
   --pink:   var(--teal-bright);
 
   /* ---- semantic ---- */
-  --good: #0E9F6E;
+  --good: #248A3D;
   --warn: #C2710C;
   --bad:  #DC2626;
 
-  --good-soft: rgba(14, 159, 110, 0.12);
+  --good-soft: rgba(36, 138, 61, 0.12);
   --warn-soft: rgba(194, 113, 12, 0.12);
   --bad-soft:  rgba(220, 38, 38, 0.10);
-  --teal-soft: rgba(13, 148, 136, 0.10);
+  --teal-soft: rgba(52, 199, 89, 0.12);
 
-  --shadow-sm: 0 1px 2px rgba(19, 28, 26, 0.06);
-  --shadow-md: 0 6px 20px rgba(19, 28, 26, 0.08);
-  --shadow-lg: 0 18px 48px rgba(19, 28, 26, 0.12);
+  --shadow-sm: 0 1px 2px rgba(29, 29, 31, 0.06);
+  --shadow-md: 0 6px 20px rgba(29, 29, 31, 0.08);
+  --shadow-lg: 0 18px 48px rgba(29, 29, 31, 0.12);
 }
 
 @layer base {
@@ -100,16 +99,14 @@
     /* faint engineering grid + a soft teal wash, on the light canvas */
     background-color: var(--background);
     background-image:
-      radial-gradient(900px 520px at 100% -8%, rgba(13,148,136,0.06), transparent 60%),
-      linear-gradient(rgba(19,28,26,0.025) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(19,28,26,0.025) 1px, transparent 1px);
-    background-size: 100% 100%, 40px 40px, 40px 40px;
+      radial-gradient(900px 520px at 100% -6%, rgba(52,199,89,0.06), transparent 60%),
+      radial-gradient(820px 520px at -8% 6%, rgba(122,122,255,0.045), transparent 62%);
     background-attachment: fixed;
   }
 
   h1, h2, h3, h4 { letter-spacing: -0.022em; font-weight: 600; color: var(--foreground); }
 
-  ::selection { background: rgba(13,148,136,0.22); color: var(--foreground); }
+  ::selection { background: rgba(52,199,89,0.24); color: var(--foreground); }
   *:focus { outline: none; }
 }
 
@@ -135,31 +132,13 @@
     border-radius: var(--radius);
   }
 
-  /* Framed data panel with HUD corner ticks — the terminal signature. */
+  /* Clean rounded card (Customy style). */
   .panel {
     position: relative;
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
-  }
-  .panel::before,
-  .panel::after {
-    content: "";
-    position: absolute;
-    width: 9px; height: 9px;
-    pointer-events: none;
-  }
-  .panel::before {
-    top: -1px; left: -1px;
-    border-top: 1.5px solid var(--border-tick);
-    border-left: 1.5px solid var(--border-tick);
-    border-top-left-radius: var(--radius);
-  }
-  .panel::after {
-    bottom: -1px; right: -1px;
-    border-bottom: 1.5px solid var(--border-tick);
-    border-right: 1.5px solid var(--border-tick);
-    border-bottom-right-radius: var(--radius);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
   }
   /* header strip inside a panel */
   .panel-head {
@@ -186,9 +165,9 @@
   .btn {
     display: inline-flex; align-items: center; justify-content: center;
     gap: .4rem;
-    padding: .55rem 1rem;
+    padding: .55rem 1.1rem;
     font-size: .8125rem; font-weight: 500;
-    border-radius: var(--radius);
+    border-radius: 999px;
     border: 1px solid transparent;
     transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease;
     cursor: pointer; white-space: nowrap; user-select: none;
@@ -196,9 +175,14 @@
   }
   .btn:active { transform: scale(0.985); }
 
-  .btn-primary { background: var(--teal); color: #fff; box-shadow: var(--shadow-sm); }
-  .btn-primary:hover { background: var(--teal-deep); }
+  /* Customy primary = ink (black) pill */
+  .btn-primary { background: var(--primary); color: #fff; box-shadow: var(--shadow-sm); }
+  .btn-primary:hover { background: #000; }
   .btn-primary:disabled { opacity: .45; cursor: not-allowed; }
+
+  /* green accent pill, for the occasional positive action */
+  .btn-green { background: var(--teal); color: #06310f; box-shadow: var(--shadow-sm); }
+  .btn-green:hover { background: var(--teal-bright); }
 
   .btn-accent { background: var(--primary); color: var(--primary-foreground); }
   .btn-accent:hover { filter: brightness(1.15); }
@@ -256,16 +240,16 @@
   ========================================================= */
   .chip {
     display: inline-flex; align-items: center; gap: .35rem;
-    padding: .18rem .55rem;
+    padding: .2rem .6rem;
     font-size: .6875rem; font-weight: 500;
-    border-radius: var(--radius-sm);
+    border-radius: 999px;
     background: var(--muted); color: var(--muted-foreground);
     border: 1px solid var(--border);
     transition: background .12s ease, color .12s ease, border-color .12s ease;
   }
   .chip-interactive { cursor: pointer; }
   .chip-interactive:hover { background: var(--card); color: var(--foreground); border-color: var(--border-strong); }
-  .chip-active { background: var(--teal-soft); color: var(--teal-deep); border-color: rgba(13,148,136,0.40); }
+  .chip-active { background: var(--teal-soft); color: var(--teal-deep); border-color: rgba(52,199,89,0.40); }
 
   /* =========================================================
      LABELS
@@ -313,8 +297,8 @@
 /* Scrollbar — slim, light */
 ::-webkit-scrollbar { width: 9px; height: 9px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(19,28,26,0.16); border-radius: 999px; border: 2px solid transparent; background-clip: content-box; }
-::-webkit-scrollbar-thumb:hover { background: rgba(13,148,136,0.5); border: 2px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb { background: rgba(29,29,31,0.16); border-radius: 999px; border: 2px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: rgba(52, 199, 89,0.5); border: 2px solid transparent; background-clip: content-box; }
 
 /* ============================================================
    Leaflet map — minimalist light overrides
@@ -341,11 +325,11 @@
 /* pulse that follows the latest found lead while scanning */
 .map-pulse {
   width: 14px; height: 14px; border-radius: 999px; background: var(--teal);
-  box-shadow: 0 0 0 0 rgba(13,148,136,0.5);
+  box-shadow: 0 0 0 0 rgba(52, 199, 89,0.5);
   animation: mapPulse 1.4s ease-out infinite;
 }
 @keyframes mapPulse {
-  0%   { box-shadow: 0 0 0 0 rgba(13,148,136,0.5); }
-  70%  { box-shadow: 0 0 0 20px rgba(13,148,136,0); }
-  100% { box-shadow: 0 0 0 0 rgba(13,148,136,0); }
+  0%   { box-shadow: 0 0 0 0 rgba(52, 199, 89,0.5); }
+  70%  { box-shadow: 0 0 0 20px rgba(52, 199, 89,0); }
+  100% { box-shadow: 0 0 0 0 rgba(52, 199, 89,0); }
 }

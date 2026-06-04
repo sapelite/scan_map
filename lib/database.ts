@@ -38,9 +38,22 @@ const writeLeads = async (leads: Lead[]): Promise<void> => {
 };
 
 /**
+ * Serialises read-modify-write operations on leads.json. Sweeps now audit leads
+ * in parallel, so without this two concurrent saves could both read the same
+ * list, each append, and the second write would clobber the first (lost update).
+ * This chains every mutation so only one runs at a time.
+ */
+let _writeChain: Promise<unknown> = Promise.resolve();
+const withLock = <T>(fn: () => Promise<T>): Promise<T> => {
+    const result = _writeChain.then(fn, fn);
+    _writeChain = result.catch(() => {});
+    return result;
+};
+
+/**
  * Persists a new lead to the database if it doesn't already exist
  */
-export const saveLead = async (lead: Lead): Promise<boolean> => {
+export const saveLead = async (lead: Lead): Promise<boolean> => withLock(async () => {
     try {
         const leads = await getLeads();
 
@@ -70,12 +83,12 @@ export const saveLead = async (lead: Lead): Promise<boolean> => {
         console.error("Critical Database Write Error:", error);
         return false;
     }
-};
+});
 
 /**
  * Cycles the status: NEW -> CONTACTED -> CLOSED -> REJECTED -> NEW
  */
-export const updateStatus = async (id: string, currentStatus: string): Promise<string> => {
+export const updateStatus = async (id: string, currentStatus: string): Promise<string> => withLock(async () => {
     try {
         const statusCycle = ["NEW", "CONTACTED", "CLOSED", "REJECTED"];
         const normalizedStatus = (currentStatus || "NEW").toUpperCase();
@@ -90,6 +103,7 @@ export const updateStatus = async (id: string, currentStatus: string): Promise<s
         
         if (index !== -1) {
             leads[index].status = nextStatus;
+            if (nextStatus === "CONTACTED") leads[index].contactedAt = new Date().toISOString();
             await writeLeads(leads);
             return nextStatus;
         }
@@ -98,12 +112,12 @@ export const updateStatus = async (id: string, currentStatus: string): Promise<s
         console.error("Status Update Error:", error);
         throw error;
     }
-};
+});
 
 /**
  * Replaces a lead in place by id (used by re-audit). Preserves position.
  */
-export const replaceLead = async (next: Lead): Promise<void> => {
+export const replaceLead = async (next: Lead): Promise<void> => withLock(async () => {
     const leads = await getLeads();
     const targetId = next.id.toString().trim();
     const index = leads.findIndex(l => l.id.toString().trim() === targetId);
@@ -113,12 +127,12 @@ export const replaceLead = async (next: Lead): Promise<void> => {
         leads[index] = next;
     }
     await writeLeads(leads);
-};
+});
 
 /**
  * Sets the status to a specific value (no cycling)
  */
-export const setStatus = async (id: string, nextStatus: string): Promise<string> => {
+export const setStatus = async (id: string, nextStatus: string): Promise<string> => withLock(async () => {
     const allowed = ["NEW", "CONTACTED", "CLOSED", "REJECTED"];
     const status = (nextStatus || "NEW").toUpperCase();
     if (!allowed.includes(status)) throw new Error(`Invalid status: ${status}`);
@@ -129,14 +143,16 @@ export const setStatus = async (id: string, nextStatus: string): Promise<string>
     if (index === -1) throw new Error("Target not found");
 
     leads[index].status = status;
+    // Stamp the moment we first reached out, so we can flag follow-ups later.
+    if (status === "CONTACTED") leads[index].contactedAt = new Date().toISOString();
     await writeLeads(leads);
     return status;
-};
+});
 
 /**
  * Updates the notes field on a lead
  */
-export const updateNotes = async (id: string, notes: string): Promise<void> => {
+export const updateNotes = async (id: string, notes: string): Promise<void> => withLock(async () => {
     const leads = await getLeads();
     const targetId = id.toString().trim();
     const index = leads.findIndex(l => l.id.toString().trim() === targetId);
@@ -144,12 +160,12 @@ export const updateNotes = async (id: string, notes: string): Promise<void> => {
 
     leads[index].notes = notes;
     await writeLeads(leads);
-};
+});
 
 /**
  * Applies a status change to many leads at once
  */
-export const bulkSetStatus = async (ids: string[], nextStatus: string): Promise<number> => {
+export const bulkSetStatus = async (ids: string[], nextStatus: string): Promise<number> => withLock(async () => {
     const allowed = ["NEW", "CONTACTED", "CLOSED", "REJECTED"];
     const status = (nextStatus || "NEW").toUpperCase();
     if (!allowed.includes(status)) throw new Error(`Invalid status: ${status}`);
@@ -165,12 +181,12 @@ export const bulkSetStatus = async (ids: string[], nextStatus: string): Promise<
     }
     await writeLeads(leads);
     return count;
-};
+});
 
 /**
  * Bulk-deletes leads
  */
-export const bulkDelete = async (ids: string[]): Promise<number> => {
+export const bulkDelete = async (ids: string[]): Promise<number> => withLock(async () => {
     const leads = await getLeads();
     const idSet = new Set(ids.map(i => i.toString().trim()));
     const remaining = leads.filter(l => !idSet.has(l.id.toString().trim()));
@@ -179,17 +195,17 @@ export const bulkDelete = async (ids: string[]): Promise<number> => {
         await writeLeads(remaining);
     }
     return removed;
-};
+});
 
 /**
  * Permanently removes a lead from the vault
  */
-export const deleteLead = async (id: string): Promise<void> => {
+export const deleteLead = async (id: string): Promise<void> => withLock(async () => {
     try {
         const leads = await getLeads();
         const targetId = id.toString().trim();
         const filteredLeads = leads.filter(l => l.id.toString().trim() !== targetId);
-        
+
         if (leads.length === filteredLeads.length) {
             console.warn(`Purge attempted but no ID matched: ${id}`);
             return;
@@ -200,4 +216,4 @@ export const deleteLead = async (id: string): Promise<void> => {
         console.error("Database Delete Error:", error);
         throw error;
     }
-};
+});

@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import {
   withBrowser, discoverPlaceLinks, extractMapsTarget, buildLeadFromTarget,
+  runPool, LEAD_CONCURRENCY,
 } from "@/lib/engine";
 import { getLeads, saveLead } from "@/lib/database";
 import { Lead } from "@/lib/types";
@@ -82,23 +83,26 @@ export async function POST(req: NextRequest) {
             }
 
             let keptThisCombo = 0;
-            for (const link of links) {
-              if (req.signal.aborted || found >= maxLeads || keptThisCombo >= perCombo) break;
-              if (seenMaps.has(link)) { skipped++; send({ type: "tick", found, saved, skipped, noWeb }); continue; }
+            // Audit several businesses in parallel (a headless browser handles a
+            // few pages at once); stop pulling work once a cap is hit.
+            const stop = () => req.signal.aborted || found >= maxLeads || keptThisCombo >= perCombo;
+            await runPool(links, LEAD_CONCURRENCY, async (link) => {
+              if (seenMaps.has(link)) { skipped++; send({ type: "tick", found, saved, skipped, noWeb }); return; }
+              seenMaps.add(link);
 
               const target = await extractMapsTarget(browser, link);
-              if (!target) { continue; }
+              if (!target) return;
 
               const nameKey = norm(target.name);
-              if (seenNames.has(nameKey)) { skipped++; send({ type: "tick", found, saved, skipped, noWeb }); continue; }
+              if (seenNames.has(nameKey)) { skipped++; send({ type: "tick", found, saved, skipped, noWeb }); return; }
               seenNames.add(nameKey);
-              seenMaps.add(link);
 
               // Website focus: only keep the kind of business we're actually looking for,
               // so we never spend an audit on something we don't need.
               const hasWeb = !!target.website;
-              if (websiteFilter === "none_only" && hasWeb) continue;
-              if (websiteFilter === "with_only" && !hasWeb) continue;
+              if (websiteFilter === "none_only" && hasWeb) return;
+              if (websiteFilter === "with_only" && !hasWeb) return;
+              if (stop()) return;
 
               try {
                 const lead = await buildLeadFromTarget(browser, target, niche);
@@ -112,7 +116,7 @@ export async function POST(req: NextRequest) {
               } catch {
                 /* one business failing shouldn't kill the sweep */
               }
-            }
+            }, stop);
           }
         });
 

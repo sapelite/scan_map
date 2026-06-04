@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Lead, STATUS_OPTIONS, ScoreFactor, DimensionBreakdown, OPPORTUNITY_META } from "@/lib/types";
+import { Lead, STATUS_OPTIONS, ScoreFactor, DimensionBreakdown } from "@/lib/types";
+import { actionPlan, suggestedScope, conversionReadiness, strengths, type Finding } from "@/lib/auditIntel";
 import { ScoreBadge, opportunityLabel, scoreHex } from "@/components/Presence";
 import { buildWhatsApp, buildEmail, waRecipient } from "@/lib/outreach";
+import { daysSinceContact, followUpDue } from "@/lib/leadValue";
 import { useToast } from "@/components/Toast";
 
 interface LeadDetailProps {
@@ -68,6 +70,30 @@ const SOCIAL_LABEL: Record<string, string> = {
   twitter: "Twitter / X", tiktok: "TikTok", youtube: "YouTube",
 };
 
+const SEV_COLOR: Record<Finding["severity"], string> = {
+  critical: "var(--bad)", warn: "var(--warn)", opportunity: "var(--teal-deep)", ok: "var(--good)",
+};
+const TEAL_CHIP: React.CSSProperties = { background: "var(--teal-soft)", borderColor: "rgba(52,199,89,0.30)", color: "var(--teal-deep)" };
+
+function FindingRow({ f }: { f: Finding }) {
+  return (
+    <div className="p-4">
+      <div className="flex items-start gap-2 mb-1.5 flex-wrap">
+        <span className="status-dot mt-1.5 shrink-0" style={{ background: SEV_COLOR[f.severity] }} aria-hidden />
+        <span className="text-sm font-semibold text-foreground">{f.title}</span>
+        <span className="flex gap-1.5 ml-auto">
+          <span className="chip text-[10px]!">{f.impact} impact</span>
+          <span className="chip text-[10px]!">{f.effort}</span>
+          <span className="chip text-[10px]!" style={TEAL_CHIP}>{f.service}</span>
+        </span>
+      </div>
+      <p className="text-xs text-muted-foreground mb-1"><span className="label-overline mr-1">Found</span>{f.evidence}</p>
+      <p className="text-xs text-muted-foreground mb-1"><span className="label-overline mr-1">Costs them</span>{f.meaning}</p>
+      <p className="text-xs text-muted-foreground"><span className="label-overline mr-1" style={{ color: "var(--teal-deep)" }}>Fix</span>{f.fix}</p>
+    </div>
+  );
+}
+
 export function LeadDetail({
   lead, onClose, onStatusChange, onNotesSaved, onPurge, onDownloadPDF, onQuickStrike, onLeadRefreshed,
 }: LeadDetailProps) {
@@ -93,7 +119,15 @@ export function LeadDetail({
       }
       const json = await res.json();
       if (json.lead && onLeadRefreshed) onLeadRefreshed(json.lead);
-      if (deep) toast.push(`Deep audit done · crawled ${json.lead?.audit?.pagesCrawled ?? 1} page(s)`, "success");
+      if (deep) {
+        const L = json.lead as Lead | undefined;
+        const pages = L?.audit?.pagesCrawled ?? 0;
+        const socials = L?.socialInsights?.length ?? 0;
+        const msg = pages > 1 ? `Deep audit done · crawled ${pages} pages`
+          : socials > 0 ? `Deep audit done · checked ${socials} social account(s)`
+          : "Deep audit done · refreshed socials & contacts (no website to crawl)";
+        toast.push(msg, "success");
+      }
       return (json.lead as Lead) ?? null;
     } catch (err) {
       toast.push(err instanceof Error ? err.message : "Failed", "error");
@@ -138,7 +172,6 @@ export function LeadDetail({
   const externalUrl = lead.websiteFromMaps || (audit?.finalUrl && audit.finalUrl !== "No website detected" ? audit.finalUrl : null);
   const lastAudited = lead.lastAuditedAt ? new Date(lead.lastAuditedAt) : null;
   const dimFactors = lead.dimensionFactors ?? [];
-  const opps = lead.opportunities ?? [];
 
   const recipient = waRecipient(lead);
   const waHref = recipient ? `https://wa.me/${recipient}?text=${encodeURIComponent(waMsg)}` : null;
@@ -236,27 +269,56 @@ export function LeadDetail({
             </div>
           </div>
 
-          {/* Pitch angles: what to sell, why it matters, how to fix */}
-          {opps.length > 0 && (
-            <section>
-              <h3 className="label-section mb-3">What to sell them · why it matters · how to fix</h3>
-              <div className="panel divide-y divide-border">
-                {opps.map((o) => {
-                  const m = OPPORTUNITY_META[o];
-                  return (
-                    <div key={o} className="p-4">
-                      <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <span className="chip shrink-0" style={{ background: "var(--teal-soft)", borderColor: "rgba(13,148,136,0.30)", color: "var(--teal-deep)" }}>{m.sell}</span>
-                        <span className="text-sm font-medium text-foreground">{m.long}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground"><span className="label-overline mr-1">Why</span>{m.why}</p>
-                      <p className="text-xs text-muted-foreground mt-1.5"><span className="label-overline mr-1">Fix</span>{m.fix}</p>
+          {/* Deep audit & action plan — works for every lead, website or not */}
+          {(() => {
+            const plan = actionPlan(lead);
+            const scope = suggestedScope(lead);
+            const conv = conversionReadiness(lead);
+            const wins = strengths(lead);
+            const okChip: React.CSSProperties = { background: "var(--good-soft)", borderColor: "rgba(36,138,61,0.35)", color: "var(--good)" };
+            const badChip: React.CSSProperties = { background: "var(--bad-soft)", borderColor: "rgba(220,38,38,0.30)", color: "var(--bad)" };
+            return (
+              <section>
+                <div className="flex items-center justify-between mb-3 gap-2">
+                  <h3 className="label-section">Audit &amp; action plan</h3>
+                  <span className="panel-meta truncate">{scope.headline}</span>
+                </div>
+
+                {/* scope + conversion readiness */}
+                <div className="panel p-4 mb-3">
+                  <div className="label-overline mb-1.5">What they need {scope.criticalCount > 0 && <span style={{ color: "var(--bad)" }}>· {scope.criticalCount} critical</span>}</div>
+                  <div className="flex flex-wrap gap-1.5 mb-4">
+                    {scope.services.length > 0
+                      ? scope.services.map((s) => <span key={s} className="chip" style={TEAL_CHIP}>{s}</span>)
+                      : <span className="text-sm text-muted-foreground">No critical gaps. Approach as optimisation / retainer.</span>}
+                  </div>
+                  <div className="label-overline mb-1.5">Can a customer act?</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {conv.items.map((i) => (
+                      <span key={i.label} className="chip" style={i.ok ? okChip : badChip}>{i.ok ? "✓" : "✕"} {i.label}</span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* prioritised findings */}
+                <div className="panel divide-y divide-border">
+                  {plan.length > 0
+                    ? plan.map((f, i) => <FindingRow key={i} f={f} />)
+                    : <div className="p-4 text-sm text-muted-foreground">Strong across the board. Best approached as a premium optimisation or retainer client.</div>}
+                </div>
+
+                {/* strengths */}
+                {wins.length > 0 && (
+                  <div className="panel p-4 mt-3">
+                    <div className="label-overline mb-2">What&apos;s already working</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {wins.map((w, i) => <span key={i} className="chip" style={{ background: "var(--good-soft)", borderColor: "rgba(36,138,61,0.30)", color: "var(--good)" }}>{w}</span>)}
                     </div>
-                  );
-                })}
-              </div>
-            </section>
-          )}
+                  </div>
+                )}
+              </section>
+            );
+          })()}
 
           {/* Outreach */}
           <section>
@@ -358,6 +420,12 @@ export function LeadDetail({
                       <Metric label="Pages missing SEO" value={`${seoIssues}`} ok={seoIssues === 0} />
                       <Metric label="Broken links" value={`${d.brokenLinks.length}`} ok={d.brokenLinks.length === 0} />
                       <Metric label="Fresh content" value={d.latestContentDate ? d.latestContentDate : (d.hasFreshContent ? "yes" : "none found")} ok={d.hasFreshContent} />
+                      {typeof audit?.psiPerformance === "number" && (
+                        <Metric label="Google performance" value={`${audit.psiPerformance}/100`} ok={audit.psiPerformance >= 50} />
+                      )}
+                      {audit?.psiLcpMs ? (
+                        <Metric label="LCP (real load)" value={`${(audit.psiLcpMs / 1000).toFixed(1)}s`} ok={audit.psiLcpMs < 2500} />
+                      ) : null}
                     </div>
                     {d.brokenLinks.length > 0 && (
                       <details className="mt-3">
@@ -438,19 +506,58 @@ export function LeadDetail({
             </div>
           </section>
 
-          {/* Socials */}
-          {audit && Object.values(audit.socials).some(Boolean) && (
-            <section>
-              <h3 className="label-section mb-3">Social</h3>
-              <div className="panel p-5 grid grid-cols-2 md:grid-cols-3 gap-2">
-                {Object.entries(audit.socials).map(([k, v]) => v ? (
-                  <a key={k} href={v} target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded-sm bg-muted hover:bg-foreground hover:text-white transition-colors text-sm font-medium">
-                    {SOCIAL_LABEL[k]}
-                  </a>
-                ) : null)}
-              </div>
-            </section>
-          )}
+          {/* Socials (merged links + enriched public stats: followers, posts, etc.) */}
+          {(() => {
+            const socials = lead.socials ?? audit?.socials;
+            if (!socials || !Object.values(socials).some(Boolean)) return null;
+            const src = lead.socialsSource ?? [];
+            const insights = lead.socialInsights ?? [];
+            const fmt = (n: number) =>
+              n >= 1_000_000 ? (n / 1e6).toFixed(1).replace(/\.0$/, "") + "M"
+              : n >= 10_000 ? Math.round(n / 1000) + "K"
+              : n >= 1000 ? (n / 1000).toFixed(1).replace(/\.0$/, "") + "K"
+              : String(n);
+            const withStats = insights.filter((s) => s.followers !== undefined);
+            return (
+              <section>
+                <div className="flex items-center gap-2 mb-3">
+                  <h3 className="label-section">Social</h3>
+                  {src.includes("search") && <span className="chip text-[10px]" title="Found by searching the open web, double-check it's them">found via web search</span>}
+                </div>
+                {withStats.length > 0 ? (
+                  <div className="space-y-2">
+                    {insights.map((s) => (
+                      <a key={s.url} href={s.url} target="_blank" rel="noopener noreferrer" className="panel p-3.5 flex items-center justify-between gap-3 card-interactive">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-sm font-semibold text-foreground">{s.platform}</span>
+                            {s.verified && <span title="Verified" className="text-(--teal-deep) text-xs">✓</span>}
+                            {s.handle && <span className="text-xs text-tertiary-foreground font-mono truncate">{s.handle}</span>}
+                          </div>
+                          {s.bio && <p className="text-xs text-muted-foreground truncate mt-0.5">{s.bio}</p>}
+                          {s.followers === undefined && s.note && <p className="text-[11px] text-tertiary-foreground mt-0.5">{s.note}</p>}
+                        </div>
+                        {s.followers !== undefined && (
+                          <div className="flex items-center gap-4 shrink-0 text-right">
+                            <div><div className="text-base font-semibold tabular-nums text-foreground">{fmt(s.followers)}</div><div className="label-overline text-[9px]!">followers</div></div>
+                            {s.posts !== undefined && <div><div className="text-base font-semibold tabular-nums text-foreground">{fmt(s.posts)}</div><div className="label-overline text-[9px]!">posts</div></div>}
+                          </div>
+                        )}
+                      </a>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="panel p-5 grid grid-cols-2 md:grid-cols-3 gap-2">
+                    {Object.entries(socials).map(([k, v]) => v ? (
+                      <a key={k} href={v} target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded-sm bg-muted hover:bg-foreground hover:text-white transition-colors text-sm font-medium">
+                        {SOCIAL_LABEL[k]}
+                      </a>
+                    ) : null)}
+                  </div>
+                )}
+              </section>
+            );
+          })()}
 
           {/* Status */}
           <section>
@@ -469,6 +576,17 @@ export function LeadDetail({
                 );
               })}
             </div>
+            {lead.contactedAt && (() => {
+              const days = daysSinceContact(lead);
+              const due = followUpDue(lead);
+              const when = days === null ? "" : days === 0 ? "today" : days === 1 ? "yesterday" : `${days} days ago`;
+              return (
+                <div className="mt-2.5 flex items-center gap-2 text-xs">
+                  <span className="text-muted-foreground">Contacted {when}</span>
+                  {due && <span className="chip" style={{ background: "var(--warn-soft)", borderColor: "rgba(194,113,12,0.40)", color: "var(--warn)" }}>Follow up due</span>}
+                </div>
+              );
+            })()}
           </section>
 
           {/* Notes */}

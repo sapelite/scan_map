@@ -1,67 +1,191 @@
 import jsPDF from "jspdf";
-import { Lead, OPPORTUNITY_META, PresenceKey } from "@/lib/types";
+import { Lead, PresenceKey } from "@/lib/types";
 import { BRAND as CUSTOMY } from "@/lib/brand";
+import { actionPlan, suggestedScope, conversionReadiness, strengths, dimensionLabel, type Finding } from "@/lib/auditIntel";
+import { PeerBenchmark } from "@/lib/benchmark";
+import { leadValue, valueBand, maxFollowers, contactChannels } from "@/lib/leadValue";
 
-// ---- palette (RGB) ----
-const TEAL: [number, number, number] = [13, 148, 136];
-const INK: [number, number, number] = [19, 28, 26];
-const MUTED: [number, number, number] = [110, 116, 113];
-const LINE: [number, number, number] = [225, 228, 225];
-const GOOD: [number, number, number] = [14, 159, 110];
+// ---- palette (RGB), aligned to the Customy brand: off-white, ink, green accent ----
+const GREEN: [number, number, number] = [52, 199, 89];
+const GREEN_DEEP: [number, number, number] = [36, 138, 61];
+const INK: [number, number, number] = [29, 29, 31];
+const INK_SOFT: [number, number, number] = [86, 86, 89];
+const MUTED: [number, number, number] = [142, 142, 147];
+const LINE: [number, number, number] = [228, 229, 230];
+const CARD: [number, number, number] = [245, 245, 247];
+const WHITE: [number, number, number] = [255, 255, 255];
+const WHITE_DIM: [number, number, number] = [176, 176, 182];
+const GOOD: [number, number, number] = [36, 138, 61];
 const MID: [number, number, number] = [194, 113, 12];
 const BAD: [number, number, number] = [220, 38, 38];
+const TRACK: [number, number, number] = [236, 239, 237];
 
 const W = 210, H = 297, M = 18;
+const colW = W - 2 * M;
 const scoreRGB = (s: number): [number, number, number] => (s >= 70 ? GOOD : s >= 40 ? MID : BAD);
+const sevRGB = (s: Finding["severity"]): [number, number, number] => (s === "critical" ? BAD : s === "warn" ? MID : GREEN_DEEP);
 
-export interface BenchmarkInfo {
-  label: string;   // e.g. "Top villas in Canggu"
-  score: number;   // peer benchmark 0-100
-  basis: string;   // e.g. "based on 8 villas audited" or "industry benchmark"
-}
-export interface PdfOpts { benchmark?: BenchmarkInfo }
+export interface PdfOpts { benchmark?: PeerBenchmark }
 
 const DIM_KEYS: PresenceKey[] = ["site", "social", "marketing", "reputation", "content"];
-const DIM_LABEL: Record<PresenceKey, string> = {
-  site: "Website", social: "Social media", marketing: "Marketing", reputation: "Reputation", content: "Content",
-};
 
 const fileName = (item: Lead, kind: string) =>
   `${kind}_${item.name.replace(/[^a-zA-Z0-9]+/g, "_").slice(0, 40)}.pdf`;
 
-// shared small helpers --------------------------------------------------------
-function heading(doc: jsPDF, text: string, y: number) {
-  doc.setTextColor(...INK); doc.setFont("helvetica", "bold"); doc.setFontSize(11);
-  doc.text(text, M, y); y += 4;
-  doc.setDrawColor(...LINE); doc.line(M, y, W - M, y);
-  return y + 6;
+const humanNum = (n: number): string =>
+  n >= 1_000_000 ? (n / 1e6).toFixed(1).replace(/\.0$/, "") + "M"
+  : n >= 10_000 ? Math.round(n / 1000) + "K"
+  : n >= 1000 ? (n / 1000).toFixed(1).replace(/\.0$/, "") + "K"
+  : String(n);
+
+// ---------------------------------------------------------------------------
+// shared layout helpers
+// ---------------------------------------------------------------------------
+
+function sectionLabel(doc: jsPDF, text: string, y: number) {
+  doc.setFont("helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(...GREEN_DEEP);
+  doc.setCharSpace(0.7); doc.text(text.toUpperCase(), M, y); doc.setCharSpace(0);
+  y += 2.6;
+  doc.setDrawColor(...LINE); doc.setLineWidth(0.4); doc.line(M, y, W - M, y);
+  return y + 7;
 }
+
 function ensure(doc: jsPDF, y: number, need = 16) {
-  if (y + need > H - 16) { doc.addPage(); return M + 4; }
+  if (y + need > H - 18) { doc.addPage(); return M + 6; }
   return y;
 }
-function footer(doc: jsPDF) {
+
+function footer(doc: jsPDF, tag?: string) {
   const pages = doc.getNumberOfPages();
   for (let i = 1; i <= pages; i++) {
     doc.setPage(i);
+    doc.setDrawColor(...LINE); doc.setLineWidth(0.4); doc.line(M, H - 13, W - M, H - 13);
     doc.setTextColor(...MUTED); doc.setFont("helvetica", "normal"); doc.setFontSize(8);
-    doc.text("Customy · Bali web, social and marketing studio", M, H - 10);
-    doc.text(`${i} / ${pages}`, W - M, H - 10, { align: "right" });
+    doc.text(tag || `${CUSTOMY.name}  ·  ${CUSTOMY.tagline}`, M, H - 8);
+    doc.text(`${i} / ${pages}`, W - M, H - 8, { align: "right" });
   }
 }
-function dimensionBars(doc: jsPDF, dims: Record<PresenceKey, number>, y: number) {
-  const barX = M + 34, barW = W - M - barX - 14;
+
+function paragraph(doc: jsPDF, text: string, x: number, y: number, width: number, lineH = 4.7, size = 9.5, color: [number, number, number] = INK_SOFT) {
+  doc.setFont("helvetica", "normal"); doc.setFontSize(size); doc.setTextColor(...color);
+  const lines = doc.splitTextToSize(text, width);
+  doc.text(lines, x, y, { lineHeightFactor: 1.35 });
+  return y + lines.length * lineH;
+}
+
+/** Dimension bars, optionally with a peer-median marker. */
+function dimensionBars(doc: jsPDF, dims: Partial<Record<PresenceKey, number>>, y: number, peer?: Partial<Record<PresenceKey, number>>) {
+  const barX = M + 36, barW = W - M - barX - 14;
   for (const k of DIM_KEYS) {
     const v = dims[k] ?? 0;
-    doc.setTextColor(...MUTED); doc.setFont("helvetica", "normal"); doc.setFontSize(9);
-    doc.text(DIM_LABEL[k], M, y + 3);
-    doc.setFillColor(238, 240, 238); doc.roundedRect(barX, y, barW, 3.2, 1.6, 1.6, "F");
-    doc.setFillColor(...scoreRGB(v)); doc.roundedRect(barX, y, Math.max((barW * v) / 100, 1.5), 3.2, 1.6, 1.6, "F");
-    doc.setTextColor(...scoreRGB(v)); doc.setFont("helvetica", "bold");
-    doc.text(`${v}`, W - M, y + 3, { align: "right" });
-    y += 8;
+    doc.setTextColor(...INK_SOFT); doc.setFont("helvetica", "normal"); doc.setFontSize(9.5);
+    doc.text(dimensionLabel(k), M, y + 3.2);
+    doc.setFillColor(...TRACK); doc.roundedRect(barX, y, barW, 4, 2, 2, "F");
+    doc.setFillColor(...scoreRGB(v)); doc.roundedRect(barX, y, Math.max((barW * v) / 100, 2), 4, 2, 2, "F");
+    // peer median marker
+    const pm = peer?.[k];
+    if (typeof pm === "number") {
+      const mx = barX + (barW * pm) / 100;
+      doc.setDrawColor(...INK); doc.setLineWidth(0.7); doc.line(mx, y - 1, mx, y + 5);
+    }
+    doc.setTextColor(...scoreRGB(v)); doc.setFont("helvetica", "bold"); doc.setFontSize(9.5);
+    doc.text(`${v}`, W - M, y + 3.2, { align: "right" });
+    y += 9;
+  }
+  if (peer) {
+    doc.setTextColor(...MUTED); doc.setFont("helvetica", "normal"); doc.setFontSize(7.5);
+    doc.text("| vertical mark = typical peer", barX, y + 1);
+    y += 4;
   }
   return y + 2;
+}
+
+function scoreScale(doc: jsPDF, score: number, x: number, w: number, y: number) {
+  const h = 3.4;
+  doc.setFillColor(...BAD); doc.roundedRect(x, y, w * 0.4, h, 1.7, 1.7, "F");
+  doc.setFillColor(...MID); doc.rect(x + w * 0.4, y, w * 0.3, h, "F");
+  doc.setFillColor(...GOOD); doc.roundedRect(x + w * 0.7, y, w * 0.3, h, 1.7, 1.7, "F");
+  const mx = x + (w * Math.min(Math.max(score, 0), 100)) / 100;
+  doc.setFillColor(...INK); doc.triangle(mx, y - 0.6, mx - 2.2, y - 4.6, mx + 2.2, y - 4.6, "F");
+  return y + h;
+}
+
+/** You vs typical vs top, from the peer benchmark. */
+function benchmarkBlock(doc: jsPDF, bm: PeerBenchmark, y: number) {
+  const labelW = 46, barX = M + labelW, barW = W - M - barX - 14;
+  const row = (label: string, val: number, color: [number, number, number], yy: number) => {
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(...INK_SOFT);
+    doc.text(doc.splitTextToSize(label, labelW - 3), M, yy + 3.4);
+    doc.setFillColor(...TRACK); doc.roundedRect(barX, yy, barW, 5, 2.5, 2.5, "F");
+    doc.setFillColor(...color); doc.roundedRect(barX, yy, Math.max((barW * val) / 100, 3), 5, 2.5, 2.5, "F");
+    doc.setTextColor(...color); doc.setFont("helvetica", "bold"); doc.text(`${val}`, W - M, yy + 3.7, { align: "right" });
+    return yy + 10;
+  };
+  y = row("You", bm.yourScore, scoreRGB(bm.yourScore), y);
+  y = row(`Typical ${bm.label}`, bm.medianScore, MUTED, y);
+  y = row("Top performers", bm.topScore, GOOD, y) + 1;
+  const gap = Math.max(bm.medianScore - bm.yourScore, 0);
+  const msg = gap >= 6
+    ? `You're ${gap} points behind the typical ${bm.label} and ${Math.max(bm.topScore - bm.yourScore, 0)} behind the best. ${bm.basis}`
+    : `You're keeping pace with the typical ${bm.label}. ${bm.basis}`;
+  return paragraph(doc, msg, M, y, colW, 4.4, 9, MUTED) + 4;
+}
+
+/** The four "can a customer act?" checks as coloured dots. */
+function conversionRow(doc: jsPDF, lead: Lead, y: number) {
+  const conv = conversionReadiness(lead);
+  const colXs = [M, M + colW / 2];
+  conv.items.forEach((it, i) => {
+    const x = colXs[i % 2], yy = y + Math.floor(i / 2) * 6.5;
+    doc.setFillColor(...(it.ok ? GOOD : BAD)); doc.circle(x + 1.4, yy - 1.3, 1.4, "F");
+    doc.setTextColor(...INK_SOFT); doc.setFont("helvetica", "normal"); doc.setFontSize(9.5);
+    doc.text(it.label, x + 5, yy);
+  });
+  return y + Math.ceil(conv.items.length / 2) * 6.5 + 2;
+}
+
+/** One finding: numbered, title, optional meta, then evidence / why / fix. */
+function findingBlock(doc: jsPDF, f: Finding, i: number, y: number, mode: "client" | "internal") {
+  const tx = M + 10;
+  y = ensure(doc, y, 30);
+  doc.setFillColor(...sevRGB(f.severity)); doc.circle(M + 3, y, 3.1, "F");
+  doc.setTextColor(...WHITE); doc.setFont("helvetica", "bold"); doc.setFontSize(8.5);
+  doc.text(`${i + 1}`, M + 3, y + 1.5, { align: "center" });
+
+  doc.setTextColor(...INK); doc.setFont("helvetica", "bold"); doc.setFontSize(10.5);
+  const t = doc.splitTextToSize(f.title, W - M - tx);
+  doc.text(t, tx, y + 1.5, { lineHeightFactor: 1.2 });
+  y += Math.max(5, t.length * 5) + 2;
+
+  // meta line
+  doc.setFont("helvetica", "bold"); doc.setFontSize(7.5); doc.setCharSpace(0.3);
+  doc.setTextColor(...sevRGB(f.severity));
+  const meta = mode === "internal"
+    ? `${f.severity.toUpperCase()}  ·  ${f.impact.toUpperCase()} IMPACT  ·  ${f.effort.toUpperCase()}  ·  ${f.service.toUpperCase()}`
+    : (f.severity === "critical" ? "CRITICAL" : f.impact === "High" ? "HIGH PRIORITY" : f.impact === "Medium" ? "WORTH DOING" : "QUICK WIN");
+  doc.text(meta, tx, y); doc.setCharSpace(0); y += 4.5;
+
+  if (mode === "internal") {
+    doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(...MUTED); doc.setCharSpace(0.3);
+    doc.text("FOUND", tx, y); doc.setCharSpace(0); y += 3.8;
+    y = paragraph(doc, f.evidence, tx, y, W - M - tx, 4.4, 9, INK_SOFT) + 1.5;
+  }
+
+  doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(...MUTED); doc.setCharSpace(0.3);
+  doc.text(mode === "client" ? "WHY IT MATTERS" : "WHY IT COSTS THEM", tx, y); doc.setCharSpace(0); y += 3.8;
+  y = paragraph(doc, f.meaning, tx, y, W - M - tx, 4.4, 9.5, INK_SOFT) + 1.5;
+
+  doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(...GREEN_DEEP); doc.setCharSpace(0.3);
+  doc.text(mode === "client" ? "WHAT WE'D DO" : "FIX", tx, y); doc.setCharSpace(0); y += 3.8;
+  y = paragraph(doc, f.fix, tx, y, W - M - tx, 4.4, 9.5, INK_SOFT) + 6;
+  return y;
+}
+
+function verdict(score: number) {
+  if (score < 40) return "Right now you're losing customers to better-presented competitors, but it's very fixable.";
+  if (score < 60) return "You've got a foundation, but real bookings are slipping through the gaps below.";
+  if (score < 80) return "You're doing well. A few targeted moves will turn browsers into bookings.";
+  return "You're ahead of most. Let's sharpen the edges and protect your lead.";
 }
 function interpretation(score: number) {
   if (score < 35) return "Lots of room to grow, which means lots of upside from a focused push.";
@@ -70,238 +194,273 @@ function interpretation(score: number) {
   return "Excellent presence. Mostly fine-tuning from here.";
 }
 
-// A red→amber→green scale with a marker at the score.
-function scoreScale(doc: jsPDF, score: number, y: number) {
-  const x = M, w = W - 2 * M, h = 4;
-  doc.setFillColor(...BAD); doc.rect(x, y, w * 0.4, h, "F");
-  doc.setFillColor(...MID); doc.rect(x + w * 0.4, y, w * 0.3, h, "F");
-  doc.setFillColor(...GOOD); doc.rect(x + w * 0.7, y, w * 0.3, h, "F");
-  const mx = x + (w * Math.min(Math.max(score, 0), 100)) / 100;
-  doc.setFillColor(...INK); doc.triangle(mx, y - 0.5, mx - 2.4, y - 5, mx + 2.4, y - 5, "F");
-  doc.setFontSize(7); doc.setTextColor(...MUTED);
-  doc.text("0", x, y + h + 4); doc.text("50", x + w / 2, y + h + 4, { align: "center" }); doc.text("100", x + w, y + h + 4, { align: "right" });
-  return y + h + 9;
-}
-
-// "You" vs peer benchmark bars.
-function benchmarkBars(doc: jsPDF, you: number, peer: number, peerLabel: string, y: number) {
-  const labelW = 46, barX = M + labelW, barW = W - M - barX - 12;
-  const row = (label: string, val: number, color: [number, number, number], yy: number) => {
-    doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(...MUTED);
-    doc.text(doc.splitTextToSize(label, labelW - 2), M, yy + 3);
-    doc.setFillColor(238, 240, 238); doc.roundedRect(barX, yy, barW, 4.5, 2, 2, "F");
-    doc.setFillColor(...color); doc.roundedRect(barX, yy, Math.max((barW * val) / 100, 2.5), 4.5, 2, 2, "F");
-    doc.setTextColor(...color); doc.setFont("helvetica", "bold"); doc.text(`${val}`, W - M, yy + 3.4, { align: "right" });
-    return yy + 10;
-  };
-  y = row("You", you, scoreRGB(you), y);
-  y = row(peerLabel, peer, GOOD, y);
-  return y;
-}
-
 // =============================================================================
-// CLIENT REPORT: branded, customer-facing, positive and consultative
+// CLIENT REPORT
 // =============================================================================
-function verdict(score: number) {
-  if (score < 40) return "Right now you're losing customers to better-presented competitors, but it's very fixable.";
-  if (score < 60) return "You've got a foundation, but real bookings are slipping through the gaps below.";
-  if (score < 80) return "You're doing well. A few targeted moves will turn browsers into bookings.";
-  return "You're ahead of most. Let's sharpen the edges and protect your lead.";
-}
-
-function buildClientPdf(item: Lead, opts?: PdfOpts) {
+function renderClientPdf(item: Lead, opts?: PdfOpts): jsPDF {
   const doc = new jsPDF();
-  let y = M;
   const score = item.stats.score;
-  const sc = scoreRGB(score);
-  const opps = item.opportunities ?? [];
+  const plan = actionPlan(item);
 
-  // ---- header ----
-  doc.setFillColor(...TEAL); doc.rect(0, 0, W, 6, "F");
-  doc.setTextColor(...MUTED); doc.setFont("helvetica", "normal"); doc.setFontSize(8.5);
-  doc.text("PREPARED FOR", M, y + 6);
-  doc.text(new Date().toLocaleDateString(undefined, { dateStyle: "medium" }), W - M, y + 6, { align: "right" });
-  y += 13;
-  doc.setTextColor(...INK); doc.setFont("helvetica", "bold"); doc.setFontSize(21);
-  const nameLines = doc.splitTextToSize(item.name, W - 2 * M); doc.text(nameLines, M, y); y += nameLines.length * 8;
-  doc.setTextColor(...MUTED); doc.setFont("helvetica", "normal"); doc.setFontSize(10);
-  doc.text(`Digital Presence Audit${item.category ? "  ·  " + item.category : ""}`, M, y); y += 9;
+  // ---- cover band ----
+  doc.setFont("helvetica", "bold"); doc.setFontSize(20);
+  let nameSize = 20;
+  while (nameSize > 13 && doc.getTextWidth(item.name) > colW) { nameSize -= 1; doc.setFontSize(nameSize); }
+  const nameLines = doc.splitTextToSize(item.name, colW).slice(0, 2);
+  const bandH = nameLines.length > 1 ? 42 : 34;
+  doc.setFillColor(...INK); doc.rect(0, 0, W, bandH, "F");
+  doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(...GREEN); doc.setCharSpace(1.2);
+  doc.text("DIGITAL PRESENCE AUDIT", M, 13); doc.setCharSpace(0);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(...WHITE_DIM);
+  doc.text(new Date().toLocaleDateString(undefined, { dateStyle: "medium" }), W - M, 13, { align: "right" });
+  doc.setFont("helvetica", "bold"); doc.setFontSize(nameSize); doc.setTextColor(...WHITE);
+  doc.text(nameLines, M, 23, { lineHeightFactor: 1.1 });
+  doc.setFont("helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor(...WHITE_DIM);
+  doc.text(`${item.category ? item.category + "   ·   " : ""}Prepared by Customy`, M, bandH - 5);
 
-  // ---- verdict headline ----
-  doc.setTextColor(...INK); doc.setFont("helvetica", "bold"); doc.setFontSize(13);
-  const vLines = doc.splitTextToSize(verdict(score), W - 2 * M); doc.text(vLines, M, y); y += vLines.length * 6 + 4;
+  let y = bandH + 13;
 
-  // ---- score panel + scale ----
-  doc.setFillColor(247, 249, 248); doc.roundedRect(M, y, W - 2 * M, 30, 2, 2, "F");
-  doc.setTextColor(...sc); doc.setFont("helvetica", "bold"); doc.setFontSize(30);
-  doc.text(`${score}`, M + 9, y + 20);
+  // ---- verdict ----
+  doc.setTextColor(...INK); doc.setFont("helvetica", "bold"); doc.setFontSize(13.5);
+  const vLines = doc.splitTextToSize(verdict(score), colW);
+  doc.text(vLines, M, y, { lineHeightFactor: 1.25 }); y += vLines.length * 6.4 + 7;
+
+  // ---- score card ----
+  const cardH = 32;
+  doc.setFillColor(...CARD); doc.roundedRect(M, y, colW, cardH, 3, 3, "F");
+  doc.setDrawColor(...LINE); doc.setLineWidth(0.4); doc.roundedRect(M, y, colW, cardH, 3, 3, "S");
+  doc.setTextColor(...scoreRGB(score)); doc.setFont("helvetica", "bold"); doc.setFontSize(34);
+  doc.text(`${score}`, M + 10, y + 21);
   const numW = doc.getTextWidth(`${score}`);
-  doc.setTextColor(...MUTED); doc.setFontSize(9); doc.setFont("helvetica", "normal"); doc.text("/100", M + 11 + numW, y + 20);
-  doc.setTextColor(...INK); doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.text("Your Digital Presence Score", M + 46, y + 12);
-  doc.setTextColor(60, 66, 63); doc.setFont("helvetica", "normal"); doc.setFontSize(9);
-  doc.text(doc.splitTextToSize(interpretation(score), W - 2 * M - 52), M + 46, y + 19);
-  y += 38;
-  y = scoreScale(doc, score, y) + 2;
+  doc.setTextColor(...MUTED); doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.text("/100", M + 13 + numW, y + 21);
+  const tx = M + 52;
+  doc.setTextColor(...INK); doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.text("Your Digital Presence Score", tx, y + 11);
+  paragraph(doc, interpretation(score), tx, y + 17, W - M - tx - 6, 4.4, 9.5, INK_SOFT);
+  y += cardH + 9;
+  y = scoreScale(doc, score, M, colW, y) + 9;
 
-  // ---- benchmark (the urgency lever) ----
-  const bm = opts?.benchmark;
-  if (bm) {
-    y = ensure(doc, y, 34);
-    y = heading(doc, "How you compare", y);
-    y = benchmarkBars(doc, score, bm.score, bm.label, y) + 1;
-    const gap = Math.max(bm.score - score, 0);
-    const art = (() => { const s = String(gap); return (s[0] === "8" || s === "11" || s === "18") ? "an" : "a"; })();
-    doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(...MUTED);
-    const gapMsg = gap >= 8
-      ? `That's ${art} ${gap}-point gap, and that gap is the difference between getting found and booked or being passed over. ${bm.basis}`
-      : `You're keeping pace with the best in your market. ${bm.basis}`;
-    doc.text(doc.splitTextToSize(gapMsg, W - 2 * M), M, y); y += doc.splitTextToSize(gapMsg, W - 2 * M).length * 4.4 + 6;
+  // ---- benchmark ----
+  if (opts?.benchmark) {
+    y = ensure(doc, y, 46);
+    y = sectionLabel(doc, `How you compare to ${opts.benchmark.label}`, y);
+    y = benchmarkBlock(doc, opts.benchmark, y) + 4;
   }
 
   // ---- dimensions ----
   if (item.stats.dimensions) {
-    y = ensure(doc, y, 60);
-    y = heading(doc, "Where you stand, dimension by dimension", y);
-    y = dimensionBars(doc, item.stats.dimensions, y) + 2;
+    y = ensure(doc, y, 64);
+    y = sectionLabel(doc, "Where you stand", y);
+    y = dimensionBars(doc, item.stats.dimensions, y, opts?.benchmark?.dimMedian) + 4;
   }
+
+  // ---- can a customer act? ----
+  y = ensure(doc, y, 30);
+  y = sectionLabel(doc, "Can a customer act right now?", y);
+  y = conversionRow(doc, item, y) + 4;
 
   // ---- strengths ----
-  const strengths: string[] = [];
-  if (item.stats.dimensions) for (const k of DIM_KEYS) if ((item.stats.dimensions[k] ?? 0) >= 70) strengths.push(`Strong ${DIM_LABEL[k].toLowerCase()}`);
-  if (item.rating >= 4.3 && item.reviewCount >= 20) strengths.push(`Great reputation, ${item.rating}★ from ${item.reviewCount} reviews`);
-  if (item.audit?.httpsActive) strengths.push("Secure (HTTPS) website");
-  if (strengths.length) {
+  const wins = strengths(item);
+  if (wins.length) {
     y = ensure(doc, y, 24);
-    y = heading(doc, "What's already working", y);
+    y = sectionLabel(doc, "What's already working", y);
     doc.setFont("helvetica", "normal"); doc.setFontSize(10);
-    for (const s of strengths.slice(0, 6)) {
+    for (const s of wins) {
       y = ensure(doc, y, 7);
-      doc.setTextColor(...GOOD); doc.setFont("helvetica", "bold"); doc.text("+", M, y);
-      doc.setTextColor(60, 66, 63); doc.setFont("helvetica", "normal"); doc.text(s, M + 6, y); y += 6;
+      doc.setFillColor(...GOOD); doc.circle(M + 1.6, y - 1.3, 1, "F");
+      doc.setTextColor(...INK_SOFT); doc.text(s, M + 6, y); y += 6.4;
     }
-    y += 4;
+    y += 5;
   }
 
-  // ---- where you're losing customers / action plan ----
-  if (opps.length) {
-    y = ensure(doc, y, 30);
-    y = heading(doc, "Where you're losing customers, and how to win them back", y);
-    opps.slice(0, 8).forEach((o, i) => {
-      const m = OPPORTUNITY_META[o];
-      y = ensure(doc, y, 30);
-      doc.setTextColor(...INK); doc.setFont("helvetica", "bold"); doc.setFontSize(10.5);
-      const t = doc.splitTextToSize(`${i + 1}.  ${m.long}`, W - 2 * M); doc.text(t, M, y); y += t.length * 5 + 1.5;
-      doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(...MUTED);
-      doc.text("WHY IT'S COSTING YOU", M + 5, y); y += 4;
-      doc.setTextColor(60, 66, 63); doc.setFontSize(9);
-      const why = doc.splitTextToSize(m.why, W - 2 * M - 5); doc.text(why, M + 5, y); y += why.length * 4.3 + 1.5;
-      doc.setTextColor(...TEAL); doc.setFont("helvetica", "bold"); doc.setFontSize(8.5);
-      doc.text("HOW WE'D FIX IT", M + 5, y); y += 4;
-      doc.setTextColor(60, 66, 63); doc.setFont("helvetica", "normal"); doc.setFontSize(9);
-      const fix = doc.splitTextToSize(m.fix, W - 2 * M - 5); doc.text(fix, M + 5, y); y += fix.length * 4.3 + 6;
-    });
+  // ---- priorities (action plan) ----
+  if (plan.length) {
+    y = ensure(doc, y, 34);
+    y = sectionLabel(doc, "Your priorities, and how we'd fix them", y);
+    plan.slice(0, 8).forEach((f, i) => { y = findingBlock(doc, f, i, y, "client"); });
   }
 
   // ---- CTA ----
-  y = ensure(doc, y, 42);
-  doc.setFillColor(...TEAL); doc.roundedRect(M, y, W - 2 * M, 36, 2.5, 2.5, "F");
-  doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(13);
-  doc.text("Book your free 15-minute strategy call", M + 8, y + 11);
-  doc.setFont("helvetica", "normal"); doc.setFontSize(9.5);
-  doc.text("Message us on WhatsApp and we'll walk through your 3 biggest wins. No obligation, no jargon.", M + 8, y + 18);
-  doc.setFontSize(9.5); doc.setFont("helvetica", "bold");
-  const cy = y + 28;
-  doc.textWithLink(`WhatsApp  ${CUSTOMY.whatsapp}`, M + 8, cy, { url: CUSTOMY.whatsappUrl });
-  doc.textWithLink(CUSTOMY.site, W - M - 8, cy, { url: CUSTOMY.siteUrl, align: "right" });
-  doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.text(CUSTOMY.tagline, W - M - 8, cy + 5.5, { align: "right" });
+  y = ensure(doc, y, 44);
+  const ctaH = 38;
+  doc.setFillColor(...INK); doc.roundedRect(M, y, colW, ctaH, 4, 4, "F");
+  doc.setFont("helvetica", "bold"); doc.setFontSize(7.5); doc.setTextColor(...GREEN); doc.setCharSpace(1);
+  doc.text("LET'S TALK", M + 9, y + 9); doc.setCharSpace(0);
+  doc.setTextColor(...WHITE); doc.setFont("helvetica", "bold"); doc.setFontSize(13);
+  doc.text("Book your free 15-minute strategy call", M + 9, y + 17);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor(...WHITE_DIM);
+  doc.text("Message us on WhatsApp and we'll walk through your biggest wins. No obligation.", M + 9, y + 24);
+  const cy = y + 33;
+  doc.setTextColor(...GREEN); doc.setFont("helvetica", "bold"); doc.setFontSize(9.5);
+  doc.textWithLink(`WhatsApp  ${CUSTOMY.whatsapp}`, M + 9, cy, { url: CUSTOMY.whatsappUrl });
+  doc.setTextColor(...WHITE_DIM);
+  doc.textWithLink(CUSTOMY.site, W - M - 9, cy, { url: CUSTOMY.siteUrl, align: "right" });
 
   footer(doc);
-  doc.save(fileName(item, "audit"));
+  return doc;
 }
 
 // =============================================================================
-// INTERNAL / ADMIN REPORT: everything (scores, dimensions, sales angles, data)
+// INTERNAL REPORT: a full scoping dossier
 // =============================================================================
-function buildAdminPdf(item: Lead) {
+function bestChannel(item: Lead): string {
+  if (item.whatsapp || item.audit?.whatsapp) return "WhatsApp";
+  if (item.phone && item.phone !== "No Phone") return "Phone";
+  if (item.email && !/^no email/i.test(item.email)) return "Email";
+  const ig = item.socials?.instagram || item.audit?.socials?.instagram;
+  if (ig) return "Instagram DM";
+  return "No direct channel";
+}
+
+function renderAdminPdf(item: Lead, opts?: PdfOpts): jsPDF {
   const doc = new jsPDF();
-  let y = M;
-  doc.setFillColor(...INK); doc.rect(0, 0, W, 6, "F");
-  doc.setTextColor(...MUTED); doc.setFont("helvetica", "normal"); doc.setFontSize(9);
-  doc.text("INTERNAL · Scanmap by Customy", M, y + 6);
-  doc.text(new Date().toLocaleDateString(), W - M, y + 6, { align: "right" }); y += 14;
+  const score = item.stats.score;
+  const scope = suggestedScope(item);
+  const plan = actionPlan(item);
+  const value = leadValue(item);
+  const followers = maxFollowers(item);
 
-  doc.setTextColor(...INK); doc.setFont("helvetica", "bold"); doc.setFontSize(18);
-  const nameLines = doc.splitTextToSize(item.name, W - 2 * M - 40); doc.text(nameLines, M, y);
-  const sc = scoreRGB(item.stats.score);
-  doc.setTextColor(...sc); doc.setFontSize(26); doc.text(`${item.stats.score}`, W - M, y, { align: "right" });
-  doc.setTextColor(...MUTED); doc.setFont("helvetica", "normal"); doc.setFontSize(8);
-  doc.text(`${item.stats.riskLevel} · /100`, W - M, y + 5, { align: "right" });
-  y += nameLines.length * 6 + 3;
-  doc.setTextColor(...MUTED); doc.setFont("helvetica", "normal"); doc.setFontSize(10);
-  doc.text(`${item.category ? item.category + " · " : ""}${item.address || "n/a"}`, M, y); y += 8;
+  // ---- ink band ----
+  doc.setFillColor(...INK); doc.rect(0, 0, W, 28, "F");
+  doc.setTextColor(...GREEN); doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setCharSpace(1);
+  doc.text("INTERNAL  ·  SCANMAP BY CUSTOMY", M, 10); doc.setCharSpace(0);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(...WHITE_DIM);
+  doc.text(new Date().toLocaleDateString(), W - M, 10, { align: "right" });
+  doc.setFont("helvetica", "bold"); doc.setFontSize(15); doc.setTextColor(...WHITE);
+  doc.text(doc.splitTextToSize(item.name, colW - 28)[0], M, 20);
+  doc.setTextColor(...(score >= 70 ? [128, 230, 200] : score >= 40 ? [240, 200, 120] : [250, 170, 170]) as [number, number, number]);
+  doc.setFontSize(16); doc.text(`${score}/100`, W - M, 20, { align: "right" });
+  doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(...WHITE_DIM);
+  doc.text(`${item.category ? item.category + "  ·  " : ""}${item.address || "n/a"}`, M, 25.5);
 
-  if (item.stats.dimensions) { y = heading(doc, "Presence dimensions", y); y = dimensionBars(doc, item.stats.dimensions, y); }
+  let y = 28 + 11;
 
-  // sales angles
-  const opps = item.opportunities ?? [];
-  if (opps.length) {
-    y = ensure(doc, y, 20); y = heading(doc, "Sales angles", y);
-    doc.setFontSize(9.5);
-    for (const o of opps) {
-      const m = OPPORTUNITY_META[o];
-      y = ensure(doc, y, 7);
-      doc.setTextColor(...TEAL); doc.setFont("helvetica", "bold"); doc.text("›", M, y);
-      doc.text(m.sell, M + 5, y);
-      doc.setTextColor(60, 66, 63); doc.setFont("helvetica", "normal");
-      doc.text(doc.splitTextToSize(m.long, W - 2 * M - 50), M + 52, y); y += 6;
-    }
-    y += 2;
+  // ---- the one-glance summary box ----
+  const boxH = 30;
+  doc.setFillColor(...CARD); doc.roundedRect(M, y, colW, boxH, 3, 3, "F");
+  doc.setFont("helvetica", "bold"); doc.setFontSize(7.5); doc.setTextColor(...GREEN_DEEP); doc.setCharSpace(0.5);
+  doc.text("WHAT TO SELL", M + 7, y + 8); doc.setCharSpace(0);
+  doc.setTextColor(...INK); doc.setFont("helvetica", "bold"); doc.setFontSize(12.5);
+  doc.text(doc.splitTextToSize(scope.headline, colW - 14)[0], M + 7, y + 15);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(...INK_SOFT);
+  const summary = `Lead value ${value}/100 (${valueBand(value)})   ·   ${scope.criticalCount} critical issue${scope.criticalCount === 1 ? "" : "s"}   ·   best channel: ${bestChannel(item)}`;
+  doc.text(summary, M + 7, y + 23);
+  doc.setTextColor(...MUTED); doc.setFontSize(8.5);
+  doc.text(`Risk: ${item.stats.riskLevel}   ·   Status: ${item.status ?? "NEW"}`, M + 7, y + 27.5);
+  y += boxH + 9;
+
+  // ---- dimensions ----
+  if (item.stats.dimensions) {
+    y = ensure(doc, y, 60);
+    y = sectionLabel(doc, "Presence dimensions", y);
+    y = dimensionBars(doc, item.stats.dimensions, y, opts?.benchmark?.dimMedian) + 3;
   }
 
-  // contact
-  y = ensure(doc, y, 30); y = heading(doc, "Contact", y);
+  // ---- conversion readiness ----
+  y = ensure(doc, y, 28);
+  y = sectionLabel(doc, "Conversion readiness", y);
+  y = conversionRow(doc, item, y) + 3;
+
+  // ---- action plan ----
+  if (plan.length) {
+    y = ensure(doc, y, 30);
+    y = sectionLabel(doc, `Action plan (${plan.length}, in priority order)`, y);
+    plan.forEach((f, i) => { y = findingBlock(doc, f, i, y, "internal"); });
+  } else {
+    y = ensure(doc, y, 16);
+    y = sectionLabel(doc, "Action plan", y);
+    y = paragraph(doc, "No critical gaps. Approach as a premium optimisation or retainer client.", M, y, colW, 5, 10, INK_SOFT) + 4;
+  }
+
+  // ---- social accounts ----
+  const insights = item.socialInsights ?? [];
+  if (insights.length) {
+    y = ensure(doc, y, 20);
+    y = sectionLabel(doc, "Social accounts", y);
+    doc.setFontSize(9.5);
+    for (const s of insights) {
+      y = ensure(doc, y, 6);
+      doc.setTextColor(...INK); doc.setFont("helvetica", "bold"); doc.text(`${s.platform}${s.verified ? " (verified)" : ""}`, M, y);
+      doc.setFont("helvetica", "normal"); doc.setTextColor(...INK_SOFT);
+      doc.text(s.handle || "", M + 34, y);
+      const stat = s.followers !== undefined ? `${humanNum(s.followers)} followers${s.posts !== undefined ? `, ${humanNum(s.posts)} posts` : ""}` : (s.note || "");
+      doc.setTextColor(...MUTED); doc.text(stat, W - M, y, { align: "right" });
+      y += 5.5;
+    }
+    y += 3;
+  }
+
+  // ---- technical signals ----
+  const a = item.audit;
+  if (a) {
+    y = ensure(doc, y, 26);
+    y = sectionLabel(doc, "Technical signals", y);
+    const yn = (b: boolean) => (b ? "Yes" : "No");
+    const rows: [string, string][] = [
+      ["HTTPS", yn(a.httpsActive)],
+      ["Mobile-ready", yn(a.mobileViewport)],
+      ["Load (homepage)", a.loadTimeMs > 0 ? `${(a.loadTimeMs / 1000).toFixed(1)}s` : "n/a"],
+      ["PageSpeed (Google)", typeof a.psiPerformance === "number" ? `${a.psiPerformance}/100` : "not run"],
+      ["Analytics", yn(a.hasGoogleAnalytics || a.hasGoogleTagManager)],
+      ["Ad pixels", a.adPixels?.length ? a.adPixels.join(", ") : "None"],
+      ["Online booking", yn(a.hasBooking)],
+      ["Lead capture", yn(a.hasEmailCapture)],
+      ["Live chat", yn(a.hasLiveChat)],
+      ["Blog / content", yn(a.hasBlog)],
+      ["Schema markup", yn(a.jsonLd)],
+      ["Words on homepage", `${a.wordCount}`],
+      ["Tech stack", a.tech?.length ? a.tech.join(", ") : (item.tech || "n/a")],
+    ];
+    if (typeof a.pagesCrawled === "number" && a.pagesCrawled > 1 && item.deepReport) {
+      rows.push(["Pages crawled", `${item.deepReport.pagesCrawled}/${item.deepReport.pagesDiscovered}`]);
+      rows.push(["Broken links", `${item.deepReport.brokenLinks.length}`]);
+      rows.push(["Homepage weight", `${item.deepReport.pageWeightKb} KB`]);
+      rows.push(["Fresh content", item.deepReport.latestContentDate || (item.deepReport.hasFreshContent ? "yes" : "none found")]);
+    }
+    const colX = M + colW / 2;
+    doc.setFontSize(9);
+    rows.forEach((r, i) => {
+      const x = i % 2 === 0 ? M : colX;
+      if (i % 2 === 0) y = ensure(doc, y, 6);
+      const yy = y;
+      doc.setTextColor(...MUTED); doc.setFont("helvetica", "normal"); doc.text(r[0], x, yy);
+      doc.setTextColor(...INK); doc.text(doc.splitTextToSize(r[1], colW / 2 - 34)[0], x + 34, yy);
+      if (i % 2 === 1 || i === rows.length - 1) y += 5.5;
+    });
+    y += 3;
+  }
+
+  // ---- contact ----
+  y = ensure(doc, y, 28);
+  y = sectionLabel(doc, "Contact", y);
   doc.setFont("helvetica", "normal"); doc.setFontSize(10);
   const fields: [string, string][] = [
     ["Website", item.url || "n/a"], ["Email", item.email || "n/a"], ["Phone", item.phone || "n/a"],
-    ["WhatsApp", item.whatsapp || item.audit?.whatsapp || "n/a"], ["Stack", item.tech || "n/a"],
-    ["Rating", item.rating ? `${item.rating} (${item.reviewCount || 0} reviews)` : "n/a"], ["Status", item.status ?? "NEW"],
+    ["WhatsApp", item.whatsapp || item.audit?.whatsapp || "n/a"],
+    ["Rating", item.rating ? `${item.rating} (${item.reviewCount || 0} reviews)` : "n/a"],
+    ["Followers", followers ? humanNum(followers) : "n/a"], ["Best channel", bestChannel(item)],
   ];
   for (const [k, v] of fields) {
     y = ensure(doc, y, 7);
     doc.setTextColor(...MUTED); doc.text(k, M, y);
-    doc.setTextColor(...INK); const lines = doc.splitTextToSize(v, W - 2 * M - 30); doc.text(lines, M + 30, y);
+    doc.setTextColor(...INK); const lines = doc.splitTextToSize(v, colW - 34); doc.text(lines, M + 34, y);
     y += Math.max(6, lines.length * 5);
   }
-  y += 4;
+  y += 3;
 
-  // website breakdown
-  if (item.scoreFactors?.length) {
-    y = ensure(doc, y, 20); y = heading(doc, "Website breakdown", y);
-    doc.setFont("helvetica", "normal"); doc.setFontSize(9);
-    for (const f of item.scoreFactors) {
-      y = ensure(doc, y, 6);
-      doc.setTextColor(f.ok ? GOOD[0] : BAD[0], f.ok ? GOOD[1] : BAD[1], f.ok ? GOOD[2] : BAD[2]); doc.text(f.ok ? "+" : "-", M, y);
-      doc.setTextColor(...INK); doc.text(f.label, M + 6, y);
-      doc.setTextColor(...MUTED); doc.text(`${f.value ? f.value + "  " : ""}${f.awarded}/${f.weight}`, W - M, y, { align: "right" });
-      y += 5;
-    }
-    y += 4;
-  }
-
-  // pitch + notes
-  y = ensure(doc, y, 16); y = heading(doc, "Pitch", y);
-  doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(60, 66, 63);
-  const pitch = doc.splitTextToSize(item.pitch || "", W - 2 * M); doc.text(pitch, M, y); y += pitch.length * 5 + 4;
   if (item.notes?.trim()) {
-    y = ensure(doc, y, 16); y = heading(doc, "Notes", y);
-    doc.setTextColor(60, 66, 63); doc.text(doc.splitTextToSize(item.notes, W - 2 * M), M, y);
+    y = ensure(doc, y, 16); y = sectionLabel(doc, "Notes", y);
+    paragraph(doc, item.notes, M, y, colW, 5, 10, INK_SOFT);
   }
 
-  footer(doc);
-  doc.save(fileName(item, "internal"));
+  footer(doc, `${CUSTOMY.name} internal  ·  ${item.name}`);
+  return doc;
 }
 
 export function generatePdf(item: Lead, mode: "client" | "admin" = "admin", opts?: PdfOpts) {
-  if (mode === "client") buildClientPdf(item, opts);
-  else buildAdminPdf(item);
+  const doc = mode === "client" ? renderClientPdf(item, opts) : renderAdminPdf(item, opts);
+  doc.save(fileName(item, mode === "client" ? "audit" : "internal"));
 }
+
+// exported for offline rendering/tests (returns the doc instead of saving)
+export const __renderClientPdf = renderClientPdf;
+export const __renderAdminPdf = renderAdminPdf;

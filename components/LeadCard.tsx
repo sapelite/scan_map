@@ -3,6 +3,13 @@
 import React from "react";
 import { Lead, Socials, OPPORTUNITY_META } from "@/lib/types";
 import { PresenceMeters, ScoreBadge, opportunityLabel } from "@/components/Presence";
+import { leadValue, valueBand } from "@/lib/leadValue";
+
+const BAND_STYLE: Record<string, React.CSSProperties> = {
+  Hot:  { background: "var(--teal-soft)", borderColor: "rgba(52,199,89,0.40)", color: "var(--teal-deep)" },
+  Warm: { background: "var(--warn-soft)", borderColor: "rgba(194,113,12,0.40)", color: "var(--warn)" },
+  Cool: { background: "var(--muted)", color: "var(--muted-foreground)" },
+};
 
 interface LeadCardProps {
   item: Lead;
@@ -10,7 +17,8 @@ interface LeadCardProps {
   onDownloadPDF?: (lead: Lead, mode?: "client" | "admin") => void;
 }
 
-function SocialIcons({ socials }: { socials: Socials }) {
+function SocialIcons({ socials }: { socials: Socials | null | undefined }) {
+  if (!socials) return null;
   const items: Array<{ key: string; href: string | null; label: string }> = [
     { key: "instagram", href: socials.instagram, label: "IG" },
     { key: "facebook", href: socials.facebook, label: "FB" },
@@ -54,6 +62,7 @@ export const LeadCard = ({ item, onOpen, onDownloadPDF }: LeadCardProps) => {
 
   const score = item.stats?.score ?? 0;
   const opps = item.opportunities ?? [];
+  const band = valueBand(leadValue(item));
 
   return (
     <div className="panel card-interactive" onClick={() => onOpen?.(item)}>
@@ -65,7 +74,10 @@ export const LeadCard = ({ item, onOpen, onDownloadPDF }: LeadCardProps) => {
             <span className="panel-meta">★ {item.rating.toFixed(1)} · {item.reviewCount || 0}</span>
           )}
         </div>
-        <span className={`chip ${status === "none" || status === "unreachable" ? "" : ""}`}>{badge}</span>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className="chip" style={BAND_STYLE[band]} title="Prospect value: how much they need us, can pay, and can be reached">{band}</span>
+          <span className="chip">{badge}</span>
+        </div>
       </div>
 
       <div className="p-5">
@@ -120,7 +132,7 @@ export const LeadCard = ({ item, onOpen, onDownloadPDF }: LeadCardProps) => {
                   <span
                     key={o}
                     className="chip"
-                    style={{ background: "var(--teal-soft)", borderColor: "rgba(13,148,136,0.30)", color: "var(--teal-deep)" }}
+                    style={{ background: "var(--teal-soft)", borderColor: "rgba(52, 199, 89,0.30)", color: "var(--teal-deep)" }}
                     title={OPPORTUNITY_META[o].long}
                   >
                     {OPPORTUNITY_META[o].short}
@@ -130,10 +142,10 @@ export const LeadCard = ({ item, onOpen, onDownloadPDF }: LeadCardProps) => {
               </div>
             )}
 
-            {/* pitch + socials */}
+            {/* pitch + socials (from the merged set: website + Maps + search) */}
             <div className="mt-4 pt-3 border-t border-border flex items-center justify-between gap-3">
               <p className="text-xs text-muted-foreground italic truncate">{item.pitch}</p>
-              {audit && <SocialIcons socials={audit.socials} />}
+              <SocialIcons socials={item.socials ?? audit?.socials ?? null} />
             </div>
           </div>
 

@@ -1,5 +1,155 @@
 [
   {
+    "id": "g2gfm2d9c",
+    "name": "ORU Pilates",
+    "url": "No website detected",
+    "websiteFromMaps": null,
+    "websiteStatus": "none",
+    "websiteFailReason": null,
+    "auditAttempts": [
+      "maps extraction: no-website-found",
+      "no website on Maps listing"
+    ],
+    "email": "No email found",
+    "whatsapp": null,
+    "opportunities": [
+      "needs_website",
+      "no_social"
+    ],
+    "tech": "Unknown",
+    "rating": 5,
+    "reviews": "21 reviews",
+    "reviewCount": 21,
+    "address": "946R+RJC, Jl. Pantai Batu Mejan, Canggu, Kec. Kuta Utara, Kabupaten Badung, Bali 80351 ",
+    "phone": "No Phone",
+    "mapsUrl": "https://www.google.com/maps/place/ORU+Pilates/data=!4m7!3m6!1s0x2dd23900608e1cbf:0xed04da98b14f7940!8m2!3d-8.6379511!4d115.1415126!16s%2Fg%2F11mrlv9hw4!19sChIJvxyOYAA50i0RQHlPsZjaBO0?authuser=0&hl=en&rclk=1",
+    "isSocialUrl": false,
+    "authorityScore": 50,
+    "stats": {
+      "score": 8,
+      "riskLevel": "Critical",
+      "dimensions": {
+        "site": 0,
+        "social": 0,
+        "marketing": 0,
+        "reputation": 55,
+        "content": 0
+      }
+    },
+    "scoreFactors": [
+      {
+        "label": "Website reachable",
+        "weight": 100,
+        "ok": false,
+        "value": "no website",
+        "awarded": 0
+      }
+    ],
+    "dimensionFactors": [
+      {
+        "key": "site",
+        "label": "Website",
+        "score": 0,
+        "weight": 30,
+        "blurb": "How good their website is across security, speed, mobile, and on-page SEO.",
+        "factors": [
+          {
+            "label": "Website reachable",
+            "weight": 100,
+            "ok": false,
+            "value": "no website",
+            "awarded": 0
+          }
+        ]
+      },
+      {
+        "key": "social",
+        "label": "Social",
+        "score": 0,
+        "weight": 22,
+        "blurb": "Whether they're on the social platforms that matter (Instagram especially).",
+        "factors": [
+          {
+            "label": "Social profiles",
+            "weight": 100,
+            "ok": false,
+            "value": "none found",
+            "awarded": 0
+          }
+        ]
+      },
+      {
+        "key": "marketing",
+        "label": "Marketing",
+        "score": 0,
+        "weight": 20,
+        "blurb": "Do they run real marketing like tracking pixels, ads, lead capture, and booking.",
+        "factors": [
+          {
+            "label": "Detected from website",
+            "weight": 100,
+            "ok": false,
+            "value": "no website to scan",
+            "awarded": 0
+          }
+        ]
+      },
+      {
+        "key": "reputation",
+        "label": "Reputation",
+        "score": 55,
+        "weight": 14,
+        "blurb": "Their Google rating and how many reviews they've earned.",
+        "factors": [
+          {
+            "label": "Star rating",
+            "weight": 50,
+            "ok": true,
+            "value": "5.0★",
+            "awarded": 50
+          },
+          {
+            "label": "Review volume",
+            "weight": 50,
+            "ok": true,
+            "value": "21 reviews",
+            "awarded": 5
+          }
+        ]
+      },
+      {
+        "key": "content",
+        "label": "Content",
+        "score": 0,
+        "weight": 14,
+        "blurb": "Do they publish substantial, fresh content (copy, blog, structured data).",
+        "factors": [
+          {
+            "label": "Detected from website",
+            "weight": 100,
+            "ok": false,
+            "value": "no website to scan",
+            "awarded": 0
+          }
+        ]
+      }
+    ],
+    "socials": {
+      "instagram": null,
+      "facebook": null,
+      "linkedin": null,
+      "twitter": null,
+      "tiktok": null,
+      "youtube": null
+    },
+    "socialsSource": [],
+    "socialInsights": [],
+    "pitch": "Not online with a real website. Prime candidate for a website build plus full digital presence.",
+    "lastAuditedAt": "2026-06-03T16:09:40.081Z",
+    "status": "NEW",
+    "date": "2026-06-03"
+  },
+  {
     "id": "2xxgjlztn",
     "name": "Haneda Barbershop Bali",
     "url": "No website detected",
@@ -40141,7 +40291,8 @@
     "websiteFailReason": null,
     "auditAttempts": [
       "maps extraction: selector:a[data-item-id=\"authority\"]",
-      "puppeteer https://everydaypilates.id/login → OK (200, 18w, 1.5s)"
+      "puppeteer https://everydaypilates.id/login → OK (200, 18w, 1.5s)",
+      "deep dossier: crawled 2/2 pages, 0 broken link(s), 0 social(s) checked"
     ],
     "email": "No email found",
     "whatsapp": null,
@@ -40157,8 +40308,8 @@
     "tech": "Custom",
     "category": "pilates studio",
     "rating": 4.3,
-    "reviews": "12 reviews",
-    "reviewCount": 12,
+    "reviews": "0",
+    "reviewCount": 0,
     "address": "Jl. Imam Bonjol No.175, Pemecutan Klod, Kec. Denpasar Bar., Kota Denpasar, Bali 80113 ",
     "phone": "0851-6894-3988 ",
     "mapsUrl": "https://www.google.com/maps/place/Everyday+Pilates+Studio/data=!4m7!3m6!1s0x2dd2419ac2740dbd:0xf8563a7ee3ed5583!8m2!3d-8.6697652!4d115.2052608!16s%2Fg%2F11yf42237c!19sChIJvQ10wppB0i0Rg1Xt4346Vvg?authuser=0&hl=en&rclk=1",
@@ -40168,11 +40319,11 @@
       "score": 24,
       "riskLevel": "Critical",
       "dimensions": {
-        "site": 58,
+        "site": 53,
         "social": 0,
         "marketing": 0,
-        "reputation": 46,
-        "content": 0
+        "reputation": 43,
+        "content": 15
       }
     },
     "scoreFactors": [
@@ -40250,23 +40401,23 @@
       {
         "label": "Image alt text (≥80%)",
         "weight": 5,
-        "awarded": 5,
-        "ok": true,
-        "value": "100%"
+        "awarded": 0,
+        "ok": false,
+        "value": "5%"
       },
       {
         "label": "Substantial content (>300 words)",
         "weight": 6,
         "awarded": 0,
         "ok": false,
-        "value": "18 words"
+        "value": "60 words"
       },
       {
         "label": "Page speed (<3s)",
         "weight": 8,
         "awarded": 8,
         "ok": true,
-        "value": "1.51s"
+        "value": "1.46s"
       },
       {
         "label": "Analytics installed",
@@ -40285,7 +40436,7 @@
       {
         "key": "site",
         "label": "Website",
-        "score": 58,
+        "score": 53,
         "weight": 30,
         "blurb": "How good their website is across security, speed, mobile, and on-page SEO.",
         "factors": [
@@ -40363,23 +40514,23 @@
           {
             "label": "Image alt text (≥80%)",
             "weight": 5,
-            "awarded": 5,
-            "ok": true,
-            "value": "100%"
+            "awarded": 0,
+            "ok": false,
+            "value": "5%"
           },
           {
             "label": "Substantial content (>300 words)",
             "weight": 6,
             "awarded": 0,
             "ok": false,
-            "value": "18 words"
+            "value": "60 words"
           },
           {
             "label": "Page speed (<3s)",
             "weight": 8,
             "awarded": 8,
             "ok": true,
-            "value": "1.51s"
+            "value": "1.46s"
           },
           {
             "label": "Analytics installed",
@@ -40471,7 +40622,7 @@
       {
         "key": "reputation",
         "label": "Reputation",
-        "score": 46,
+        "score": 43,
         "weight": 14,
         "blurb": "Their Google rating and how many reviews they've earned.",
         "factors": [
@@ -40486,15 +40637,15 @@
             "label": "Review volume",
             "weight": 50,
             "ok": false,
-            "value": "12 reviews",
-            "awarded": 3
+            "value": "0 reviews",
+            "awarded": 0
           }
         ]
       },
       {
         "key": "content",
         "label": "Content",
-        "score": 0,
+        "score": 15,
         "weight": 14,
         "blurb": "Do they publish substantial, fresh content (copy, blog, structured data).",
         "factors": [
@@ -40502,14 +40653,14 @@
             "label": "Substantial copy (300+ words)",
             "weight": 30,
             "ok": false,
-            "value": "18 words",
+            "value": "60 words",
             "awarded": 0
           },
           {
             "label": "Section headings (3+ H2)",
             "weight": 15,
             "ok": false,
-            "value": "0 H2",
+            "value": "1 H2",
             "awarded": 0
           },
           {
@@ -40521,9 +40672,9 @@
           {
             "label": "Images present (5+)",
             "weight": 15,
-            "ok": false,
-            "value": "1 images",
-            "awarded": 0
+            "ok": true,
+            "value": "21 images",
+            "awarded": 15
           },
           {
             "label": "Structured data (schema)",
@@ -40539,7 +40690,7 @@
       "httpsActive": true,
       "finalUrl": "https://everydaypilates.id/login",
       "redirected": false,
-      "loadTimeMs": 1507,
+      "loadTimeMs": 1456,
       "reachable": true,
       "title": "Login -\n Everyday Pilates",
       "titleLength": 25,
@@ -40547,9 +40698,9 @@
       "metaDescriptionLength": 0,
       "canonical": null,
       "h1Count": 1,
-      "h2Count": 0,
-      "wordCount": 18,
-      "imageCount": 1,
+      "h2Count": 1,
+      "wordCount": 60,
+      "imageCount": 21,
       "imagesWithAlt": 1,
       "internalLinks": 1,
       "externalLinks": 0,
@@ -40581,11 +40732,27 @@
         "youtube": null
       },
       "socialCount": 0,
-      "isSocialOnly": false
+      "isSocialOnly": false,
+      "pagesCrawled": 2
+    },
+    "deepReport": {
+      "ranAt": "2026-06-03T11:46:49.993Z",
+      "sitemapFound": false,
+      "pagesDiscovered": 2,
+      "pagesCrawled": 2,
+      "pagesMissingTitle": 0,
+      "pagesMissingMeta": 2,
+      "totalImages": 22,
+      "pageWeightKb": 9,
+      "scriptCount": 8,
+      "brokenLinks": [],
+      "hasFreshContent": false,
+      "latestContentDate": null,
+      "socials": []
     },
     "pitch": "Best angles to sell: Copywriting + content · Content creation · Marketing strategy.",
-    "lastAuditedAt": "2026-06-01T16:10:55.828Z",
-    "status": "NEW",
+    "lastAuditedAt": "2026-06-03T11:46:49.995Z",
+    "status": "CONTACTED",
     "date": "2026-06-01"
   },
   {
@@ -40610,8 +40777,8 @@
     "tech": "Unknown",
     "category": "pilates studio",
     "rating": 5,
-    "reviews": "13 reviews",
-    "reviewCount": 13,
+    "reviews": "0",
+    "reviewCount": 0,
     "address": "Jl. Thamrin No.28, Pemecutan, Kec. Denpasar Bar., Denpasar Barat, Bali 80112 ",
     "phone": "0813-3967-2535 ",
     "mapsUrl": "https://www.google.com/maps/place/Pilatopia/data=!4m7!3m6!1s0x2dd241d50c0c11e5:0x2fe73d5cc4b60a2e!8m2!3d-8.6573126!4d115.2096504!16s%2Fg%2F11py_kxw56!19sChIJ5REMDNVB0i0RLgq2xFw95y8?authuser=0&hl=en&rclk=1",
@@ -40624,7 +40791,7 @@
         "site": 0,
         "social": 0,
         "marketing": 0,
-        "reputation": 53,
+        "reputation": 50,
         "content": 0
       }
     },
@@ -40689,7 +40856,7 @@
       {
         "key": "reputation",
         "label": "Reputation",
-        "score": 53,
+        "score": 50,
         "weight": 14,
         "blurb": "Their Google rating and how many reviews they've earned.",
         "factors": [
@@ -40704,8 +40871,8 @@
             "label": "Review volume",
             "weight": 50,
             "ok": false,
-            "value": "13 reviews",
-            "awarded": 3
+            "value": "0 reviews",
+            "awarded": 0
           }
         ]
       },
@@ -40776,8 +40943,8 @@
       "isSocialOnly": false
     },
     "pitch": "Their website is down (HTTP 200). Rebuild plus recovery opportunity.",
-    "lastAuditedAt": "2026-06-01T16:10:48.093Z",
-    "status": "NEW",
+    "lastAuditedAt": "2026-06-03T10:58:37.840Z",
+    "status": "CONTACTED",
     "date": "2026-06-01"
   },
   {
@@ -59730,7 +59897,7 @@
     },
     "pitch": "Their website is down (HTTP 400). Rebuild plus recovery opportunity.",
     "lastAuditedAt": "2026-06-01T16:01:46.343Z",
-    "status": "NEW",
+    "status": "CONTACTED",
     "date": "2026-06-01"
   },
   {
@@ -73679,7 +73846,7 @@
     },
     "pitch": "Their website is down (timeout of 15000ms exceeded). Rebuild plus recovery opportunity.",
     "lastAuditedAt": "2026-06-01T15:56:01.127Z",
-    "status": "NEW",
+    "status": "CONTACTED",
     "date": "2026-06-01"
   },
   {
@@ -75511,7 +75678,7 @@
     },
     "pitch": "Best angles to sell: Performance overhaul · Copywriting + content · Content creation.",
     "lastAuditedAt": "2026-06-01T15:54:47.024Z",
-    "status": "NEW",
+    "status": "CONTACTED",
     "date": "2026-06-01"
   },
   {
@@ -77351,13 +77518,13 @@
     "websiteFailReason": null,
     "auditAttempts": [
       "maps extraction: selector:a[data-item-id=\"authority\"]",
-      "puppeteer https://umalas-pilates.rezerv.co/ → OK (200, 82w, 0.3s)"
+      "puppeteer https://umalas-pilates.rezerv.co/ → OK (200, 82w, 0.3s)",
+      "deep dossier: crawled 2/3 pages, 0 broken link(s), 0 social(s) checked"
     ],
     "email": "No email found",
     "whatsapp": null,
     "opportunities": [
       "thin_content",
-      "no_content",
       "no_analytics",
       "no_contact_capture",
       "no_social"
@@ -77365,22 +77532,22 @@
     "tech": "Custom",
     "category": "pilates studio",
     "rating": 4.7,
-    "reviews": "31 reviews",
-    "reviewCount": 31,
+    "reviews": "0",
+    "reviewCount": 0,
     "address": "Jl. Dukuh Indah, Kerobokan Kelod, Kec. Kuta Utara, Kabupaten Badung, Bali 80361 ",
     "phone": "0813-3703-5677 ",
     "mapsUrl": "https://www.google.com/maps/place/Umalas+Pilates+Studio/data=!4m7!3m6!1s0x2dd24771e864f379:0x1cc856863ad45621!8m2!3d-8.6656345!4d115.1623725!16s%2Fg%2F11cm35b_vk!19sChIJefNk6HFH0i0RIVbUOoZWyBw?authuser=0&hl=en&rclk=1",
     "isSocialUrl": false,
     "authorityScore": 47,
     "stats": {
-      "score": 31,
+      "score": 34,
       "riskLevel": "Critical",
       "dimensions": {
         "site": 52,
         "social": 0,
         "marketing": 40,
-        "reputation": 55,
-        "content": 0
+        "reputation": 47,
+        "content": 25
       }
     },
     "scoreFactors": [
@@ -77474,7 +77641,7 @@
         "weight": 8,
         "awarded": 8,
         "ok": true,
-        "value": "0.30s"
+        "value": "0.29s"
       },
       {
         "label": "Analytics installed",
@@ -77587,7 +77754,7 @@
             "weight": 8,
             "awarded": 8,
             "ok": true,
-            "value": "0.30s"
+            "value": "0.29s"
           },
           {
             "label": "Analytics installed",
@@ -77679,7 +77846,7 @@
       {
         "key": "reputation",
         "label": "Reputation",
-        "score": 55,
+        "score": 47,
         "weight": 14,
         "blurb": "Their Google rating and how many reviews they've earned.",
         "factors": [
@@ -77693,16 +77860,16 @@
           {
             "label": "Review volume",
             "weight": 50,
-            "ok": true,
-            "value": "31 reviews",
-            "awarded": 8
+            "ok": false,
+            "value": "0 reviews",
+            "awarded": 0
           }
         ]
       },
       {
         "key": "content",
         "label": "Content",
-        "score": 0,
+        "score": 25,
         "weight": 14,
         "blurb": "Do they publish substantial, fresh content (copy, blog, structured data).",
         "factors": [
@@ -77723,8 +77890,8 @@
           {
             "label": "Blog / news section",
             "weight": 25,
-            "ok": false,
-            "awarded": 0
+            "ok": true,
+            "awarded": 25
           },
           {
             "label": "Images present (5+)",
@@ -77747,7 +77914,7 @@
       "httpsActive": true,
       "finalUrl": "https://umalas-pilates.rezerv.co/",
       "redirected": false,
-      "loadTimeMs": 296,
+      "loadTimeMs": 293,
       "reachable": true,
       "title": "Business not found",
       "titleLength": 18,
@@ -77775,7 +77942,7 @@
       "hasEmailCapture": true,
       "hasBooking": true,
       "hasLiveChat": false,
-      "hasBlog": false,
+      "hasBlog": true,
       "tech": [],
       "emails": [],
       "phones": [],
@@ -77789,11 +77956,27 @@
         "youtube": null
       },
       "socialCount": 0,
-      "isSocialOnly": false
+      "isSocialOnly": false,
+      "pagesCrawled": 2
     },
-    "pitch": "Best angles to sell: Copywriting + content · Content creation · Analytics setup.",
-    "lastAuditedAt": "2026-06-01T15:54:04.231Z",
-    "status": "NEW",
+    "deepReport": {
+      "ranAt": "2026-06-03T10:00:53.965Z",
+      "sitemapFound": true,
+      "pagesDiscovered": 3,
+      "pagesCrawled": 2,
+      "pagesMissingTitle": 1,
+      "pagesMissingMeta": 2,
+      "totalImages": 0,
+      "pageWeightKb": 8,
+      "scriptCount": 0,
+      "brokenLinks": [],
+      "hasFreshContent": false,
+      "latestContentDate": null,
+      "socials": []
+    },
+    "pitch": "Best angles to sell: Copywriting + content · Analytics setup · Contact + conversion.",
+    "lastAuditedAt": "2026-06-03T10:00:53.967Z",
+    "status": "CONTACTED",
     "date": "2026-06-01"
   },
   {
@@ -80283,7 +80466,7 @@
     },
     "pitch": "Their website is down (HTTP 400). Rebuild plus recovery opportunity.",
     "lastAuditedAt": "2026-06-01T15:53:18.417Z",
-    "status": "NEW",
+    "status": "CONTACTED",
     "date": "2026-06-01"
   },
   {
@@ -86412,7 +86595,7 @@
     },
     "pitch": "Their website is down (HTTP 400). Rebuild plus recovery opportunity.",
     "lastAuditedAt": "2026-06-01T15:50:39.073Z",
-    "status": "NEW",
+    "status": "CONTACTED",
     "date": "2026-06-01"
   },
   {
@@ -96019,7 +96202,7 @@
     },
     "pitch": "Best angles to sell: Copywriting + content · Content creation · Marketing strategy.",
     "lastAuditedAt": "2026-06-01T15:46:43.844Z",
-    "status": "NEW",
+    "status": "CONTACTED",
     "date": "2026-06-01"
   },
   {
@@ -149803,7 +149986,9 @@
     "websiteFailReason": null,
     "auditAttempts": [
       "maps extraction: selector:a[data-item-id=\"authority\"]",
-      "puppeteer https://zin.world/zin-cafe/?utm_source=google_zincafe → OK (200, 746w, 2.3s)"
+      "puppeteer https://zin.world/zin-cafe/?utm_source=google_zincafe → OK (200, 746w, 2.3s)",
+      "deep dossier: crawled 15/15 pages, 0 broken link(s), 2 social(s) checked",
+      "social stats: Instagram 11997"
     ],
     "email": "No email found",
     "whatsapp": "+6281131116647",
@@ -149811,22 +149996,22 @@
     "tech": "WordPress",
     "category": "cafe",
     "rating": 4.8,
-    "reviews": "3,063 reviews",
-    "reviewCount": 3063,
+    "reviews": "0",
+    "reviewCount": 0,
     "address": "Jl. Nelayan No.78F, Canggu, Kec. Kuta Utara, Kabupaten Badung, Bali ",
     "phone": "0811-3111-6647 ",
     "mapsUrl": "https://www.google.com/maps/place/ZIN+Cafe/data=!4m7!3m6!1s0x2dd247f1c2f4aed5:0x5e53a86b911c326a!8m2!3d-8.6599654!4d115.1335257!16s%2Fg%2F11fks25kdf!19sChIJ1a70wvFH0i0RajIckWuoU14?authuser=0&hl=en&rclk=1",
     "isSocialUrl": false,
     "authorityScore": 48,
     "stats": {
-      "score": 91,
+      "score": 86,
       "riskLevel": "Low",
       "dimensions": {
         "site": 89,
         "social": 100,
         "marketing": 100,
-        "reputation": 98,
-        "content": 60
+        "reputation": 48,
+        "content": 75
       }
     },
     "scoreFactors": [
@@ -149844,18 +150029,18 @@
         "value": "200"
       },
       {
-        "label": "Title tag (10–65 chars)",
+        "label": "Title tag (10-65 chars)",
         "weight": 10,
         "awarded": 10,
         "ok": true,
         "value": "53 chars"
       },
       {
-        "label": "Meta description (50–160)",
+        "label": "Meta description (50-160)",
         "weight": 10,
         "awarded": 10,
         "ok": true,
-        "value": "157 chars"
+        "value": "138 chars"
       },
       {
         "label": "Single H1",
@@ -149913,14 +150098,14 @@
         "weight": 6,
         "awarded": 6,
         "ok": true,
-        "value": "746 words"
+        "value": "974 words"
       },
       {
         "label": "Page speed (<3s)",
         "weight": 8,
         "awarded": 8,
         "ok": true,
-        "value": "2.29s"
+        "value": "2.31s"
       },
       {
         "label": "Analytics installed",
@@ -149941,7 +150126,7 @@
         "label": "Website",
         "score": 89,
         "weight": 30,
-        "blurb": "How good their website is — security, speed, mobile, and on-page SEO.",
+        "blurb": "How good their website is across security, speed, mobile, and on-page SEO.",
         "factors": [
           {
             "label": "HTTPS enabled",
@@ -149957,18 +150142,18 @@
             "value": "200"
           },
           {
-            "label": "Title tag (10–65 chars)",
+            "label": "Title tag (10-65 chars)",
             "weight": 10,
             "awarded": 10,
             "ok": true,
             "value": "53 chars"
           },
           {
-            "label": "Meta description (50–160)",
+            "label": "Meta description (50-160)",
             "weight": 10,
             "awarded": 10,
             "ok": true,
-            "value": "157 chars"
+            "value": "138 chars"
           },
           {
             "label": "Single H1",
@@ -150026,14 +150211,14 @@
             "weight": 6,
             "awarded": 6,
             "ok": true,
-            "value": "746 words"
+            "value": "974 words"
           },
           {
             "label": "Page speed (<3s)",
             "weight": 8,
             "awarded": 8,
             "ok": true,
-            "value": "2.29s"
+            "value": "2.31s"
           },
           {
             "label": "Analytics installed",
@@ -150057,28 +150242,35 @@
         "blurb": "Whether they're on the social platforms that matter (Instagram especially).",
         "factors": [
           {
-            "label": "Any social profile linked",
-            "weight": 30,
+            "label": "Any social profile",
+            "weight": 25,
             "ok": true,
-            "value": "2 linked",
-            "awarded": 30
+            "value": "2 found",
+            "awarded": 25
           },
           {
             "label": "Instagram",
-            "weight": 30,
+            "weight": 25,
             "ok": true,
-            "awarded": 30
+            "awarded": 25
           },
           {
             "label": "Facebook",
-            "weight": 20,
+            "weight": 15,
             "ok": true,
-            "awarded": 20
+            "awarded": 15
           },
           {
             "label": "Multiple platforms (2+)",
+            "weight": 15,
+            "ok": true,
+            "awarded": 15
+          },
+          {
+            "label": "Engaged audience (1k+ followers)",
             "weight": 20,
             "ok": true,
+            "value": "11 997 followers",
             "awarded": 20
           }
         ]
@@ -150088,7 +150280,7 @@
         "label": "Marketing",
         "score": 100,
         "weight": 20,
-        "blurb": "Do they run real marketing — tracking pixels, ads, lead capture, booking.",
+        "blurb": "Do they run real marketing like tracking pixels, ads, lead capture, and booking.",
         "factors": [
           {
             "label": "Analytics installed",
@@ -150126,7 +150318,7 @@
       {
         "key": "reputation",
         "label": "Reputation",
-        "score": 98,
+        "score": 48,
         "weight": 14,
         "blurb": "Their Google rating and how many reviews they've earned.",
         "factors": [
@@ -150140,16 +150332,16 @@
           {
             "label": "Review volume",
             "weight": 50,
-            "ok": true,
-            "value": "3063 reviews",
-            "awarded": 50
+            "ok": false,
+            "value": "0 reviews",
+            "awarded": 0
           }
         ]
       },
       {
         "key": "content",
         "label": "Content",
-        "score": 60,
+        "score": 75,
         "weight": 14,
         "blurb": "Do they publish substantial, fresh content (copy, blog, structured data).",
         "factors": [
@@ -150157,15 +150349,15 @@
             "label": "Substantial copy (300+ words)",
             "weight": 30,
             "ok": true,
-            "value": "746 words",
+            "value": "974 words",
             "awarded": 30
           },
           {
             "label": "Section headings (3+ H2)",
             "weight": 15,
-            "ok": false,
-            "value": "0 H2",
-            "awarded": 0
+            "ok": true,
+            "value": "7 H2",
+            "awarded": 15
           },
           {
             "label": "Blog / news section",
@@ -150194,16 +150386,16 @@
       "httpsActive": true,
       "finalUrl": "https://zin.world/zin-cafe/?utm_source=google_zincafe",
       "redirected": false,
-      "loadTimeMs": 2289,
+      "loadTimeMs": 2307,
       "reachable": true,
       "title": "ZIN Cafe Canggu | Free Co-Working Space | Event Venue",
       "titleLength": 53,
-      "metaDescription": "Restaurant & Cafe Canggu - Free Coworking, Rooftop and in-house roasted organic coffee. Best place in Canggu to hang out in a breezy and spacious restaurant.",
-      "metaDescriptionLength": 157,
+      "metaDescription": "Visit Zin Cafe Canggu for healthy food, specialty coffee, coworking spaces, nourishing drinks, and a vibrant community atmosphere in Bali.",
+      "metaDescriptionLength": 138,
       "canonical": "https://zin.world/zin-cafe/",
       "h1Count": 10,
-      "h2Count": 0,
-      "wordCount": 746,
+      "h2Count": 7,
+      "wordCount": 974,
       "imageCount": 55,
       "imagesWithAlt": 5,
       "internalLinks": 66,
@@ -150245,10 +150437,80 @@
         "youtube": null
       },
       "socialCount": 2,
-      "isSocialOnly": false
+      "isSocialOnly": false,
+      "pagesCrawled": 15
     },
-    "pitch": "Already a strong digital presence — approach as a premium optimisation / retainer client.",
-    "lastAuditedAt": "2026-06-01T14:04:09.740Z",
+    "deepReport": {
+      "ranAt": "2026-06-03T16:12:39.647Z",
+      "sitemapFound": true,
+      "pagesDiscovered": 15,
+      "pagesCrawled": 15,
+      "pagesMissingTitle": 9,
+      "pagesMissingMeta": 13,
+      "totalImages": 273,
+      "pageWeightKb": 159,
+      "scriptCount": 80,
+      "brokenLinks": [],
+      "hasFreshContent": false,
+      "latestContentDate": null,
+      "socials": [
+        {
+          "platform": "Instagram",
+          "url": "https://www.instagram.com/worldofzin",
+          "live": true,
+          "title": "ZIN Hotels, Cafe, Wellness, Fitness",
+          "note": "",
+          "handle": "@worldofzin",
+          "followers": 11997,
+          "following": 1278,
+          "posts": 962,
+          "bio": "Leisure, pleasure and the luxury of wellbeing. ZIN Hotels, Villas, Restaurant, Wellness and Fitness. Email: reservation@zinhotels.com"
+        },
+        {
+          "platform": "Facebook",
+          "url": "https://www.facebook.com/zinhotels/",
+          "live": true,
+          "title": null,
+          "note": "present, public data gated (login wall)",
+          "handle": "@zinhotels"
+        }
+      ]
+    },
+    "socials": {
+      "instagram": "https://www.instagram.com/worldofzin",
+      "facebook": "https://www.facebook.com/zinhotels/",
+      "linkedin": null,
+      "twitter": null,
+      "tiktok": null,
+      "youtube": null
+    },
+    "socialsSource": [
+      "website"
+    ],
+    "socialInsights": [
+      {
+        "platform": "Instagram",
+        "url": "https://www.instagram.com/worldofzin",
+        "live": true,
+        "title": "ZIN Hotels, Cafe, Wellness, Fitness",
+        "note": "",
+        "handle": "@worldofzin",
+        "followers": 11997,
+        "following": 1278,
+        "posts": 962,
+        "bio": "Leisure, pleasure and the luxury of wellbeing. ZIN Hotels, Villas, Restaurant, Wellness and Fitness. Email: reservation@zinhotels.com"
+      },
+      {
+        "platform": "Facebook",
+        "url": "https://www.facebook.com/zinhotels/",
+        "live": true,
+        "title": null,
+        "note": "present, public data gated (login wall)",
+        "handle": "@zinhotels"
+      }
+    ],
+    "pitch": "Already a strong digital presence. Approach as a premium optimisation or retainer client.",
+    "lastAuditedAt": "2026-06-03T16:12:40.968Z",
     "status": "NEW",
     "date": "2026-06-01"
   },
@@ -184491,7 +184753,7 @@
     ],
     "pitch": "Not online with a real website — prime candidate for a website build + full digital presence.",
     "lastAuditedAt": "2026-06-01T15:33:33.393Z",
-    "status": "NEW",
+    "status": "CONTACTED",
     "date": "2026-05-07"
   },
   {

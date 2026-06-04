@@ -55,6 +55,10 @@ export interface WebsiteAudit {
 
   // --- deep crawl ---
   pagesCrawled?: number;       // how many pages a deep audit visited (1 = homepage only)
+  // --- real performance (Google PageSpeed Insights, fetched only on a deep audit) ---
+  psiPerformance?: number;     // Lighthouse performance score 0-100 (mobile)
+  psiLcpMs?: number;           // Largest Contentful Paint, ms
+  psiCls?: number;             // Cumulative Layout Shift
 
   tech: string[];
   emails: string[];
@@ -147,6 +151,7 @@ export interface Lead {
   authorityScore: number;
   date?: string;
   status?: string;
+  contactedAt?: string;                // ISO timestamp set when first marked CONTACTED
   notes?: string;
   lastAuditedAt?: string;
   stats: {
@@ -158,6 +163,9 @@ export interface Lead {
   dimensionFactors?: DimensionBreakdown[]; // full per-dimension breakdown for the detail view
   audit?: WebsiteAudit;
   deepReport?: DeepReport;             // produced by an on-demand Deep audit
+  socials?: Socials;                   // best-known socials: website links + Maps panel + web search
+  socialsSource?: ("website" | "maps" | "search")[]; // where each social signal came from
+  socialInsights?: SocialCheck[];      // enriched per-account public stats (followers, posts, etc.)
   pitch: string;
 }
 
@@ -168,6 +176,14 @@ export interface SocialCheck {
   live: boolean;          // page reachable (not 404/unreachable)
   title: string | null;   // og:title / page title if exposed
   note: string;           // e.g. "public data limited (login wall)" or "unreachable"
+  // --- public stats, when the platform exposes them (Instagram, TikTok) ---
+  handle?: string;        // @handle
+  followers?: number;     // follower / like-page count
+  following?: number;
+  posts?: number;         // posts / videos
+  verified?: boolean;     // blue tick
+  bio?: string;           // profile bio / description
+  email?: string;         // public contact email exposed on the profile, if any
 }
 
 /** A deep, on-demand dossier: a full website crawl plus best-effort social checks. */

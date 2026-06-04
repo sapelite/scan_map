@@ -5,6 +5,13 @@ import {
   Lead, WebsiteAudit, ScoreFactor, Socials, WebsiteStatus, Opportunity,
   PresenceDimensions, DimensionBreakdown, OPPORTUNITY_META, DeepReport, SocialCheck,
 } from './types';
+import { BALI_AREAS } from './bali';
+
+/** First known Bali area mentioned in an address (used to sharpen social searches). */
+function baliAreaOf(address: string): string {
+  const a = (address || '').toLowerCase();
+  return BALI_AREAS.find((area) => a.includes(area.toLowerCase())) ?? '';
+}
 
 // ==========================================================================
 // Engine v3 — accuracy-focused
@@ -21,6 +28,11 @@ import {
 
 const UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36';
+
+// Instagram (and TikTok) only serve their public og:description stats to a
+// mobile user-agent; the desktop UA gets an empty JS shell.
+const UA_MOBILE =
+  'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1';
 
 const SOCIAL_DOMAINS = [
   'instagram.com', 'facebook.com', 'linktr.ee', 'tiktok.com',
@@ -105,8 +117,13 @@ interface MapsTarget {
   phone: string;
   mapsUrl: string;
   authorityScore: number;
+  socials: Socials;        // any social links exposed on the Maps listing itself
   extractionNotes: string[];
 }
+
+const EMPTY_SOCIALS = (): Socials => ({
+  instagram: null, facebook: null, linkedin: null, twitter: null, tiktok: null, youtube: null,
+});
 
 function unwrapGoogleRedirect(href: string): string {
   try {
@@ -349,7 +366,12 @@ export async function extractMapsTarget(browser: Browser, link: string): Promise
       const phone = document.querySelector('button[data-item-id*="phone"]')
         ?.getAttribute('aria-label')?.replace(/^Phone:\s*/i, '') || '';
 
-      return { name, rating, reviews, reviewCount, website, raw, address, phone, usedNotes };
+      // ----- Social links shown on the listing (free to grab while we're here) -----
+      const socialHrefs = (Array.from(document.querySelectorAll('a[href]')) as HTMLAnchorElement[])
+        .map((a) => a.href)
+        .filter((h) => /(instagram|facebook|tiktok|linkedin|youtube|twitter|x)\.com\//i.test(h));
+
+      return { name, rating, reviews, reviewCount, website, raw, address, phone, socialHrefs, usedNotes };
     });
 
     notes.push(...details.usedNotes);
@@ -367,6 +389,9 @@ export async function extractMapsTarget(browser: Browser, link: string): Promise
       notes.push('no-website-found');
     }
 
+    const socials = socialsFromUrls(details.socialHrefs || []);
+    if (countSocials(socials) > 0) notes.push(`maps-socials:${countSocials(socials)}`);
+
     return {
       name: details.name,
       rating: details.rating,
@@ -378,6 +403,7 @@ export async function extractMapsTarget(browser: Browser, link: string): Promise
       phone: details.phone || 'No Phone',
       mapsUrl: link,
       authorityScore: (details.rating || 0) * 10,
+      socials,
       extractionNotes: notes,
     };
   } catch (err) {
@@ -406,6 +432,234 @@ function extractSocials(html: string): Socials {
     tiktok:    findFirst(html, /https?:\/\/(www\.)?tiktok\.com\/@[A-Za-z0-9_.]+/i),
     youtube:   findFirst(html, /https?:\/\/(www\.)?youtube\.com\/(@|channel\/|user\/|c\/)[A-Za-z0-9_\-]+/i),
   };
+}
+
+// ===========================================================================
+// SOCIAL DISCOVERY — normalise links, count them, and (best-effort) search the
+// open web for a business's profiles when we don't already know them.
+// ===========================================================================
+
+function countSocials(s: Socials): number {
+  return Object.values(s).filter(Boolean).length;
+}
+
+/** Merge social objects; earlier sources win per platform (so website > maps > search). */
+function mergeSocials(...sources: (Socials | undefined)[]): Socials {
+  const out = EMPTY_SOCIALS();
+  for (const src of sources) {
+    if (!src) continue;
+    (Object.keys(out) as (keyof Socials)[]).forEach((k) => { if (!out[k] && src[k]) out[k] = src[k]; });
+  }
+  return out;
+}
+
+// Path segments that are NOT a profile (platform features, not businesses).
+const RESERVED_IG = new Set(['p', 'reel', 'reels', 'explore', 'accounts', 'about', 'directory', 'stories', 'tv', 'tags', 'locations', 'legal', 'developer', 'privacy', 'sitemap', 'web']);
+const RESERVED_FB = new Set(['profile.php', 'pages', 'groups', 'events', 'watch', 'marketplace', 'sharer', 'tr', 'plugins', 'dialog', 'login', 'help', 'policies', 'business', 'ads', 'permalink.php', 'people', 'photo', 'story.php']);
+const RESERVED_TW = new Set(['home', 'search', 'i', 'intent', 'share', 'hashtag', 'explore', 'messages', 'settings']);
+
+/** Classify a single URL as a clean social PROFILE (platform + canonical url), or null. */
+function classifyProfile(raw: string): { platform: keyof Socials; url: string } | null {
+  let u: URL;
+  try { u = new URL(raw); } catch { return null; }
+  const host = u.hostname.replace(/^www\./, '').toLowerCase();
+  const seg = u.pathname.split('/').filter(Boolean);
+  if (!seg.length) return null;
+  const first = seg[0];
+  const firstLc = first.toLowerCase();
+
+  if (/(^|\.)instagram\.com$/.test(host)) {
+    if (!RESERVED_IG.has(firstLc) && /^[a-z0-9._]{2,30}$/i.test(first)) return { platform: 'instagram', url: `https://instagram.com/${first}` };
+  } else if (/(^|\.)facebook\.com$/.test(host)) {
+    if (!RESERVED_FB.has(firstLc) && /^[a-z0-9.\-]{3,}$/i.test(first)) return { platform: 'facebook', url: `https://facebook.com/${first}` };
+  } else if (/(^|\.)tiktok\.com$/.test(host)) {
+    const handle = firstLc.startsWith('@') ? first : '@' + first;
+    if (handle.length > 2 && /^@[a-z0-9._]{2,}$/i.test(handle)) return { platform: 'tiktok', url: `https://tiktok.com/${handle}` };
+  } else if (/(^|\.)linkedin\.com$/.test(host)) {
+    if ((firstLc === 'company' || firstLc === 'in') && seg[1]) return { platform: 'linkedin', url: `https://linkedin.com/${firstLc}/${seg[1]}` };
+  } else if (/(^|\.)youtube\.com$/.test(host)) {
+    if (firstLc.startsWith('@')) return { platform: 'youtube', url: `https://youtube.com/${first}` };
+    if (['channel', 'user', 'c'].includes(firstLc) && seg[1]) return { platform: 'youtube', url: `https://youtube.com/${firstLc}/${seg[1]}` };
+  } else if (/(^|\.)(twitter|x)\.com$/.test(host)) {
+    if (!RESERVED_TW.has(firstLc) && /^[a-z0-9_]{2,15}$/i.test(first)) return { platform: 'twitter', url: `https://x.com/${first}` };
+  }
+  return null;
+}
+
+/** Turn raw URLs into a Socials object, keeping the first clean profile per platform. */
+function socialsFromUrls(urls: string[]): Socials {
+  const s = EMPTY_SOCIALS();
+  for (const raw of urls) {
+    const p = classifyProfile(raw);
+    if (p && !s[p.platform]) s[p.platform] = p.url;
+  }
+  return s;
+}
+
+const normalizeStr = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+// Common, non-distinctive words that shouldn't be enough to match a business on their own.
+const GENERIC_NAME_WORDS = new Set([
+  'bali', 'ubud', 'canggu', 'seminyak', 'uluwatu', 'sanur', 'kuta', 'denpasar',
+  'the', 'and', 'restaurant', 'cafe', 'coffee', 'warung', 'bar', 'club', 'beach',
+  'hotel', 'villa', 'villas', 'resort', 'spa', 'shop', 'store', 'house', 'group',
+  'studio', 'salon', 'clinic', 'kitchen', 'food', 'eatery', 'bistro', 'lounge',
+]);
+
+/**
+ * How confidently a profile handle belongs to this business:
+ *  - "strong": the handle is (or contains, or is contained by) the full name.
+ *  - "weak":   it only shares a distinctive word (could be a different business).
+ *  - null:     no plausible match.
+ */
+function matchStrength(url: string, name: string): 'strong' | 'weak' | null {
+  let path = '';
+  try { path = (new URL(url).pathname.split('/').filter(Boolean)[0] || '').replace(/^@/, ''); } catch { return null; }
+  const h = normalizeStr(path);
+  const n = normalizeStr(name);
+  if (h.length < 3 || n.length < 3) return null;
+  if (n.includes(h) || h.includes(n)) return 'strong';
+  const tokens = name.toLowerCase().split(/[^a-z0-9]+/)
+    .filter((t) => t.length >= 5 && !GENERIC_NAME_WORDS.has(t));
+  return tokens.some((t) => h.includes(t)) ? 'weak' : null;
+}
+
+/** Boolean form, kept for tests. */
+function handleMatchesName(url: string, name: string): boolean {
+  return matchStrength(url, name) !== null;
+}
+
+/**
+ * Find a business's social profiles via web search. To keep keyed-API quotas
+ * (e.g. Google CSE's 100/day) for when they're actually needed, the order is:
+ *  1. FREE Brave HTML scrape (unlimited, just paced) — handles the bulk.
+ *  2. Only when scraping is being throttled, spend a keyed API request as a
+ *     buffer: Brave Search API, then Google Custom Search.
+ *  3. Bing scrape as a last free attempt.
+ * So the daily API quota is a reserve for burst moments, not used per lead.
+ */
+const SOCIAL_URL_RX = /https?:\/\/(?:[a-z0-9-]+\.)?(?:instagram\.com|facebook\.com|tiktok\.com|linkedin\.com|youtube\.com|twitter\.com|x\.com)\/[^\s"'<>)\]&]+/gi;
+
+// Space out scrape requests across a sweep so we don't trip rate limits.
+let _lastSearchAt = 0;
+async function paceSearch(minGapMs = 1300) {
+  const wait = _lastSearchAt + minGapMs - Date.now();
+  if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+  _lastSearchAt = Date.now();
+}
+
+/** Official Brave Search API. Returns result URLs, or null when no key is configured. */
+async function braveApiUrls(query: string): Promise<string[] | null> {
+  const key = process.env.BRAVE_SEARCH_API_KEY;
+  if (!key) return null;
+  try {
+    const r = await axios.get('https://api.search.brave.com/res/v1/web/search', {
+      params: { q: query, count: 10 },
+      timeout: 8000,
+      headers: { Accept: 'application/json', 'Accept-Encoding': 'gzip', 'X-Subscription-Token': key },
+      validateStatus: () => true,
+    });
+    if (r.status !== 200) return null;                 // quota/error -> let caller fall through
+    const results = r.data?.web?.results;
+    if (!Array.isArray(results)) return [];
+    const out: string[] = [];
+    for (const res of results as Array<{ url?: string }>) if (res.url) out.push(res.url);
+    return out;
+  } catch { return null; }
+}
+
+/**
+ * Google Programmable Search (Custom Search JSON API). Free tier: 100 queries/day.
+ * Uses your existing Google key plus a (free to create) search-engine id in GOOGLE_CSE_ID.
+ * Returns result URLs, or null when not configured.
+ */
+async function googleCseUrls(query: string): Promise<string[] | null> {
+  const key = process.env.GOOGLE_CSE_KEY || process.env.GOOGLE_API_KEY;
+  const cx = process.env.GOOGLE_CSE_ID;
+  if (!key || !cx) return null;
+  try {
+    const r = await axios.get('https://www.googleapis.com/customsearch/v1', {
+      params: { key, cx, q: query, num: 10 },
+      timeout: 8000, validateStatus: () => true,
+    });
+    if (r.status !== 200) return null;                 // quota exhausted/error -> fall through
+    if (!Array.isArray(r.data?.items)) return [];
+    return (r.data.items as Array<{ link?: string }>).map((i) => i.link).filter((l): l is string => !!l);
+  } catch { return null; }
+}
+
+async function scrapeSearch(engine: 'brave' | 'bing', query: string): Promise<{ urls: string[]; status: number }> {
+  const base = engine === 'brave' ? 'https://search.brave.com/search' : 'https://www.bing.com/search';
+  const res = await axios.get(base, {
+    params: { q: query },
+    timeout: 6000,
+    headers: { 'User-Agent': UA, Accept: 'text/html,application/xhtml+xml', 'Accept-Language': 'en-US,en;q=0.9' },
+    validateStatus: () => true,
+  });
+  const body = typeof res.data === 'string' ? res.data : '';
+  const urls = [...new Set((body.match(SOCIAL_URL_RX) || []).map((u) => u.replace(/&amp;/g, '&')))];
+  return { urls, status: res.status };
+}
+
+// Circuit breaker: once a free-tier search engine starts throttling us, stop
+// hammering it for a few minutes so a big sweep doesn't waste time on 429s.
+let _searchCooldownUntil = 0;
+let _consecThrottle = 0;
+
+async function webSearch(query: string): Promise<string[]> {
+  // 1) FREE Brave scrape first (unlimited), unless we're in a throttle cooldown.
+  let throttled = Date.now() < _searchCooldownUntil;
+  if (!throttled) {
+    try {
+      await paceSearch();
+      const { urls, status } = await scrapeSearch('brave', query);
+      if (status === 429 || status === 202) {
+        throttled = true;
+        if (++_consecThrottle >= 3) _searchCooldownUntil = Date.now() + 5 * 60_000;
+      } else {
+        _consecThrottle = 0;
+        return urls; // a real answer (even empty) — don't spend API quota
+      }
+    } catch { throttled = true; }
+  }
+
+  // 2) Only when scraping is throttled: spend a keyed-API request as a buffer.
+  if (throttled) {
+    const brave = await braveApiUrls(query);
+    if (brave !== null) return brave;
+    const google = await googleCseUrls(query);
+    if (google !== null) return google;
+    // 3) No quota left either: one last free attempt via Bing.
+    try {
+      const { urls, status } = await scrapeSearch('bing', query);
+      if (status === 200) return urls;
+    } catch { /* ignore */ }
+  }
+  return [];
+}
+
+/**
+ * Best-effort: search the open web for a business's social profiles when we
+ * don't already know them. Time-boxed, fault-tolerant (never throws), and
+ * validated against the business name so we don't attach the wrong account.
+ * For recall, we pick the first profile per platform that MATCHES THE NAME,
+ * not just the first profile on the page (which may be an ad or unrelated).
+ */
+async function findSocials(name: string, area: string, category?: string): Promise<Socials> {
+  const found = EMPTY_SOCIALS();
+  const bits = [name, category, area, 'Bali', 'instagram facebook'].filter(Boolean).join(' ');
+  try {
+    const urls = await webSearch(bits);
+    const candidates = urls.map(classifyProfile).filter((c): c is { platform: keyof Socials; url: string } => !!c);
+    (Object.keys(found) as (keyof Socials)[]).forEach((platform) => {
+      const forPlatform = candidates.filter((c) => c.platform === platform);
+      // Prefer a strong name match; only fall back to a weak one if there's no strong.
+      const pick = forPlatform.find((c) => matchStrength(c.url, name) === 'strong')
+        ?? forPlatform.find((c) => matchStrength(c.url, name) === 'weak');
+      if (pick) found[platform] = pick.url;
+    });
+  } catch { /* best-effort, ignore */ }
+  return found;
 }
 
 function detectTech(lower: string, $: cheerio.CheerioAPI): string[] {
@@ -466,6 +720,15 @@ function extractWhatsApp(html: string): string | null {
   // wa.link
   m = html.match(/https?:\/\/wa\.link\/[A-Za-z0-9]+/i);
   if (m) return m[0];
+  return null;
+}
+
+/** Pull a WhatsApp number out of free text (e.g. a social bio): wa.me links or a "WA: +62..." mention. */
+function whatsappFromText(text: string): string | null {
+  const link = text.match(/wa\.me\/(\+?\d{6,15})|whatsapp\.com\/send\?[^"'\s]*phone=(\+?\d{6,15})/i);
+  if (link) return '+' + (link[1] || link[2]).replace(/^\+/, '');
+  const mention = text.match(/(?:whats?app|wa)\b[^\d+]{0,8}(\+?\d[\d\s\-]{7,16}\d)/i);
+  if (mention) { const d = mention[1].replace(/[^\d]/g, ''); if (d.length >= 9 && d.length <= 15) return '+' + d; }
   return null;
 }
 
@@ -615,9 +878,15 @@ function detectOpportunities(o: {
   rating: number;
   reviewCount: number;
   isSocialOnly: boolean;
+  socials?: Socials;
+  socialInsights?: SocialCheck[];
 }): Opportunity[] {
   const opps: Opportunity[] = [];
   const a = o.audit;
+  const soc = o.socials ?? a?.socials;
+  const sc = soc ? countSocials(soc) : 0;
+  // a profile with barely any posts is effectively dormant
+  const lowPostAccount = (o.socialInsights ?? []).some((s) => s.posts !== undefined && s.posts < 12);
 
   if (o.websiteStatus === "none") opps.push("needs_website");
   if (o.websiteStatus === "unreachable") opps.push("broken_website");
@@ -639,13 +908,18 @@ function detectOpportunities(o: {
     if (!a.hasEmailCapture) opps.push("no_email_capture");
     if (!a.hasBooking) opps.push("no_booking");
     if (a.emails.length === 0 && a.phones.length === 0 && !a.whatsapp) opps.push("no_contact_capture");
-    // social
-    if (a.socialCount === 0) opps.push("no_social");
-    else {
-      if (!a.socials.instagram) opps.push("no_instagram");
-      if (a.socialCount === 1) opps.push("dormant_social");
-    }
   }
+
+  // social — judged from the best-known socials, with or without a website
+  if (sc === 0) opps.push("no_social");
+  else {
+    if (!soc!.instagram) opps.push("no_instagram");
+    if (sc === 1 || lowPostAccount) opps.push("dormant_social");
+  }
+
+  // discoverable on socials but no real website to convert on: they can be found,
+  // but can't take bookings or be found on Google search.
+  if (o.websiteStatus !== "audited" && !o.isSocialOnly && sc > 0) opps.push("no_booking");
 
   // reputation — available from the Maps listing even without a website
   if (o.reviewCount > 0 && o.reviewCount < 10) opps.push("low_reviews");
@@ -867,38 +1141,128 @@ const PLATFORM_LABEL: Record<string, string> = {
   twitter: 'Twitter / X', tiktok: 'TikTok', youtube: 'YouTube',
 };
 
-/** Best-effort check of each social account. Platforms gate public data behind
- *  login walls, so we report liveness + whatever public meta renders, honestly. */
-async function checkSocials(socials: Socials): Promise<SocialCheck[]> {
-  const entries = (Object.entries(socials) as [string, string | null][]).filter(([, u]) => !!u) as [string, string][];
-  const out: SocialCheck[] = [];
-  for (const [key, url] of entries) {
-    const platform = PLATFORM_LABEL[key] || key;
-    try {
-      const r = await axios.get(url, {
-        timeout: 9000, maxRedirects: 4,
-        headers: { 'User-Agent': UA, 'Accept-Language': 'en-US,en;q=0.9' },
-        validateStatus: () => true, responseType: 'text', transformResponse: [(d) => d],
-      });
-      const live = r.status >= 200 && r.status < 400;
-      let title: string | null = null;
-      let note = '';
-      if (live && typeof r.data === 'string') {
-        const head = r.data.slice(0, 6000);
-        const m = head.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["']/i) || head.match(/<title[^>]*>([^<]+)<\/title>/i);
-        title = m ? m[1].trim().replace(/\s+/g, ' ').slice(0, 120) : null;
-        if (/log in|login|sign up|create an account|see posts/i.test(head) && /(instagram|facebook|tiktok|linkedin)\./i.test(url)) {
-          note = 'public data limited (login wall)';
-        }
-      } else if (!live) {
-        note = `HTTP ${r.status}`;
-      }
-      out.push({ platform, url, live, title, note });
-    } catch {
-      out.push({ platform, url, live: false, title: null, note: 'unreachable' });
+/** Decode HTML entities + JSON unicode escapes that show up in og/meta strings. */
+function decodeText(s: string): string {
+  return s
+    .replace(/\\u([0-9a-fA-F]{4})/g, (_, h) => String.fromCharCode(parseInt(h, 16)))
+    .replace(/\\n/g, ' ').replace(/\\\//g, '/')
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, h) => String.fromCharCode(parseInt(h, 16)))
+    .replace(/&#(\d+);/g, (_, d) => String.fromCharCode(parseInt(d, 10)))
+    .replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#0?39;|&apos;/g, "'")
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/\s+/g, ' ').trim();
+}
+
+/** "211K" -> 211000, "2,460" -> 2460, "2.4M" -> 2400000. */
+function parseHumanCount(s: string): number | undefined {
+  const m = s.replace(/,/g, '').match(/([\d.]+)\s*([KMkm])?/);
+  if (!m) return undefined;
+  const n = parseFloat(m[1]);
+  if (!isFinite(n)) return undefined;
+  const suf = (m[2] || '').toLowerCase();
+  return Math.round(suf === 'k' ? n * 1e3 : suf === 'm' ? n * 1e6 : n);
+}
+
+const ogContent = (html: string, prop: string): string | null => {
+  const m = html.match(new RegExp(`<meta[^>]+property=["']og:${prop}["'][^>]+content=["']([^"']*)["']`, 'i'))
+    || html.match(new RegExp(`<meta[^>]+content=["']([^"']*)["'][^>]+property=["']og:${prop}["']`, 'i'));
+  return m ? m[1] : null;
+};
+
+async function fetchText(url: string, ua: string, timeout = 9000) {
+  const r = await axios.get(url, {
+    timeout, maxRedirects: 5,
+    headers: { 'User-Agent': ua, 'Accept-Language': 'en-US,en;q=0.9', Accept: 'text/html,application/xhtml+xml' },
+    validateStatus: () => true, responseType: 'text', transformResponse: [(d) => d],
+  });
+  return { status: r.status, finalUrl: (r.request?.res?.responseUrl as string) || url, html: typeof r.data === 'string' ? r.data : '' };
+}
+
+const handleFromUrl = (url: string): string | undefined => {
+  try { const seg = new URL(url).pathname.split('/').filter(Boolean)[0]; return seg ? '@' + seg.replace(/^@/, '') : undefined; } catch { return undefined; }
+};
+
+/** Instagram public profile stats (mobile UA exposes og:description + JSON). */
+async function enrichInstagram(url: string): Promise<SocialCheck> {
+  const base: SocialCheck = { platform: 'Instagram', url, live: false, title: null, note: '', handle: handleFromUrl(url) };
+  try {
+    const { status, html } = await fetchText(url, UA_MOBILE);
+    base.live = status >= 200 && status < 400;
+    if (!base.live || !html) { base.note = `HTTP ${status}`; return base; }
+    const desc = ogContent(html, 'description');
+    if (desc) {
+      const m = decodeText(desc).match(/([\d.,]+\s*[KMkm]?)\s+Followers,\s*([\d.,]+\s*[KMkm]?)\s+Following,\s*([\d.,]+\s*[KMkm]?)\s+Posts/i);
+      if (m) { base.followers = parseHumanCount(m[1]); base.following = parseHumanCount(m[2]); base.posts = parseHumanCount(m[3]); }
     }
-  }
-  return out;
+    // exact follower count from embedded JSON beats the rounded "211K"
+    const exact = html.match(/"(?:edge_followed_by":\{"count"|follower_count)":?(\d+)/) || html.match(/"follower_count":(\d+)/);
+    if (exact) base.followers = parseInt(exact[1], 10);
+    const og = ogContent(html, 'title');
+    if (og) { const nm = decodeText(og).match(/^(.*?)\s*\(@/); base.title = nm ? nm[1] : decodeText(og).slice(0, 80); }
+    if (/"is_verified":true/.test(html)) base.verified = true;
+    const bio = html.match(/"biography":"((?:[^"\\]|\\.){0,300})"/);
+    if (bio && bio[1]) base.bio = decodeText(bio[1]).slice(0, 200);
+    // Public contact email: IG business profiles often expose one; else scan the bio.
+    const pe = html.match(/"(?:public_email|business_email)":"([^"@]+@[^"]+)"/);
+    const emailCand = pe ? decodeText(pe[1]) : (base.bio?.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i)?.[0]);
+    if (emailCand && !NOISE_EMAILS.some((n) => emailCand.toLowerCase().includes(n))) base.email = emailCand;
+    if (base.followers === undefined && /log in|sign up/i.test(html.slice(0, 4000))) base.note = 'public data limited';
+    return base;
+  } catch { base.note = 'unreachable'; return base; }
+}
+
+/** TikTok public profile stats (followerCount lives in an embedded JSON blob). */
+async function enrichTikTok(url: string): Promise<SocialCheck> {
+  const base: SocialCheck = { platform: 'TikTok', url, live: false, title: null, note: '', handle: handleFromUrl(url) };
+  try {
+    const { status, html } = await fetchText(url, UA_MOBILE);
+    base.live = status >= 200 && status < 400;
+    if (!base.live || !html) { base.note = `HTTP ${status}`; return base; }
+    const f = html.match(/"followerCount":(\d+)/); if (f) base.followers = parseInt(f[1], 10);
+    const g = html.match(/"followingCount":(\d+)/); if (g) base.following = parseInt(g[1], 10);
+    const v = html.match(/"videoCount":(\d+)/); if (v) base.posts = parseInt(v[1], 10);
+    const nick = html.match(/"nickname":"((?:[^"\\]|\\.){0,80})"/); if (nick) base.title = decodeText(nick[1]);
+    const sig = html.match(/"signature":"((?:[^"\\]|\\.){0,200})"/); if (sig && sig[1]) base.bio = decodeText(sig[1]).slice(0, 200);
+    if (/"verified":true/.test(html)) base.verified = true;
+    if (base.followers === undefined) base.note = 'public data limited';
+    return base;
+  } catch { base.note = 'unreachable'; return base; }
+}
+
+/** Liveness + whatever public meta renders, for platforms that gate the rest (FB, LinkedIn, X, YouTube). */
+async function enrichGeneric(platform: string, url: string): Promise<SocialCheck> {
+  const base: SocialCheck = { platform, url, live: false, title: null, note: '', handle: handleFromUrl(url) };
+  try {
+    const { status, finalUrl, html } = await fetchText(url, UA);
+    // Facebook (and similar) bounce logged-out visitors to /login, often with a
+    // 400. The page still exists, so treat it as present-but-gated, not dead.
+    const gated = /\/login(\.php)?(\/|\?|$)/i.test(finalUrl)
+      || /log in to facebook|see posts, photos/i.test(html.slice(0, 4000))
+      || (/facebook\.com/i.test(url) && status === 400);
+    if (gated) {
+      base.live = true;
+      base.note = 'present, public data gated (login wall)';
+      return base;
+    }
+    base.live = status >= 200 && status < 400;
+    if (base.live && html) {
+      const t = ogContent(html, 'title') || (html.match(/<title[^>]*>([^<]+)<\/title>/i) || [])[1];
+      base.title = t ? decodeText(t).slice(0, 120) : null;
+    } else if (!base.live) {
+      base.note = `HTTP ${status}`;
+    }
+    return base;
+  } catch { base.note = 'unreachable'; return base; }
+}
+
+/** Enrich every known social account in parallel: real stats where we can, honest notes where we can't. */
+async function enrichSocials(socials: Socials): Promise<SocialCheck[]> {
+  const entries = (Object.entries(socials) as [string, string | null][]).filter(([, u]) => !!u) as [string, string][];
+  return Promise.all(entries.map(([key, url]) => {
+    if (key === 'instagram') return enrichInstagram(url);
+    if (key === 'tiktok') return enrichTikTok(url);
+    return enrichGeneric(PLATFORM_LABEL[key] || key, url);
+  }));
 }
 
 /** Crawl the site (sitemap + nav), merge contact/social signals into the audit,
@@ -974,6 +1338,33 @@ async function buildDeepReport(origin: string, audit: WebsiteAudit, navLinks: st
 }
 
 /**
+ * Real performance numbers from Google PageSpeed Insights (mobile). Needs
+ * GOOGLE_PAGESPEED_API_KEY (works without one too, just lower rate limits). PSI
+ * is slow, so we only call it on a deep audit, and never let it block forever.
+ */
+async function fetchPageSpeed(url: string): Promise<{ performance: number; lcpMs: number; cls: number } | null> {
+  try {
+    const r = await axios.get('https://www.googleapis.com/pagespeedonline/v5/runPagespeed', {
+      params: {
+        url, strategy: 'mobile', category: 'performance',
+        ...(process.env.GOOGLE_PAGESPEED_API_KEY ? { key: process.env.GOOGLE_PAGESPEED_API_KEY } : {}),
+      },
+      timeout: 30000, validateStatus: () => true,
+    });
+    if (r.status !== 200) return null;
+    const lh = r.data?.lighthouseResult;
+    const perf = lh?.categories?.performance?.score;
+    if (typeof perf !== 'number') return null;
+    const audits = lh?.audits ?? {};
+    return {
+      performance: Math.round(perf * 100),
+      lcpMs: Math.round(audits['largest-contentful-paint']?.numericValue ?? 0),
+      cls: Number((audits['cumulative-layout-shift']?.numericValue ?? 0).toFixed(3)),
+    };
+  } catch { return null; }
+}
+
+/**
  * Deep dossier: robust homepage audit, then a full site crawl (sitemap + nav)
  * that merges extra contacts/socials into the audit and produces SEO-health,
  * broken-link, freshness and page-weight findings, plus a best-effort check of
@@ -1009,7 +1400,16 @@ export async function deepAuditWebsite(browser: Browser, websiteUrl: string): Pr
   } catch { /* ignore */ } finally { await page.close().catch(() => {}); }
 
   const report = await buildDeepReport(origin, audit, navLinks);
-  report.socials = await checkSocials(audit.socials);
+  report.socials = await enrichSocials(audit.socials);
+
+  // Real Google performance numbers (only on a deep audit — PSI is slow).
+  const psi = await fetchPageSpeed(audit.finalUrl);
+  if (psi) {
+    audit.psiPerformance = psi.performance;
+    audit.psiLcpMs = psi.lcpMs;
+    audit.psiCls = psi.cls;
+    attempts.push(`pagespeed: perf ${psi.performance}, LCP ${(psi.lcpMs / 1000).toFixed(1)}s`);
+  }
 
   audit.socialCount = Object.values(audit.socials).filter(Boolean).length;
   audit.pagesCrawled = report.pagesCrawled;
@@ -1091,6 +1491,8 @@ export function computePresence(o: {
   websiteStatus: WebsiteStatus;
   rating: number;
   reviewCount: number;
+  socials?: Socials;       // best-known socials (website + Maps + search), if discovered
+  followers?: number;      // largest follower count across their social accounts
 }): PresenceResult {
   const a = o.audit;
   const audited = o.websiteStatus === "audited" && !!a;
@@ -1100,15 +1502,19 @@ export function computePresence(o: {
     ? computeSeoScore(a!)
     : buildFactors([["Website reachable", 100, false, o.websiteStatus === "none" ? "no website" : "unreachable"]]);
 
-  // ---- SOCIAL ----
-  const social = audited
+  // ---- SOCIAL (works even without a website: socials can come from Maps or search) ----
+  const soc = o.socials ?? a?.socials;
+  const sc = soc ? countSocials(soc) : 0;
+  const followers = o.followers ?? 0;
+  const social = (audited || sc > 0)
     ? buildFactors([
-        ["Any social profile linked", 30, a!.socialCount >= 1, `${a!.socialCount} linked`],
-        ["Instagram", 30, !!a!.socials.instagram],
-        ["Facebook", 20, !!a!.socials.facebook],
-        ["Multiple platforms (2+)", 20, a!.socialCount >= 2],
+        ["Any social profile", 25, sc >= 1, `${sc} found`],
+        ["Instagram", 25, !!soc?.instagram],
+        ["Facebook", 15, !!soc?.facebook],
+        ["Multiple platforms (2+)", 15, sc >= 2],
+        ["Engaged audience (1k+ followers)", 20, followers >= 1000, followers > 0 ? `${followers.toLocaleString()} followers` : undefined],
       ])
-    : buildFactors([["Detected from website", 100, false, "no website to scan"]]);
+    : buildFactors([["Social profiles", 100, false, "none found"]]);
 
   // ---- MARKETING ----
   const marketing = audited
@@ -1189,6 +1595,32 @@ export async function withBrowser<T>(fn: (browser: Browser) => Promise<T>): Prom
   try { return await fn(browser); } finally { await browser.close().catch(() => {}); }
 }
 
+/** How many leads to audit in parallel. A headless browser handles a few pages
+ *  at once fine; keep it modest so we don't trip Maps/social rate limits. */
+export const LEAD_CONCURRENCY = Math.min(Math.max(Number(process.env.SCANMAP_CONCURRENCY) || 4, 1), 8);
+
+/**
+ * Run `worker` over `items` with at most `concurrency` in flight. Stops pulling
+ * new work as soon as `shouldStop` returns true. JS is single-threaded, so the
+ * shared counters the workers touch are safe; caps may overshoot by < concurrency.
+ */
+export async function runPool<T>(
+  items: T[],
+  concurrency: number,
+  worker: (item: T, index: number) => Promise<void>,
+  shouldStop?: () => boolean,
+): Promise<void> {
+  let next = 0;
+  const run = async () => {
+    while (next < items.length) {
+      if (shouldStop?.()) return;
+      const idx = next++;
+      await worker(items[idx], idx);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.max(1, concurrency) }, run));
+}
+
 export async function discoverTargets(
   browser: Browser, niche: string, location: string, scanLimit: number,
   onProgress?: (done: number, total: number, name: string) => void,
@@ -1251,9 +1683,52 @@ export async function buildLeadFromTarget(browser: Browser, target: MapsTarget, 
     allAttempts.push('no website on Maps listing');
   }
 
+  // ---- best-known socials: website audit links + Maps listing + web-search fallback ----
+  const socialsSource: ("website" | "maps" | "search")[] = [];
+  let socials = mergeSocials(audit?.socials, target.socials);
+  if (audit && countSocials(audit.socials) > 0) socialsSource.push("website");
+  if (countSocials(target.socials) > 0) socialsSource.push("maps");
+  // Search the open web for socials when we know none, OR on a deep audit always
+  // (a deep audit re-searches to turn up extra platforms we may have missed).
+  if (countSocials(socials) === 0 || opts?.deep) {
+    const searched = await findSocials(target.name, baliAreaOf(target.address), category);
+    const before = countSocials(socials);
+    if (countSocials(searched) > 0) {
+      socials = mergeSocials(socials, searched);
+      if (countSocials(socials) > before) {
+        if (!socialsSource.includes("search")) socialsSource.push("search");
+        allAttempts.push(`web-search socials: ${countSocials(socials) - before} new (${countSocials(socials)} total)`);
+      }
+    }
+  }
+  const socialCount = countSocials(socials);
+  // Fold the merged socials back into the audit so the website's social score
+  // benefits from links we found on Maps or via search, not just on the page.
+  if (audit) { audit.socials = socials; audit.socialCount = socialCount; }
+
+  // ---- enrich each social account with real public stats (followers, posts, etc.) ----
+  const socialInsights = socialCount > 0 ? await enrichSocials(socials) : [];
+  const maxFollowers = socialInsights.reduce((m, s) => Math.max(m, s.followers ?? 0), 0);
+  if (socialInsights.some((s) => s.followers !== undefined)) {
+    allAttempts.push(`social stats: ${socialInsights.filter((s) => s.followers !== undefined).map((s) => `${s.platform} ${s.followers}`).join(', ')}`);
+  }
+  // Harvest contact details from the socials when the website didn't give us any
+  // (this is how no-website leads get an email / WhatsApp at all).
+  let harvestedWhatsApp: string | null = null;
+  let harvestedEmail: string | null = null;
+  for (const s of socialInsights) {
+    if (!harvestedWhatsApp && s.bio) harvestedWhatsApp = whatsappFromText(s.bio);
+    if (!harvestedEmail && s.email) harvestedEmail = s.email;
+    if (!harvestedEmail && s.bio) {
+      const m = s.bio.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i);
+      if (m && !NOISE_EMAILS.some((n) => m[0].toLowerCase().includes(n))) harvestedEmail = m[0];
+    }
+  }
+  if (mainEmail === 'No email found' && harvestedEmail) mainEmail = harvestedEmail;
+
   // ---- combined Digital Presence score across all five dimensions ----
   const presence = computePresence({
-    audit, websiteStatus, rating: target.rating, reviewCount: target.reviewCount,
+    audit, websiteStatus, rating: target.rating, reviewCount: target.reviewCount, socials, followers: maxFollowers,
   });
   const score = presence.overall;
 
@@ -1277,6 +1752,8 @@ export async function buildLeadFromTarget(browser: Browser, target: MapsTarget, 
     rating: target.rating,
     reviewCount: target.reviewCount,
     isSocialOnly: audit?.isSocialOnly ?? false,
+    socials,
+    socialInsights,
   });
 
   const lead: Lead = {
@@ -1288,7 +1765,7 @@ export async function buildLeadFromTarget(browser: Browser, target: MapsTarget, 
     websiteFailReason,
     auditAttempts: allAttempts,
     email: mainEmail,
-    whatsapp: audit?.whatsapp ?? null,
+    whatsapp: audit?.whatsapp ?? harvestedWhatsApp ?? null,
     opportunities,
     tech: primaryTech,
     category,
@@ -1305,6 +1782,9 @@ export async function buildLeadFromTarget(browser: Browser, target: MapsTarget, 
     dimensionFactors: presence.dimensionFactors,
     audit,
     deepReport,
+    socials,
+    socialsSource,
+    socialInsights,
     pitch: buildPitch(websiteStatus, opportunities, websiteFailReason),
     lastAuditedAt: new Date().toISOString(),
   };
@@ -1387,3 +1867,9 @@ function buildPitch(
   const sells = [...new Set(opportunities.map(o => OPPORTUNITY_META[o].sell))].slice(0, 3);
   return `Best angles to sell: ${sells.join(' · ')}.`;
 }
+
+// exported for offline tests (not used by the app)
+export const __findSocials = findSocials;
+export const __socialsFromUrls = socialsFromUrls;
+export const __handleMatchesName = handleMatchesName;
+export const __enrichSocials = enrichSocials;

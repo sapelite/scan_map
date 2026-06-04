@@ -19,7 +19,7 @@ interface MapCanvasProps {
 const BALI_BOUNDS: [[number, number], [number, number]] = [[-8.95, 114.40], [-8.05, 115.75]];
 
 const leadColor = (l: Lead): string => {
-  if (l.websiteStatus === "none") return "#0D9488";          // teal, prime no-website leads
+  if (l.websiteStatus === "none") return "#34C759";          // teal, prime no-website leads
   if (l.websiteStatus === "unreachable") return "#DC2626";
   const s = l.stats?.score ?? 0;
   return s >= 70 ? "#0E9F6E" : s >= 40 ? "#C2710C" : "#DC2626";
@@ -81,7 +81,7 @@ export default function MapCanvas({ leads, scanning, latest, selectedId, onSelec
         const sel = selectedId && String(lead.id) === String(selectedId);
         const m = L.circleMarker([c.lat, c.lng], {
           radius: sel ? 8 : 5,
-          color: sel ? "#0F1A18" : color,
+          color: sel ? "#1D1D1F" : color,
           weight: sel ? 2 : 1.25,
           fillColor: color,
           fillOpacity: 0.6,

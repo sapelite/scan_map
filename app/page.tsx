@@ -4,12 +4,14 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { Lead, LeadStatus, STATUS_OPTIONS } from "@/lib/types";
-import { generatePdf, BenchmarkInfo } from "@/lib/pdf";
+import { generatePdf } from "@/lib/pdf";
+import { peerBenchmark } from "@/lib/benchmark";
 import { buildWhatsApp, waRecipient } from "@/lib/outreach";
 import { ToastProvider, useToast } from "@/components/Toast";
 import { LeadDetail } from "@/components/LeadDetail";
 import { CrmToolbar, SortKey, QuickFilterKey, matchesQuickFilter, quickFilterCounts } from "@/components/CrmToolbar";
 import { SWEEP_PRESETS, BALI_AREAS, BALI_DEFAULT_AREAS } from "@/lib/bali";
+import { leadValue } from "@/lib/leadValue";
 import { DIM_FULL, DIM_ORDER } from "@/components/Presence";
 
 // Full-page map is client-only (Leaflet needs the browser).
@@ -75,7 +77,7 @@ function ScoreDistribution({ leads }: { leads: Lead[] }) {
       <div className="flex items-end gap-3 h-20">
         {buckets.map((count, i) => (
           <div key={i} className="flex-1 flex flex-col items-center gap-2">
-            <div className="w-full rounded-sm transition-all" style={{ height: `${(count / max) * 100}%`, minHeight: count > 0 ? "6px" : "2px", background: count === 0 ? "rgba(19,28,26,0.06)" : colors[i] }} title={`${count} lead(s)`} />
+            <div className="w-full rounded-sm transition-all" style={{ height: `${(count / max) * 100}%`, minHeight: count > 0 ? "6px" : "2px", background: count === 0 ? "rgba(29,29,31,0.06)" : colors[i] }} title={`${count} lead(s)`} />
             <div className="text-[10px] text-muted-foreground tabular-nums">{labels[i]}</div>
           </div>
         ))}
@@ -173,7 +175,7 @@ function ScoringLegend() {
 // ---- Map marker legend ----
 function MapLegend() {
   const items: [string, string][] = [
-    ["#0D9488", "No website"],
+    ["#34C759", "No website"],
     ["#0E9F6E", "Strong (70+)"],
     ["#C2710C", "Some gaps"],
     ["#DC2626", "Weak / down"],
@@ -473,7 +475,7 @@ function CommandCenterInner() {
   const [statusFilter, setStatusFilter] = useState<"ALL" | LeadStatus>("ALL");
   const [techFilter, setTechFilter] = useState("ALL");
   const [quickFilters, setQuickFilters] = useState<Set<QuickFilterKey>>(new Set());
-  const [sort, setSort] = useState<SortKey>("score_asc");
+  const [sort, setSort] = useState<SortKey>("value_desc");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [openLead, setOpenLead] = useState<Lead | null>(null);
   const [recenterKey, setRecenterKey] = useState(0);
@@ -551,11 +553,12 @@ function CommandCenterInner() {
     });
     return [...out].sort((a, b) => {
       switch (sort) {
+        case "value_desc": return leadValue(b) - leadValue(a);
         case "score_desc": return (b.stats?.score ?? 0) - (a.stats?.score ?? 0);
         case "score_asc":  return (a.stats?.score ?? 0) - (b.stats?.score ?? 0);
         case "name_asc":   return a.name.localeCompare(b.name);
-        case "date_desc":
-        default: return (b.date ?? "").localeCompare(a.date ?? "");
+        case "date_desc":  return (b.date ?? "").localeCompare(a.date ?? "");
+        default:           return leadValue(b) - leadValue(a);
       }
     });
   }, [vaultLeads, searchTerm, statusFilter, techFilter, quickFilters, sort]);
@@ -586,8 +589,10 @@ function CommandCenterInner() {
     try {
       const response = await fetch(`/api/leads/${id}/status`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ currentStatus: nextStatus }) });
       if (response.ok) {
-        setVaultLeads((prev) => prev.map((l) => (String(l.id) === String(id) ? { ...l, status: nextStatus } : l)));
-        if (openLead && String(openLead.id) === String(id)) setOpenLead({ ...openLead, status: nextStatus });
+        // Mirror the server stamping the contact time, so "follow up" shows right away.
+        const patch = (l: Lead): Lead => ({ ...l, status: nextStatus, ...(nextStatus === "CONTACTED" ? { contactedAt: new Date().toISOString() } : {}) });
+        setVaultLeads((prev) => prev.map((l) => (String(l.id) === String(id) ? patch(l) : l)));
+        if (openLead && String(openLead.id) === String(id)) setOpenLead(patch(openLead));
       } else toast.push("Update failed", "error");
     } catch { toast.push("Update failed", "error"); }
   };
@@ -702,7 +707,7 @@ function CommandCenterInner() {
   };
 
   const downloadPDF = (item: Lead, mode: "client" | "admin" = "admin") =>
-    generatePdf(item, mode, mode === "client" ? { benchmark: computeBenchmark(item, vaultLeads) } : undefined);
+    generatePdf(item, mode, { benchmark: peerBenchmark(item, vaultLeads) ?? undefined });
 
   const pushRecent = (entry: RecentSearch) => {
     setRecent((prev) => {
@@ -1055,26 +1060,6 @@ function CommandCenterInner() {
       )}
     </div>
   );
-}
-
-function computeBenchmark(item: Lead, all: Lead[]): BenchmarkInfo {
-  const cat = (item.category || "").toLowerCase().trim();
-  const area = BALI_AREAS.find((a) => (item.address || "").toLowerCase().includes(a.toLowerCase()));
-  const hasScore = (l: Lead) => typeof l.stats?.score === "number";
-  const catPeers = cat ? all.filter((l) => String(l.id) !== String(item.id) && (l.category || "").toLowerCase().trim() === cat && hasScore(l)) : [];
-  const areaPeers = area ? catPeers.filter((l) => (l.address || "").toLowerCase().includes(area.toLowerCase())) : [];
-  let pool: Lead[] = [];
-  let label = "";
-  if (areaPeers.length >= 3) { pool = areaPeers; label = `Top ${item.category} in ${area}`; }
-  else if (catPeers.length >= 3) { pool = catPeers; label = `Top ${item.category}`; }
-  if (pool.length >= 3) {
-    const scores = pool.map((l) => l.stats!.score).sort((a, b) => b - a);
-    const topN = Math.max(3, Math.ceil(scores.length * 0.25));
-    const top = scores.slice(0, topN);
-    const avg = Math.round(top.reduce((s, v) => s + v, 0) / top.length);
-    return { label, score: Math.max(avg, item.stats.score), basis: `Based on ${pool.length} ${item.category}${pool.length === 1 ? "" : "s"} you've audited.` };
-  }
-  return { label: "Top performers", score: 82, basis: "Industry benchmark." };
 }
 
 function StatCard({ label, value, sub, tone, onClick, active }: { label: string; value: React.ReactNode; sub?: string; tone?: "success" | "warn"; onClick?: () => void; active?: boolean }) {

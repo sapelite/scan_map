@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { withBrowser, discoverTargets, buildLeadFromTarget } from '@/lib/engine';
+import { withBrowser, discoverTargets, buildLeadFromTarget, runPool, LEAD_CONCURRENCY } from '@/lib/engine';
 import { getLeads, saveLead } from '@/lib/database';
 import { Lead } from '@/lib/types';
 
@@ -94,12 +94,12 @@ export async function POST(req: NextRequest) {
 
           send({ status: 'hunting', msg: `Discovered ${finalTargets.length} businesses. Auditing now...` });
 
-          for (let i = 0; i < finalTargets.length; i++) {
-            if (req.signal.aborted) break; // user hit Stop, halt further audits
-            const target = finalTargets[i];
+          // Audit several at once (much faster than one-by-one) but stop on Stop.
+          let done = 0;
+          await runPool(finalTargets, LEAD_CONCURRENCY, async (target) => {
             send({
               status: 'auditing',
-              msg: `Auditing ${i + 1}/${finalTargets.length}: ${target.name}${target.website ? '' : ' (no website on Maps)'}`,
+              msg: `Auditing ${++done}/${finalTargets.length}: ${target.name}${target.website ? '' : ' (no website on Maps)'}`,
             });
             try {
               const lead = await buildLeadFromTarget(browser, target);
@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
             } catch (err) {
               console.error(`Audit failed for ${target.name}`, err);
             }
-          }
+          }, () => req.signal.aborted);
         });
       } catch (error) {
         console.error('Critical stream error:', error);

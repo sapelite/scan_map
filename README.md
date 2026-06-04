@@ -69,6 +69,28 @@ You need an internet connection while scanning (it reads Google Maps) and to loa
 
 Your leads are saved in a file called `leads.json` inside the folder, so they stay between sessions.
 
+### Social discovery (followers, Instagram, etc.)
+
+For each business the scan also looks up its socials and pulls public stats (Instagram
+followers and posts, TikTok, and so on). It finds socials three ways: links on their
+website, links on their Google listing, and a web search when neither has them.
+
+The website and Google-listing sources, plus the follower/post stats, all work for
+free with no setup. The **web-search** step (used only when a business has no website
+and no social link on its listing) is the one part that can get rate-limited.
+
+- **Default (no setup):** it scrapes Brave. Fine for one-off searches and small sweeps,
+  but it gets throttled if you scan a lot at once, so it backs off and finds fewer.
+- **For reliable big sweeps**, add one of these to `.env`:
+  - `GOOGLE_CSE_ID` — free, 100 searches/day. You already have a Google key; just create
+    a free search engine at https://programmablesearchengine.google.com (set it to search
+    the whole web) and paste its ID.
+  - `BRAVE_SEARCH_API_KEY` — Brave's API. Has a free tier (~2,000/month, needs a card on
+    file) and paid plans (about $5 per 1,000). Key from https://brave.com/search/api/
+
+It never attaches a social account it isn't confident belongs to the business, so a
+throttled search just means fewer socials found, never wrong ones.
+
 ---
 
 ## If something goes wrong
