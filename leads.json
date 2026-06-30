@@ -1,5 +1,1454 @@
 [
   {
+    "id": "zvo8q176l",
+    "name": "XBR Canggu",
+    "url": "No website detected",
+    "websiteFromMaps": null,
+    "websiteStatus": "none",
+    "websiteFailReason": null,
+    "auditAttempts": [
+      "maps extraction: no-website-found",
+      "no website on Maps listing"
+    ],
+    "email": "No email found",
+    "whatsapp": null,
+    "opportunities": [
+      "needs_website",
+      "no_social"
+    ],
+    "tech": "Unknown",
+    "category": "bar",
+    "rating": 4.4,
+    "reviews": "328 reviews",
+    "reviewCount": 328,
+    "address": "Jl. Pantai Batu Bolong No.117, Canggu, Kec. Kuta Utara, Kabupaten Badung, Bali ",
+    "phone": "0819-3896-1103 ",
+    "mapsUrl": "https://www.google.com/maps/place/XBR+Canggu/data=!4m7!3m6!1s0x2dd24787cbaeaf15:0x8c49cb67b16f899f!8m2!3d-8.6581909!4d115.1312494!16s%2Fg%2F11fzf8rp9k!19sChIJFa-uy4dH0i0Rn4lvsWfLSYw?authuser=0&hl=en&rclk=1",
+    "isSocialUrl": false,
+    "authorityScore": 44,
+    "stats": {
+      "score": 13,
+      "riskLevel": "Critical",
+      "dimensions": {
+        "site": 0,
+        "social": 0,
+        "marketing": 0,
+        "reputation": 94,
+        "content": 0
+      }
+    },
+    "scoreFactors": [
+      {
+        "label": "Website reachable",
+        "weight": 100,
+        "ok": false,
+        "value": "no website",
+        "awarded": 0
+      }
+    ],
+    "dimensionFactors": [
+      {
+        "key": "site",
+        "label": "Website",
+        "score": 0,
+        "weight": 30,
+        "blurb": "How good their website is across security, speed, mobile, and on-page SEO.",
+        "factors": [
+          {
+            "label": "Website reachable",
+            "weight": 100,
+            "ok": false,
+            "value": "no website",
+            "awarded": 0
+          }
+        ]
+      },
+      {
+        "key": "social",
+        "label": "Social",
+        "score": 0,
+        "weight": 22,
+        "blurb": "Whether they're on the social platforms that matter (Instagram especially).",
+        "factors": [
+          {
+            "label": "Social profiles",
+            "weight": 100,
+            "ok": false,
+            "value": "none found",
+            "awarded": 0
+          }
+        ]
+      },
+      {
+        "key": "marketing",
+        "label": "Marketing",
+        "score": 0,
+        "weight": 20,
+        "blurb": "Do they run real marketing like tracking pixels, ads, lead capture, and booking.",
+        "factors": [
+          {
+            "label": "Detected from website",
+            "weight": 100,
+            "ok": false,
+            "value": "no website to scan",
+            "awarded": 0
+          }
+        ]
+      },
+      {
+        "key": "reputation",
+        "label": "Reputation",
+        "score": 94,
+        "weight": 14,
+        "blurb": "Their Google rating and how many reviews they've earned.",
+        "factors": [
+          {
+            "label": "Star rating",
+            "weight": 50,
+            "ok": true,
+            "value": "4.4★",
+            "awarded": 44
+          },
+          {
+            "label": "Review volume",
+            "weight": 50,
+            "ok": true,
+            "value": "328 reviews",
+            "awarded": 50
+          }
+        ]
+      },
+      {
+        "key": "content",
+        "label": "Content",
+        "score": 0,
+        "weight": 14,
+        "blurb": "Do they publish substantial, fresh content (copy, blog, structured data).",
+        "factors": [
+          {
+            "label": "Detected from website",
+            "weight": 100,
+            "ok": false,
+            "value": "no website to scan",
+            "awarded": 0
+          }
+        ]
+      }
+    ],
+    "socials": {
+      "instagram": null,
+      "facebook": null,
+      "linkedin": null,
+      "twitter": null,
+      "tiktok": null,
+      "youtube": null
+    },
+    "socialsSource": [],
+    "socialInsights": [],
+    "pitch": "Not online with a real website. Prime candidate for a website build plus full digital presence.",
+    "lastAuditedAt": "2026-06-05T10:17:51.614Z",
+    "status": "NEW",
+    "date": "2026-06-05"
+  },
+  {
+    "id": "24stt989g",
+    "name": "Beer Me Up Restaurant",
+    "url": "No website detected",
+    "websiteFromMaps": null,
+    "websiteStatus": "none",
+    "websiteFailReason": null,
+    "auditAttempts": [
+      "maps extraction: no-website-found",
+      "no website on Maps listing"
+    ],
+    "email": "No email found",
+    "whatsapp": null,
+    "opportunities": [
+      "needs_website",
+      "no_social"
+    ],
+    "tech": "Unknown",
+    "category": "bar",
+    "rating": 4.7,
+    "reviews": "48 reviews",
+    "reviewCount": 48,
+    "address": "Jl. Pantai Batu Bolong No.49D, Canggu, Kec. Kuta Utara, Kabupaten Badung, Bali 80351 ",
+    "phone": "No Phone",
+    "mapsUrl": "https://www.google.com/maps/place/Beer+Me+Up+Restaurant/data=!4m7!3m6!1s0x2dd239187128f7c5:0xa3665669c1410597!8m2!3d-8.6407841!4d115.1430023!16s%2Fg%2F11t5xpkws0!19sChIJxfcocRg50i0RlwVBwWlWZqM?authuser=0&hl=en&rclk=1",
+    "isSocialUrl": false,
+    "authorityScore": 47,
+    "stats": {
+      "score": 8,
+      "riskLevel": "Critical",
+      "dimensions": {
+        "site": 0,
+        "social": 0,
+        "marketing": 0,
+        "reputation": 59,
+        "content": 0
+      }
+    },
+    "scoreFactors": [
+      {
+        "label": "Website reachable",
+        "weight": 100,
+        "ok": false,
+        "value": "no website",
+        "awarded": 0
+      }
+    ],
+    "dimensionFactors": [
+      {
+        "key": "site",
+        "label": "Website",
+        "score": 0,
+        "weight": 30,
+        "blurb": "How good their website is across security, speed, mobile, and on-page SEO.",
+        "factors": [
+          {
+            "label": "Website reachable",
+            "weight": 100,
+            "ok": false,
+            "value": "no website",
+            "awarded": 0
+          }
+        ]
+      },
+      {
+        "key": "social",
+        "label": "Social",
+        "score": 0,
+        "weight": 22,
+        "blurb": "Whether they're on the social platforms that matter (Instagram especially).",
+        "factors": [
+          {
+            "label": "Social profiles",
+            "weight": 100,
+            "ok": false,
+            "value": "none found",
+            "awarded": 0
+          }
+        ]
+      },
+      {
+        "key": "marketing",
+        "label": "Marketing",
+        "score": 0,
+        "weight": 20,
+        "blurb": "Do they run real marketing like tracking pixels, ads, lead capture, and booking.",
+        "factors": [
+          {
+            "label": "Detected from website",
+            "weight": 100,
+            "ok": false,
+            "value": "no website to scan",
+            "awarded": 0
+          }
+        ]
+      },
+      {
+        "key": "reputation",
+        "label": "Reputation",
+        "score": 59,
+        "weight": 14,
+        "blurb": "Their Google rating and how many reviews they've earned.",
+        "factors": [
+          {
+            "label": "Star rating",
+            "weight": 50,
+            "ok": true,
+            "value": "4.7★",
+            "awarded": 47
+          },
+          {
+            "label": "Review volume",
+            "weight": 50,
+            "ok": true,
+            "value": "48 reviews",
+            "awarded": 12
+          }
+        ]
+      },
+      {
+        "key": "content",
+        "label": "Content",
+        "score": 0,
+        "weight": 14,
+        "blurb": "Do they publish substantial, fresh content (copy, blog, structured data).",
+        "factors": [
+          {
+            "label": "Detected from website",
+            "weight": 100,
+            "ok": false,
+            "value": "no website to scan",
+            "awarded": 0
+          }
+        ]
+      }
+    ],
+    "socials": {
+      "instagram": null,
+      "facebook": null,
+      "linkedin": null,
+      "twitter": null,
+      "tiktok": null,
+      "youtube": null
+    },
+    "socialsSource": [],
+    "socialInsights": [],
+    "pitch": "Not online with a real website. Prime candidate for a website build plus full digital presence.",
+    "lastAuditedAt": "2026-06-05T10:17:48.466Z",
+    "status": "NEW",
+    "date": "2026-06-05"
+  },
+  {
+    "id": "ks30egwqy",
+    "name": "Sand Bar",
+    "url": "No website detected",
+    "websiteFromMaps": null,
+    "websiteStatus": "none",
+    "websiteFailReason": null,
+    "auditAttempts": [
+      "maps extraction: no-website-found",
+      "no website on Maps listing",
+      "web-search socials: 2 new (2 total)",
+      "social stats: Instagram 5881"
+    ],
+    "email": "No email found",
+    "whatsapp": null,
+    "opportunities": [
+      "needs_website",
+      "no_booking"
+    ],
+    "tech": "Unknown",
+    "category": "bar",
+    "rating": 4.3,
+    "reviews": "1,547 reviews",
+    "reviewCount": 1547,
+    "address": "Jl. Pantai Batu Bolong, Canggu, Kec. Kuta Utara, Kabupaten Badung, Bali ",
+    "phone": "0812-3889-5559 ",
+    "mapsUrl": "https://www.google.com/maps/place/Sand+Bar/data=!4m7!3m6!1s0x2dd238767dbdb553:0x2d4a563faec2b492!8m2!3d-8.659448!4d115.1303181!16s%2Fg%2F11dxcjmsv5!19sChIJU7W9fXY40i0RkrTCrj9WSi0?authuser=0&hl=en&rclk=1",
+    "isSocialUrl": false,
+    "authorityScore": 43,
+    "stats": {
+      "score": 35,
+      "riskLevel": "Critical",
+      "dimensions": {
+        "site": 0,
+        "social": 100,
+        "marketing": 0,
+        "reputation": 93,
+        "content": 0
+      }
+    },
+    "scoreFactors": [
+      {
+        "label": "Website reachable",
+        "weight": 100,
+        "ok": false,
+        "value": "no website",
+        "awarded": 0
+      }
+    ],
+    "dimensionFactors": [
+      {
+        "key": "site",
+        "label": "Website",
+        "score": 0,
+        "weight": 30,
+        "blurb": "How good their website is across security, speed, mobile, and on-page SEO.",
+        "factors": [
+          {
+            "label": "Website reachable",
+            "weight": 100,
+            "ok": false,
+            "value": "no website",
+            "awarded": 0
+          }
+        ]
+      },
+      {
+        "key": "social",
+        "label": "Social",
+        "score": 100,
+        "weight": 22,
+        "blurb": "Whether they're on the social platforms that matter (Instagram especially).",
+        "factors": [
+          {
+            "label": "Any social profile",
+            "weight": 25,
+            "ok": true,
+            "value": "2 found",
+            "awarded": 25
+          },
+          {
+            "label": "Instagram",
+            "weight": 25,
+            "ok": true,
+            "awarded": 25
+          },
+          {
+            "label": "Facebook",
+            "weight": 15,
+            "ok": true,
+            "awarded": 15
+          },
+          {
+            "label": "Multiple platforms (2+)",
+            "weight": 15,
+            "ok": true,
+            "awarded": 15
+          },
+          {
+            "label": "Engaged audience (1k+ followers)",
+            "weight": 20,
+            "ok": true,
+            "value": "5 881 followers",
+            "awarded": 20
+          }
+        ]
+      },
+      {
+        "key": "marketing",
+        "label": "Marketing",
+        "score": 0,
+        "weight": 20,
+        "blurb": "Do they run real marketing like tracking pixels, ads, lead capture, and booking.",
+        "factors": [
+          {
+            "label": "Detected from website",
+            "weight": 100,
+            "ok": false,
+            "value": "no website to scan",
+            "awarded": 0
+          }
+        ]
+      },
+      {
+        "key": "reputation",
+        "label": "Reputation",
+        "score": 93,
+        "weight": 14,
+        "blurb": "Their Google rating and how many reviews they've earned.",
+        "factors": [
+          {
+            "label": "Star rating",
+            "weight": 50,
+            "ok": true,
+            "value": "4.3★",
+            "awarded": 43
+          },
+          {
+            "label": "Review volume",
+            "weight": 50,
+            "ok": true,
+            "value": "1547 reviews",
+            "awarded": 50
+          }
+        ]
+      },
+      {
+        "key": "content",
+        "label": "Content",
+        "score": 0,
+        "weight": 14,
+        "blurb": "Do they publish substantial, fresh content (copy, blog, structured data).",
+        "factors": [
+          {
+            "label": "Detected from website",
+            "weight": 100,
+            "ok": false,
+            "value": "no website to scan",
+            "awarded": 0
+          }
+        ]
+      }
+    ],
+    "socials": {
+      "instagram": "https://instagram.com/sandbar_bali",
+      "facebook": "https://facebook.com/sandbarofficial",
+      "linkedin": null,
+      "twitter": null,
+      "tiktok": null,
+      "youtube": null
+    },
+    "socialsSource": [
+      "search"
+    ],
+    "socialInsights": [
+      {
+        "platform": "Instagram",
+        "url": "https://instagram.com/sandbar_bali",
+        "live": true,
+        "title": "sandbarbali",
+        "note": "",
+        "handle": "@sandbar_bali",
+        "followers": 5881,
+        "following": 41,
+        "posts": 363
+      },
+      {
+        "platform": "Facebook",
+        "url": "https://facebook.com/sandbarofficial",
+        "live": true,
+        "title": null,
+        "note": "present, public data gated (login wall)",
+        "handle": "@sandbarofficial"
+      }
+    ],
+    "pitch": "Not online with a real website. Prime candidate for a website build plus full digital presence.",
+    "lastAuditedAt": "2026-06-05T10:17:46.484Z",
+    "status": "NEW",
+    "date": "2026-06-05"
+  },
+  {
+    "id": "09xl0jvef",
+    "name": "Favela Chic Beach Club",
+    "url": "No website detected",
+    "websiteFromMaps": null,
+    "websiteStatus": "none",
+    "websiteFailReason": null,
+    "auditAttempts": [
+      "maps extraction: panel-hydration-timeout, no-website-found",
+      "no website on Maps listing",
+      "web-search socials: 3 new (3 total)",
+      "social stats: Instagram 262, TikTok 13800"
+    ],
+    "email": "No email found",
+    "whatsapp": null,
+    "opportunities": [
+      "needs_website",
+      "no_booking"
+    ],
+    "tech": "Unknown",
+    "category": "beach club",
+    "rating": 4.2,
+    "reviews": "50 reviews",
+    "reviewCount": 50,
+    "address": "84WF+7PV, Canggu, Kuta Utara, Badung Regency, Bali ",
+    "phone": "No Phone",
+    "mapsUrl": "https://www.google.com/maps/place/Favela+Chic+Beach+Club/data=!4m7!3m6!1s0x2dd238767b73abc7:0x35c7a1171daa291f!8m2!3d-8.6542552!4d115.1242847!16s%2Fg%2F11cjj01h3c!19sChIJx6tze3Y40i0RHymqHRehxzU?authuser=0&hl=en&rclk=1",
+    "isSocialUrl": false,
+    "authorityScore": 42,
+    "stats": {
+      "score": 30,
+      "riskLevel": "Critical",
+      "dimensions": {
+        "site": 0,
+        "social": 100,
+        "marketing": 0,
+        "reputation": 55,
+        "content": 0
+      }
+    },
+    "scoreFactors": [
+      {
+        "label": "Website reachable",
+        "weight": 100,
+        "ok": false,
+        "value": "no website",
+        "awarded": 0
+      }
+    ],
+    "dimensionFactors": [
+      {
+        "key": "site",
+        "label": "Website",
+        "score": 0,
+        "weight": 30,
+        "blurb": "How good their website is across security, speed, mobile, and on-page SEO.",
+        "factors": [
+          {
+            "label": "Website reachable",
+            "weight": 100,
+            "ok": false,
+            "value": "no website",
+            "awarded": 0
+          }
+        ]
+      },
+      {
+        "key": "social",
+        "label": "Social",
+        "score": 100,
+        "weight": 22,
+        "blurb": "Whether they're on the social platforms that matter (Instagram especially).",
+        "factors": [
+          {
+            "label": "Any social profile",
+            "weight": 25,
+            "ok": true,
+            "value": "3 found",
+            "awarded": 25
+          },
+          {
+            "label": "Instagram",
+            "weight": 25,
+            "ok": true,
+            "awarded": 25
+          },
+          {
+            "label": "Facebook",
+            "weight": 15,
+            "ok": true,
+            "awarded": 15
+          },
+          {
+            "label": "Multiple platforms (2+)",
+            "weight": 15,
+            "ok": true,
+            "awarded": 15
+          },
+          {
+            "label": "Engaged audience (1k+ followers)",
+            "weight": 20,
+            "ok": true,
+            "value": "13 800 followers",
+            "awarded": 20
+          }
+        ]
+      },
+      {
+        "key": "marketing",
+        "label": "Marketing",
+        "score": 0,
+        "weight": 20,
+        "blurb": "Do they run real marketing like tracking pixels, ads, lead capture, and booking.",
+        "factors": [
+          {
+            "label": "Detected from website",
+            "weight": 100,
+            "ok": false,
+            "value": "no website to scan",
+            "awarded": 0
+          }
+        ]
+      },
+      {
+        "key": "reputation",
+        "label": "Reputation",
+        "score": 55,
+        "weight": 14,
+        "blurb": "Their Google rating and how many reviews they've earned.",
+        "factors": [
+          {
+            "label": "Star rating",
+            "weight": 50,
+            "ok": true,
+            "value": "4.2★",
+            "awarded": 42
+          },
+          {
+            "label": "Review volume",
+            "weight": 50,
+            "ok": true,
+            "value": "50 reviews",
+            "awarded": 13
+          }
+        ]
+      },
+      {
+        "key": "content",
+        "label": "Content",
+        "score": 0,
+        "weight": 14,
+        "blurb": "Do they publish substantial, fresh content (copy, blog, structured data).",
+        "factors": [
+          {
+            "label": "Detected from website",
+            "weight": 100,
+            "ok": false,
+            "value": "no website to scan",
+            "awarded": 0
+          }
+        ]
+      }
+    ],
+    "socials": {
+      "instagram": "https://instagram.com/favelachicbali",
+      "facebook": "https://facebook.com/lafavelaseminyak",
+      "linkedin": null,
+      "twitter": null,
+      "tiktok": "https://tiktok.com/@lafavelabali_",
+      "youtube": null
+    },
+    "socialsSource": [
+      "search"
+    ],
+    "socialInsights": [
+      {
+        "platform": "Instagram",
+        "url": "https://instagram.com/favelachicbali",
+        "live": true,
+        "title": "FavelaChicBali",
+        "note": "",
+        "handle": "@favelachicbali",
+        "followers": 262,
+        "following": 119,
+        "posts": 33,
+        "bio": "Surf Lessons, Amazing Food, Friendly Local Hangout 🌊 🏄 🏝 Echo Beach, Canggu, Bali"
+      },
+      {
+        "platform": "Facebook",
+        "url": "https://facebook.com/lafavelaseminyak",
+        "live": true,
+        "title": null,
+        "note": "present, public data gated (login wall)",
+        "handle": "@lafavelaseminyak"
+      },
+      {
+        "platform": "TikTok",
+        "url": "https://tiktok.com/@lafavelabali_",
+        "live": true,
+        "title": "LA FAVELA BALI",
+        "note": "",
+        "handle": "@lafavelabali_",
+        "followers": 13800,
+        "following": 4,
+        "posts": 104,
+        "bio": "Bali's hottest restaurant & night club, situated in the heart of Seminyak 🪩🎶"
+      }
+    ],
+    "pitch": "Not online with a real website. Prime candidate for a website build plus full digital presence.",
+    "lastAuditedAt": "2026-06-05T10:17:24.058Z",
+    "status": "NEW",
+    "date": "2026-06-05"
+  },
+  {
+    "id": "fphr9f2h3",
+    "name": "Nordu Coffee Canggu - kopinomordua",
+    "url": "No website detected",
+    "websiteFromMaps": null,
+    "websiteStatus": "none",
+    "websiteFailReason": null,
+    "auditAttempts": [
+      "maps extraction: no-website-found",
+      "no website on Maps listing",
+      "web-search socials: 1 new (1 total)",
+      "social stats: Instagram 61859"
+    ],
+    "email": "No email found",
+    "whatsapp": null,
+    "opportunities": [
+      "needs_website",
+      "dormant_social",
+      "no_booking"
+    ],
+    "tech": "Unknown",
+    "category": "coffee shop",
+    "rating": 5,
+    "reviews": "34 reviews",
+    "reviewCount": 34,
+    "address": "S7, Jl. Raya Kayutulang, Canggu, Kuta Utara, Badung Regency, Bali 80351 ",
+    "phone": "No Phone",
+    "mapsUrl": "https://www.google.com/maps/place/Nordu+Coffee+Canggu+-+kopinomordua/data=!4m7!3m6!1s0x2dd23900433e2dd7:0x159b4ef27487cfa0!8m2!3d-8.6439881!4d115.1432154!16s%2Fg%2F11nhz8mbqq!19sChIJ1y0-QwA50i0RoM-HdPJOmxU?authuser=0&hl=en&rclk=1",
+    "isSocialUrl": false,
+    "authorityScore": 50,
+    "stats": {
+      "score": 24,
+      "riskLevel": "Critical",
+      "dimensions": {
+        "site": 0,
+        "social": 70,
+        "marketing": 0,
+        "reputation": 59,
+        "content": 0
+      }
+    },
+    "scoreFactors": [
+      {
+        "label": "Website reachable",
+        "weight": 100,
+        "ok": false,
+        "value": "no website",
+        "awarded": 0
+      }
+    ],
+    "dimensionFactors": [
+      {
+        "key": "site",
+        "label": "Website",
+        "score": 0,
+        "weight": 30,
+        "blurb": "How good their website is across security, speed, mobile, and on-page SEO.",
+        "factors": [
+          {
+            "label": "Website reachable",
+            "weight": 100,
+            "ok": false,
+            "value": "no website",
+            "awarded": 0
+          }
+        ]
+      },
+      {
+        "key": "social",
+        "label": "Social",
+        "score": 70,
+        "weight": 22,
+        "blurb": "Whether they're on the social platforms that matter (Instagram especially).",
+        "factors": [
+          {
+            "label": "Any social profile",
+            "weight": 25,
+            "ok": true,
+            "value": "1 found",
+            "awarded": 25
+          },
+          {
+            "label": "Instagram",
+            "weight": 25,
+            "ok": true,
+            "awarded": 25
+          },
+          {
+            "label": "Facebook",
+            "weight": 15,
+            "ok": false,
+            "awarded": 0
+          },
+          {
+            "label": "Multiple platforms (2+)",
+            "weight": 15,
+            "ok": false,
+            "awarded": 0
+          },
+          {
+            "label": "Engaged audience (1k+ followers)",
+            "weight": 20,
+            "ok": true,
+            "value": "61 859 followers",
+            "awarded": 20
+          }
+        ]
+      },
+      {
+        "key": "marketing",
+        "label": "Marketing",
+        "score": 0,
+        "weight": 20,
+        "blurb": "Do they run real marketing like tracking pixels, ads, lead capture, and booking.",
+        "factors": [
+          {
+            "label": "Detected from website",
+            "weight": 100,
+            "ok": false,
+            "value": "no website to scan",
+            "awarded": 0
+          }
+        ]
+      },
+      {
+        "key": "reputation",
+        "label": "Reputation",
+        "score": 59,
+        "weight": 14,
+        "blurb": "Their Google rating and how many reviews they've earned.",
+        "factors": [
+          {
+            "label": "Star rating",
+            "weight": 50,
+            "ok": true,
+            "value": "5.0★",
+            "awarded": 50
+          },
+          {
+            "label": "Review volume",
+            "weight": 50,
+            "ok": true,
+            "value": "34 reviews",
+            "awarded": 9
+          }
+        ]
+      },
+      {
+        "key": "content",
+        "label": "Content",
+        "score": 0,
+        "weight": 14,
+        "blurb": "Do they publish substantial, fresh content (copy, blog, structured data).",
+        "factors": [
+          {
+            "label": "Detected from website",
+            "weight": 100,
+            "ok": false,
+            "value": "no website to scan",
+            "awarded": 0
+          }
+        ]
+      }
+    ],
+    "socials": {
+      "instagram": "https://instagram.com/kopinomordua",
+      "facebook": null,
+      "linkedin": null,
+      "twitter": null,
+      "tiktok": null,
+      "youtube": null
+    },
+    "socialsSource": [
+      "search"
+    ],
+    "socialInsights": [
+      {
+        "platform": "Instagram",
+        "url": "https://instagram.com/kopinomordua",
+        "live": true,
+        "title": "Nordu Coffee",
+        "note": "",
+        "handle": "@kopinomordua",
+        "followers": 61859,
+        "following": 1,
+        "posts": 1287,
+        "bio": "#KopiSusuSpecialist ⏱️ Open Everyday for #KawanNordu Need More Coffee? Menu, Location, Information ⬇️ Career info @gwggroup.career"
+      }
+    ],
+    "pitch": "Not online with a real website. Prime candidate for a website build plus full digital presence.",
+    "lastAuditedAt": "2026-06-05T10:16:45.160Z",
+    "status": "NEW",
+    "date": "2026-06-05"
+  },
+  {
+    "id": "7c9156w42",
+    "name": "Tabo Cafe Canggu",
+    "url": "No website detected",
+    "websiteFromMaps": null,
+    "websiteStatus": "none",
+    "websiteFailReason": null,
+    "auditAttempts": [
+      "maps extraction: no-website-found",
+      "no website on Maps listing"
+    ],
+    "email": "No email found",
+    "whatsapp": null,
+    "opportunities": [
+      "needs_website",
+      "no_social"
+    ],
+    "tech": "Unknown",
+    "category": "coffee shop",
+    "rating": 5,
+    "reviews": "37 reviews",
+    "reviewCount": 37,
+    "address": "Jl. Kayu Tulang No.8, Canggu, Kec. Kuta Utara, Kabupaten Badung, Bali 80361 ",
+    "phone": "0822-2163-8857 ",
+    "mapsUrl": "https://www.google.com/maps/place/Tabo+Cafe+Canggu/data=!4m7!3m6!1s0x2dd239c84e5577c5:0x85ea09539bf4eb7f!8m2!3d-8.6398117!4d115.1465009!16s%2Fg%2F11ys8_b58v!19sChIJxXdVTsg50i0Rf-v0m1MJ6oU?authuser=0&hl=en&rclk=1",
+    "isSocialUrl": false,
+    "authorityScore": 50,
+    "stats": {
+      "score": 8,
+      "riskLevel": "Critical",
+      "dimensions": {
+        "site": 0,
+        "social": 0,
+        "marketing": 0,
+        "reputation": 59,
+        "content": 0
+      }
+    },
+    "scoreFactors": [
+      {
+        "label": "Website reachable",
+        "weight": 100,
+        "ok": false,
+        "value": "no website",
+        "awarded": 0
+      }
+    ],
+    "dimensionFactors": [
+      {
+        "key": "site",
+        "label": "Website",
+        "score": 0,
+        "weight": 30,
+        "blurb": "How good their website is across security, speed, mobile, and on-page SEO.",
+        "factors": [
+          {
+            "label": "Website reachable",
+            "weight": 100,
+            "ok": false,
+            "value": "no website",
+            "awarded": 0
+          }
+        ]
+      },
+      {
+        "key": "social",
+        "label": "Social",
+        "score": 0,
+        "weight": 22,
+        "blurb": "Whether they're on the social platforms that matter (Instagram especially).",
+        "factors": [
+          {
+            "label": "Social profiles",
+            "weight": 100,
+            "ok": false,
+            "value": "none found",
+            "awarded": 0
+          }
+        ]
+      },
+      {
+        "key": "marketing",
+        "label": "Marketing",
+        "score": 0,
+        "weight": 20,
+        "blurb": "Do they run real marketing like tracking pixels, ads, lead capture, and booking.",
+        "factors": [
+          {
+            "label": "Detected from website",
+            "weight": 100,
+            "ok": false,
+            "value": "no website to scan",
+            "awarded": 0
+          }
+        ]
+      },
+      {
+        "key": "reputation",
+        "label": "Reputation",
+        "score": 59,
+        "weight": 14,
+        "blurb": "Their Google rating and how many reviews they've earned.",
+        "factors": [
+          {
+            "label": "Star rating",
+            "weight": 50,
+            "ok": true,
+            "value": "5.0★",
+            "awarded": 50
+          },
+          {
+            "label": "Review volume",
+            "weight": 50,
+            "ok": true,
+            "value": "37 reviews",
+            "awarded": 9
+          }
+        ]
+      },
+      {
+        "key": "content",
+        "label": "Content",
+        "score": 0,
+        "weight": 14,
+        "blurb": "Do they publish substantial, fresh content (copy, blog, structured data).",
+        "factors": [
+          {
+            "label": "Detected from website",
+            "weight": 100,
+            "ok": false,
+            "value": "no website to scan",
+            "awarded": 0
+          }
+        ]
+      }
+    ],
+    "socials": {
+      "instagram": null,
+      "facebook": null,
+      "linkedin": null,
+      "twitter": null,
+      "tiktok": null,
+      "youtube": null
+    },
+    "socialsSource": [],
+    "socialInsights": [],
+    "pitch": "Not online with a real website. Prime candidate for a website build plus full digital presence.",
+    "lastAuditedAt": "2026-06-05T10:16:44.093Z",
+    "status": "NEW",
+    "date": "2026-06-05"
+  },
+  {
+    "id": "ypz18n5xi",
+    "name": "SUGI.CANGGU",
+    "url": "No website detected",
+    "websiteFromMaps": null,
+    "websiteStatus": "none",
+    "websiteFailReason": null,
+    "auditAttempts": [
+      "maps extraction: panel-hydration-timeout, no-website-found",
+      "no website on Maps listing",
+      "web-search socials: 1 new (1 total)"
+    ],
+    "email": "No email found",
+    "whatsapp": null,
+    "opportunities": [
+      "needs_website",
+      "dormant_social",
+      "no_booking"
+    ],
+    "tech": "Unknown",
+    "category": "coffee shop",
+    "rating": 5,
+    "reviews": "426 reviews",
+    "reviewCount": 426,
+    "address": "banjar, Jl. Canggu Padang Linjong No.2a, Canggu, Kec. Kuta Utara, Kabupaten Badung, Bali 80361 ",
+    "phone": "0813-3978-6180 ",
+    "mapsUrl": "https://www.google.com/maps/place/SUGI.CANGGU/data=!4m7!3m6!1s0x2dd239d2ef3113f9:0xcca54b69b9898dbd!8m2!3d-8.6405063!4d115.1405162!16s%2Fg%2F11x15zzktr!19sChIJ-RMx79I50i0RvY2JuWlLpcw?authuser=0&hl=en&rclk=1",
+    "isSocialUrl": false,
+    "authorityScore": 50,
+    "stats": {
+      "score": 25,
+      "riskLevel": "Critical",
+      "dimensions": {
+        "site": 0,
+        "social": 50,
+        "marketing": 0,
+        "reputation": 100,
+        "content": 0
+      }
+    },
+    "scoreFactors": [
+      {
+        "label": "Website reachable",
+        "weight": 100,
+        "ok": false,
+        "value": "no website",
+        "awarded": 0
+      }
+    ],
+    "dimensionFactors": [
+      {
+        "key": "site",
+        "label": "Website",
+        "score": 0,
+        "weight": 30,
+        "blurb": "How good their website is across security, speed, mobile, and on-page SEO.",
+        "factors": [
+          {
+            "label": "Website reachable",
+            "weight": 100,
+            "ok": false,
+            "value": "no website",
+            "awarded": 0
+          }
+        ]
+      },
+      {
+        "key": "social",
+        "label": "Social",
+        "score": 50,
+        "weight": 22,
+        "blurb": "Whether they're on the social platforms that matter (Instagram especially).",
+        "factors": [
+          {
+            "label": "Any social profile",
+            "weight": 25,
+            "ok": true,
+            "value": "1 found",
+            "awarded": 25
+          },
+          {
+            "label": "Instagram",
+            "weight": 25,
+            "ok": true,
+            "awarded": 25
+          },
+          {
+            "label": "Facebook",
+            "weight": 15,
+            "ok": false,
+            "awarded": 0
+          },
+          {
+            "label": "Multiple platforms (2+)",
+            "weight": 15,
+            "ok": false,
+            "awarded": 0
+          },
+          {
+            "label": "Engaged audience (1k+ followers)",
+            "weight": 20,
+            "ok": false,
+            "awarded": 0
+          }
+        ]
+      },
+      {
+        "key": "marketing",
+        "label": "Marketing",
+        "score": 0,
+        "weight": 20,
+        "blurb": "Do they run real marketing like tracking pixels, ads, lead capture, and booking.",
+        "factors": [
+          {
+            "label": "Detected from website",
+            "weight": 100,
+            "ok": false,
+            "value": "no website to scan",
+            "awarded": 0
+          }
+        ]
+      },
+      {
+        "key": "reputation",
+        "label": "Reputation",
+        "score": 100,
+        "weight": 14,
+        "blurb": "Their Google rating and how many reviews they've earned.",
+        "factors": [
+          {
+            "label": "Star rating",
+            "weight": 50,
+            "ok": true,
+            "value": "5.0★",
+            "awarded": 50
+          },
+          {
+            "label": "Review volume",
+            "weight": 50,
+            "ok": true,
+            "value": "426 reviews",
+            "awarded": 50
+          }
+        ]
+      },
+      {
+        "key": "content",
+        "label": "Content",
+        "score": 0,
+        "weight": 14,
+        "blurb": "Do they publish substantial, fresh content (copy, blog, structured data).",
+        "factors": [
+          {
+            "label": "Detected from website",
+            "weight": 100,
+            "ok": false,
+            "value": "no website to scan",
+            "awarded": 0
+          }
+        ]
+      }
+    ],
+    "socials": {
+      "instagram": "https://instagram.com/sugicanggu",
+      "facebook": null,
+      "linkedin": null,
+      "twitter": null,
+      "tiktok": null,
+      "youtube": null
+    },
+    "socialsSource": [
+      "search"
+    ],
+    "socialInsights": [
+      {
+        "platform": "Instagram",
+        "url": "https://instagram.com/sugicanggu",
+        "live": true,
+        "title": null,
+        "note": "",
+        "handle": "@sugicanggu"
+      }
+    ],
+    "pitch": "Not online with a real website. Prime candidate for a website build plus full digital presence.",
+    "lastAuditedAt": "2026-06-05T10:16:36.906Z",
+    "status": "NEW",
+    "date": "2026-06-05"
+  },
+  {
+    "id": "5el1tj51t",
+    "name": "Felice Canggu",
+    "url": "No website detected",
+    "websiteFromMaps": null,
+    "websiteStatus": "none",
+    "websiteFailReason": null,
+    "auditAttempts": [
+      "maps extraction: no-website-found",
+      "no website on Maps listing",
+      "web-search socials: 2 new (2 total)",
+      "social stats: Instagram 1401"
+    ],
+    "email": "No email found",
+    "whatsapp": null,
+    "opportunities": [
+      "needs_website",
+      "no_booking"
+    ],
+    "tech": "Unknown",
+    "category": "restaurant",
+    "rating": 4.7,
+    "reviews": "117 reviews",
+    "reviewCount": 117,
+    "address": "Jl. Pantai Batu Bolong, Canggu, Kec. Kuta Utara, Kabupaten Badung, Bali 80351 ",
+    "phone": "0896-7044-3852 ",
+    "mapsUrl": "https://www.google.com/maps/place/Felice+Canggu/data=!4m7!3m6!1s0x2dd23900344005f7:0x5cac1d658e9052a9!8m2!3d-8.645343!4d115.1412517!16s%2Fg%2F11vs2w1t3n!19sChIJ9wVANAA50i0RqVKQjmUdrFw?authuser=0&hl=en&rclk=1",
+    "isSocialUrl": false,
+    "authorityScore": 47,
+    "stats": {
+      "score": 33,
+      "riskLevel": "Critical",
+      "dimensions": {
+        "site": 0,
+        "social": 100,
+        "marketing": 0,
+        "reputation": 76,
+        "content": 0
+      }
+    },
+    "scoreFactors": [
+      {
+        "label": "Website reachable",
+        "weight": 100,
+        "ok": false,
+        "value": "no website",
+        "awarded": 0
+      }
+    ],
+    "dimensionFactors": [
+      {
+        "key": "site",
+        "label": "Website",
+        "score": 0,
+        "weight": 30,
+        "blurb": "How good their website is across security, speed, mobile, and on-page SEO.",
+        "factors": [
+          {
+            "label": "Website reachable",
+            "weight": 100,
+            "ok": false,
+            "value": "no website",
+            "awarded": 0
+          }
+        ]
+      },
+      {
+        "key": "social",
+        "label": "Social",
+        "score": 100,
+        "weight": 22,
+        "blurb": "Whether they're on the social platforms that matter (Instagram especially).",
+        "factors": [
+          {
+            "label": "Any social profile",
+            "weight": 25,
+            "ok": true,
+            "value": "2 found",
+            "awarded": 25
+          },
+          {
+            "label": "Instagram",
+            "weight": 25,
+            "ok": true,
+            "awarded": 25
+          },
+          {
+            "label": "Facebook",
+            "weight": 15,
+            "ok": true,
+            "awarded": 15
+          },
+          {
+            "label": "Multiple platforms (2+)",
+            "weight": 15,
+            "ok": true,
+            "awarded": 15
+          },
+          {
+            "label": "Engaged audience (1k+ followers)",
+            "weight": 20,
+            "ok": true,
+            "value": "1 401 followers",
+            "awarded": 20
+          }
+        ]
+      },
+      {
+        "key": "marketing",
+        "label": "Marketing",
+        "score": 0,
+        "weight": 20,
+        "blurb": "Do they run real marketing like tracking pixels, ads, lead capture, and booking.",
+        "factors": [
+          {
+            "label": "Detected from website",
+            "weight": 100,
+            "ok": false,
+            "value": "no website to scan",
+            "awarded": 0
+          }
+        ]
+      },
+      {
+        "key": "reputation",
+        "label": "Reputation",
+        "score": 76,
+        "weight": 14,
+        "blurb": "Their Google rating and how many reviews they've earned.",
+        "factors": [
+          {
+            "label": "Star rating",
+            "weight": 50,
+            "ok": true,
+            "value": "4.7★",
+            "awarded": 47
+          },
+          {
+            "label": "Review volume",
+            "weight": 50,
+            "ok": true,
+            "value": "117 reviews",
+            "awarded": 29
+          }
+        ]
+      },
+      {
+        "key": "content",
+        "label": "Content",
+        "score": 0,
+        "weight": 14,
+        "blurb": "Do they publish substantial, fresh content (copy, blog, structured data).",
+        "factors": [
+          {
+            "label": "Detected from website",
+            "weight": 100,
+            "ok": false,
+            "value": "no website to scan",
+            "awarded": 0
+          }
+        ]
+      }
+    ],
+    "socials": {
+      "instagram": "https://instagram.com/felicecanggu",
+      "facebook": "https://facebook.com/felicecanggu",
+      "linkedin": null,
+      "twitter": null,
+      "tiktok": null,
+      "youtube": null
+    },
+    "socialsSource": [
+      "search"
+    ],
+    "socialInsights": [
+      {
+        "platform": "Instagram",
+        "url": "https://instagram.com/felicecanggu",
+        "live": true,
+        "title": "Felice Canggu Italian Bistro",
+        "note": "",
+        "handle": "@felicecanggu",
+        "followers": 1401,
+        "following": 865,
+        "posts": 236,
+        "bio": "Italian bistro in Canggu, Bali, serving authentic Italian cuisine paired with fine wine and signature cocktails! Click the link below for more info!"
+      },
+      {
+        "platform": "Facebook",
+        "url": "https://facebook.com/felicecanggu",
+        "live": true,
+        "title": null,
+        "note": "present, public data gated (login wall)",
+        "handle": "@felicecanggu"
+      }
+    ],
+    "pitch": "Not online with a real website. Prime candidate for a website build plus full digital presence.",
+    "lastAuditedAt": "2026-06-05T10:15:02.526Z",
+    "status": "NEW",
+    "date": "2026-06-05"
+  },
+  {
     "id": "g2gfm2d9c",
     "name": "ORU Pilates",
     "url": "No website detected",
@@ -286,9 +1735,10 @@
     ],
     "pitch": "Not online with a real website. Prime candidate for a website build plus full digital presence.",
     "lastAuditedAt": "2026-06-02T17:12:09.301Z",
-    "status": "NEW",
+    "status": "CONTACTED",
     "date": "2026-06-02",
-    "notes": ""
+    "notes": "",
+    "contactedAt": "2026-06-05T10:12:21.442Z"
   },
   {
     "id": "kga020wqf",
@@ -427,8 +1877,9 @@
     ],
     "pitch": "Not online with a real website. Prime candidate for a website build plus full digital presence.",
     "lastAuditedAt": "2026-06-02T17:12:04.228Z",
-    "status": "NEW",
-    "date": "2026-06-02"
+    "status": "CONTACTED",
+    "date": "2026-06-02",
+    "contactedAt": "2026-06-05T10:12:28.849Z"
   },
   {
     "id": "4gylgakwh",
@@ -567,8 +2018,9 @@
     ],
     "pitch": "Not online with a real website. Prime candidate for a website build plus full digital presence.",
     "lastAuditedAt": "2026-06-02T17:12:01.759Z",
-    "status": "NEW",
-    "date": "2026-06-02"
+    "status": "CONTACTED",
+    "date": "2026-06-02",
+    "contactedAt": "2026-06-05T10:12:22.103Z"
   },
   {
     "id": "wd6chishs",
@@ -3502,8 +4954,9 @@
     },
     "pitch": "Best angles to sell: Copywriting + content · Content creation · Marketing strategy.",
     "lastAuditedAt": "2026-06-02T16:07:16.703Z",
-    "status": "NEW",
-    "date": "2026-06-02"
+    "status": "CONTACTED",
+    "date": "2026-06-02",
+    "contactedAt": "2026-06-05T10:12:19.363Z"
   },
   {
     "id": "f0mw4jwha",
@@ -8920,8 +10373,9 @@
     },
     "pitch": "Their website is down (connect ECONNREFUSED 36.50.77.42:443). Rebuild plus recovery opportunity.",
     "lastAuditedAt": "2026-06-02T16:02:51.531Z",
-    "status": "NEW",
-    "date": "2026-06-02"
+    "status": "REJECTED",
+    "date": "2026-06-02",
+    "contactedAt": "2026-06-05T10:12:00.239Z"
   },
   {
     "id": "3300ozjgm",
@@ -28922,7 +30376,7 @@
     },
     "pitch": "Best angles to sell: Copywriting + content · Content creation · Marketing strategy.",
     "lastAuditedAt": "2026-06-02T15:42:44.762Z",
-    "status": "NEW",
+    "status": "CLOSED",
     "date": "2026-06-02"
   },
   {
@@ -35522,8 +36976,9 @@
     },
     "pitch": "Best angles to sell: Copywriting + content · Content creation · Marketing strategy.",
     "lastAuditedAt": "2026-06-02T15:35:16.996Z",
-    "status": "NEW",
-    "date": "2026-06-02"
+    "status": "CONTACTED",
+    "date": "2026-06-02",
+    "contactedAt": "2026-06-05T10:12:20.102Z"
   },
   {
     "id": "stnoka9iz",
@@ -40752,7 +42207,7 @@
     },
     "pitch": "Best angles to sell: Copywriting + content · Content creation · Marketing strategy.",
     "lastAuditedAt": "2026-06-03T11:46:49.995Z",
-    "status": "CONTACTED",
+    "status": "CLOSED",
     "date": "2026-06-01"
   },
   {
@@ -42776,8 +44231,9 @@
     },
     "pitch": "Best angles to sell: Copywriting + content · Content creation · Marketing strategy.",
     "lastAuditedAt": "2026-06-01T16:09:37.727Z",
-    "status": "NEW",
-    "date": "2026-06-01"
+    "status": "CONTACTED",
+    "date": "2026-06-01",
+    "contactedAt": "2026-06-05T10:12:16.755Z"
   },
   {
     "id": "ajy2laq8n",
@@ -47800,8 +49256,9 @@
     },
     "pitch": "Best angles to sell: Copywriting + content · Content creation · Marketing strategy.",
     "lastAuditedAt": "2026-06-01T16:07:36.374Z",
-    "status": "NEW",
-    "date": "2026-06-01"
+    "status": "CONTACTED",
+    "date": "2026-06-01",
+    "contactedAt": "2026-06-05T10:12:24.799Z"
   },
   {
     "id": "yiotsyxna",
@@ -55124,8 +56581,9 @@
     },
     "pitch": "Best angles to sell: Copywriting + content · Content creation · Analytics setup.",
     "lastAuditedAt": "2026-06-01T16:03:42.245Z",
-    "status": "NEW",
-    "date": "2026-06-01"
+    "status": "CONTACTED",
+    "date": "2026-06-01",
+    "contactedAt": "2026-06-05T10:12:29.546Z"
   },
   {
     "id": "vtnl796w4",
@@ -59897,7 +61355,7 @@
     },
     "pitch": "Their website is down (HTTP 400). Rebuild plus recovery opportunity.",
     "lastAuditedAt": "2026-06-01T16:01:46.343Z",
-    "status": "CONTACTED",
+    "status": "REJECTED",
     "date": "2026-06-01"
   },
   {
@@ -80466,7 +81924,7 @@
     },
     "pitch": "Their website is down (HTTP 400). Rebuild plus recovery opportunity.",
     "lastAuditedAt": "2026-06-01T15:53:18.417Z",
-    "status": "CONTACTED",
+    "status": "CLOSED",
     "date": "2026-06-01"
   },
   {
@@ -81376,8 +82834,9 @@
     },
     "pitch": "Best angles to sell: Copywriting + content · Content creation · Marketing strategy.",
     "lastAuditedAt": "2026-06-01T15:52:41.334Z",
-    "status": "NEW",
-    "date": "2026-06-01"
+    "status": "CONTACTED",
+    "date": "2026-06-01",
+    "contactedAt": "2026-06-05T10:12:17.797Z"
   },
   {
     "id": "hnpw0r7fk",
@@ -86595,7 +88054,7 @@
     },
     "pitch": "Their website is down (HTTP 400). Rebuild plus recovery opportunity.",
     "lastAuditedAt": "2026-06-01T15:50:39.073Z",
-    "status": "CONTACTED",
+    "status": "CLOSED",
     "date": "2026-06-01"
   },
   {
@@ -89348,8 +90807,9 @@
     },
     "pitch": "Best angles to sell: Copywriting + content · Content creation · Marketing strategy.",
     "lastAuditedAt": "2026-06-01T15:49:29.364Z",
-    "status": "NEW",
-    "date": "2026-06-01"
+    "status": "CONTACTED",
+    "date": "2026-06-01",
+    "contactedAt": "2026-06-05T10:12:18.604Z"
   },
   {
     "id": "v2j3gej56",
@@ -96202,7 +97662,7 @@
     },
     "pitch": "Best angles to sell: Copywriting + content · Content creation · Marketing strategy.",
     "lastAuditedAt": "2026-06-01T15:46:43.844Z",
-    "status": "CONTACTED",
+    "status": "CLOSED",
     "date": "2026-06-01"
   },
   {
@@ -98682,8 +100142,9 @@
     },
     "pitch": "Their website is down (HTTP 403). Rebuild plus recovery opportunity.",
     "lastAuditedAt": "2026-06-01T15:45:21.173Z",
-    "status": "NEW",
-    "date": "2026-06-01"
+    "status": "CONTACTED",
+    "date": "2026-06-01",
+    "contactedAt": "2026-06-05T10:12:14.732Z"
   },
   {
     "id": "yaju46l37",
@@ -101608,8 +103069,9 @@
     },
     "pitch": "Their website is down (HTTP 403) — rebuild + recovery opportunity.",
     "lastAuditedAt": "2026-06-01T15:14:01.820Z",
-    "status": "NEW",
-    "date": "2026-06-01"
+    "status": "CONTACTED",
+    "date": "2026-06-01",
+    "contactedAt": "2026-06-05T10:12:27.274Z"
   },
   {
     "id": "v4sm4ued6",
@@ -105904,8 +107366,9 @@
     },
     "pitch": "Best angles to sell: Copywriting + content · Content creation · Marketing strategy.",
     "lastAuditedAt": "2026-06-01T15:12:15.307Z",
-    "status": "NEW",
-    "date": "2026-06-01"
+    "status": "CONTACTED",
+    "date": "2026-06-01",
+    "contactedAt": "2026-06-05T10:12:22.716Z"
   },
   {
     "id": "ywoh0upa8",
@@ -112501,8 +113964,9 @@
     },
     "pitch": "Their website is down (HTTP 404) — rebuild + recovery opportunity.",
     "lastAuditedAt": "2026-06-01T15:09:14.620Z",
-    "status": "NEW",
-    "date": "2026-06-01"
+    "status": "REJECTED",
+    "date": "2026-06-01",
+    "contactedAt": "2026-06-05T10:12:07.016Z"
   },
   {
     "id": "p4g04frez",
@@ -112693,8 +114157,9 @@
     },
     "pitch": "Their website is down (HTTP 403) — rebuild + recovery opportunity.",
     "lastAuditedAt": "2026-06-01T15:09:02.635Z",
-    "status": "NEW",
-    "date": "2026-06-01"
+    "status": "REJECTED",
+    "date": "2026-06-01",
+    "contactedAt": "2026-06-05T10:12:09.770Z"
   },
   {
     "id": "qbss3ck7e",
@@ -113346,8 +114811,9 @@
     },
     "pitch": "Their website is down (HTTP 403) — rebuild + recovery opportunity.",
     "lastAuditedAt": "2026-06-01T15:08:50.964Z",
-    "status": "NEW",
-    "date": "2026-06-01"
+    "status": "REJECTED",
+    "date": "2026-06-01",
+    "contactedAt": "2026-06-05T10:12:10.479Z"
   },
   {
     "id": "mqg5pa0t9",
@@ -116734,8 +118200,9 @@
     },
     "pitch": "Their website is down (HTTP 404) — rebuild + recovery opportunity.",
     "lastAuditedAt": "2026-06-01T15:07:38.684Z",
-    "status": "NEW",
-    "date": "2026-06-01"
+    "status": "REJECTED",
+    "date": "2026-06-01",
+    "contactedAt": "2026-06-05T10:12:01.268Z"
   },
   {
     "id": "xz650taij",
@@ -125616,8 +127083,9 @@
     },
     "pitch": "Their website is down (socket hang up) — rebuild + recovery opportunity.",
     "lastAuditedAt": "2026-06-01T15:04:41.276Z",
-    "status": "NEW",
-    "date": "2026-06-01"
+    "status": "REJECTED",
+    "date": "2026-06-01",
+    "contactedAt": "2026-06-05T10:12:06.068Z"
   },
   {
     "id": "ayf91ti5l",
@@ -125808,8 +127276,9 @@
     },
     "pitch": "Their website is down (HTTP 403) — rebuild + recovery opportunity.",
     "lastAuditedAt": "2026-06-01T15:04:38.043Z",
-    "status": "NEW",
-    "date": "2026-06-01"
+    "status": "REJECTED",
+    "date": "2026-06-01",
+    "contactedAt": "2026-06-05T10:12:11.190Z"
   },
   {
     "id": "nj4p5xaez",
@@ -126000,8 +127469,9 @@
     },
     "pitch": "Their website is down (HTTP 403) — rebuild + recovery opportunity.",
     "lastAuditedAt": "2026-06-01T15:04:32.702Z",
-    "status": "NEW",
-    "date": "2026-06-01"
+    "status": "REJECTED",
+    "date": "2026-06-01",
+    "contactedAt": "2026-06-05T10:12:02.146Z"
   },
   {
     "id": "6dfzobqrx",
@@ -127366,8 +128836,9 @@
     },
     "pitch": "Best angles to sell: Copywriting + content · Content creation · Marketing strategy.",
     "lastAuditedAt": "2026-06-01T15:04:10.064Z",
-    "status": "NEW",
-    "date": "2026-06-01"
+    "status": "CONTACTED",
+    "date": "2026-06-01",
+    "contactedAt": "2026-06-05T10:12:28.114Z"
   },
   {
     "id": "xik8xt3mp",
@@ -139254,8 +140725,9 @@
     },
     "pitch": "Best angles to sell: Copywriting + content · Content creation · Marketing strategy.",
     "lastAuditedAt": "2026-06-01T14:43:54.347Z",
-    "status": "NEW",
-    "date": "2026-06-01"
+    "status": "CONTACTED",
+    "date": "2026-06-01",
+    "contactedAt": "2026-06-05T10:12:20.755Z"
   },
   {
     "id": "q45ya7bxw",
@@ -146123,8 +147595,9 @@
     },
     "pitch": "Best angles to sell: Copywriting + content · Content creation · Funnel + email marketing.",
     "lastAuditedAt": "2026-06-01T14:05:37.309Z",
-    "status": "NEW",
-    "date": "2026-06-01"
+    "status": "CONTACTED",
+    "date": "2026-06-01",
+    "contactedAt": "2026-06-05T10:12:23.419Z"
   },
   {
     "id": "6hai1piby",
@@ -150973,8 +152446,9 @@
     },
     "pitch": "Best angles to sell: Security + rebuild · Copywriting + content · Content creation.",
     "lastAuditedAt": "2026-06-01T14:03:49.673Z",
-    "status": "NEW",
-    "date": "2026-06-01"
+    "status": "CONTACTED",
+    "date": "2026-06-01",
+    "contactedAt": "2026-06-05T10:12:15.362Z"
   },
   {
     "id": "tr6hudviy",
@@ -151893,8 +153367,9 @@
     },
     "pitch": "Best angles to sell: Performance overhaul · Copywriting + content · Content creation.",
     "lastAuditedAt": "2026-06-01T14:03:41.646Z",
-    "status": "NEW",
-    "date": "2026-06-01"
+    "status": "CONTACTED",
+    "date": "2026-06-01",
+    "contactedAt": "2026-06-05T10:12:24.080Z"
   },
   {
     "id": "gni21b0vw",
@@ -158767,8 +160242,9 @@
     },
     "pitch": "Best angles to sell: Copywriting + content · Content creation · Marketing strategy.",
     "lastAuditedAt": "2026-06-01T13:39:13.275Z",
-    "status": "NEW",
-    "date": "2026-06-01"
+    "status": "CONTACTED",
+    "date": "2026-06-01",
+    "contactedAt": "2026-06-05T10:12:26.377Z"
   },
   {
     "id": "tq33l81cm",
@@ -159878,8 +161354,9 @@
     },
     "pitch": "Their website is down (HTTP 400) — rebuild + recovery opportunity.",
     "lastAuditedAt": "2026-06-01T14:09:00.578Z",
-    "status": "NEW",
-    "date": "2026-06-01"
+    "status": "REJECTED",
+    "date": "2026-06-01",
+    "contactedAt": "2026-06-05T10:12:13.330Z"
   },
   {
     "id": "ut201bezl",
@@ -163277,7 +164754,7 @@
     },
     "pitch": "Their website is down (HTTP 403) — rebuild + recovery opportunity.",
     "lastAuditedAt": "2026-06-01T14:09:04.037Z",
-    "status": "NEW",
+    "status": "CLOSED",
     "date": "2026-06-01"
   },
   {
@@ -165567,7 +167044,7 @@
     },
     "pitch": "Best angles to sell: SEO package · Copywriting + content · Content creation.",
     "lastAuditedAt": "2026-06-01T13:36:09.079Z",
-    "status": "NEW",
+    "status": "CLOSED",
     "date": "2026-06-01"
   },
   {
@@ -167127,7 +168604,7 @@
     },
     "pitch": "Their website is down (getaddrinfo ENOTFOUND www.m.facebook.com) — rebuild + recovery opportunity.",
     "lastAuditedAt": "2026-06-01T14:09:15.071Z",
-    "status": "NEW",
+    "status": "CLOSED",
     "date": "2026-06-01"
   },
   {
@@ -171253,8 +172730,9 @@
     },
     "pitch": "Best angles to sell: SEO package · Copywriting + content · Content creation.",
     "lastAuditedAt": "2026-06-01T13:33:50.465Z",
-    "status": "NEW",
-    "date": "2026-06-01"
+    "status": "REJECTED",
+    "date": "2026-06-01",
+    "contactedAt": "2026-06-05T10:12:14.029Z"
   },
   {
     "id": "rtaonalgi",
@@ -174860,8 +176338,9 @@
     },
     "pitch": "Their website is down (getaddrinfo ENOTFOUND pantareirestaurantbali.com) — rebuild + recovery opportunity.",
     "lastAuditedAt": "2026-06-01T14:09:18.098Z",
-    "status": "NEW",
-    "date": "2026-06-01"
+    "status": "REJECTED",
+    "date": "2026-06-01",
+    "contactedAt": "2026-06-05T10:12:05.279Z"
   },
   {
     "id": "ggztfgmz2",
@@ -175053,8 +176532,9 @@
     },
     "pitch": "Their website is down (HTTP 403) — rebuild + recovery opportunity.",
     "lastAuditedAt": "2026-06-01T14:09:31.718Z",
-    "status": "NEW",
-    "date": "2026-06-01"
+    "status": "REJECTED",
+    "date": "2026-06-01",
+    "contactedAt": "2026-06-05T10:12:03.203Z"
   },
   {
     "id": "5b5celcl3",
@@ -175244,8 +176724,9 @@
     },
     "pitch": "Their website is down (HTTP 403) — rebuild + recovery opportunity.",
     "lastAuditedAt": "2026-06-01T14:09:36.486Z",
-    "status": "NEW",
-    "date": "2026-06-01"
+    "status": "REJECTED",
+    "date": "2026-06-01",
+    "contactedAt": "2026-06-05T10:12:08.080Z"
   },
   {
     "id": "5a4g10d1t",
@@ -176760,8 +178241,9 @@
     },
     "pitch": "Their website is down (HTTP 400) — rebuild + recovery opportunity.",
     "lastAuditedAt": "2026-06-01T14:09:54.802Z",
-    "status": "NEW",
-    "date": "2026-06-01"
+    "status": "REJECTED",
+    "date": "2026-06-01",
+    "contactedAt": "2026-06-05T10:12:04.381Z"
   },
   {
     "id": "20jdfl9ha",
@@ -180973,8 +182455,9 @@
     },
     "pitch": "Their website is down (HTTP 403) — rebuild + recovery opportunity.",
     "lastAuditedAt": "2026-06-01T14:10:58.751Z",
-    "status": "NEW",
-    "date": "2026-05-07"
+    "status": "REJECTED",
+    "date": "2026-05-07",
+    "contactedAt": "2026-06-05T10:12:08.952Z"
   },
   {
     "id": "zkr63wvpz",
@@ -182346,36 +183829,40 @@
     "websiteStatus": "audited",
     "websiteFailReason": null,
     "auditAttempts": [
-      "maps extraction: selector:a[data-item-id=\"authority\"]",
-      "puppeteer https://labaraccabali.com/ → OK (200, 182w, 3.0s)"
+      "maps extraction: panel-hydration-timeout, selector:a[data-item-id=\"authority\"]",
+      "puppeteer https://labaraccabali.com/ → OK (200, 182w, 7.9s)",
+      "pagespeed: perf 55, LCP 12.2s",
+      "deep dossier: crawled 1/1 pages, 0 broken link(s), 0 social(s) checked",
+      "web-search socials: 2 new (2 total)",
+      "social stats: Instagram 33260"
     ],
     "email": "info@labaraccabali.com",
     "whatsapp": "+6282339785155",
     "opportunities": [
+      "slow_site",
       "thin_content",
       "no_content",
       "no_analytics",
-      "no_email_capture",
-      "no_social"
+      "no_email_capture"
     ],
     "tech": "Custom",
     "rating": 4.6,
-    "reviews": "3,265 reviews",
-    "reviewCount": 3265,
+    "reviews": "0",
+    "reviewCount": 0,
     "address": "Jl. Tanah Barak No.51, Canggu, Kec. Kuta Utara, Kabupaten Badung, Bali 80351 ",
     "phone": "0823-3978-5155 ",
     "mapsUrl": "https://www.google.com/maps/place/La+Baracca/data=!4m7!3m6!1s0x2dd238798fc241ff:0x3b5ce069ba2c219f!8m2!3d-8.6513075!4d115.131708!16s%2Fg%2F11bwgw0qj3!19sChIJ_0HCj3k40i0RnyEsumngXDs?authuser=0&hl=en&rclk=1",
     "isSocialUrl": false,
     "authorityScore": 46,
     "stats": {
-      "score": 34,
-      "riskLevel": "Critical",
+      "score": 49,
+      "riskLevel": "High Risk",
       "dimensions": {
-        "site": 49,
-        "social": 0,
+        "site": 43,
+        "social": 100,
         "marketing": 30,
-        "reputation": 96,
-        "content": 0
+        "reputation": 46,
+        "content": 15
       }
     },
     "scoreFactors": [
@@ -182393,14 +183880,14 @@
         "value": "200"
       },
       {
-        "label": "Title tag (10–65 chars)",
+        "label": "Title tag (10-65 chars)",
         "weight": 10,
         "awarded": 10,
         "ok": true,
         "value": "15 chars"
       },
       {
-        "label": "Meta description (50–160)",
+        "label": "Meta description (50-160)",
         "weight": 10,
         "awarded": 0,
         "ok": false,
@@ -182467,9 +183954,9 @@
       {
         "label": "Page speed (<3s)",
         "weight": 8,
-        "awarded": 8,
-        "ok": true,
-        "value": "2.98s"
+        "awarded": 0,
+        "ok": false,
+        "value": "7.91s"
       },
       {
         "label": "Analytics installed",
@@ -182480,17 +183967,17 @@
       {
         "label": "Social presence linked",
         "weight": 2,
-        "awarded": 0,
-        "ok": false
+        "awarded": 2,
+        "ok": true
       }
     ],
     "dimensionFactors": [
       {
         "key": "site",
         "label": "Website",
-        "score": 49,
+        "score": 43,
         "weight": 30,
-        "blurb": "How good their website is — security, speed, mobile, and on-page SEO.",
+        "blurb": "How good their website is across security, speed, mobile, and on-page SEO.",
         "factors": [
           {
             "label": "HTTPS enabled",
@@ -182506,14 +183993,14 @@
             "value": "200"
           },
           {
-            "label": "Title tag (10–65 chars)",
+            "label": "Title tag (10-65 chars)",
             "weight": 10,
             "awarded": 10,
             "ok": true,
             "value": "15 chars"
           },
           {
-            "label": "Meta description (50–160)",
+            "label": "Meta description (50-160)",
             "weight": 10,
             "awarded": 0,
             "ok": false,
@@ -182580,9 +184067,9 @@
           {
             "label": "Page speed (<3s)",
             "weight": 8,
-            "awarded": 8,
-            "ok": true,
-            "value": "2.98s"
+            "awarded": 0,
+            "ok": false,
+            "value": "7.91s"
           },
           {
             "label": "Analytics installed",
@@ -182593,42 +184080,49 @@
           {
             "label": "Social presence linked",
             "weight": 2,
-            "awarded": 0,
-            "ok": false
+            "awarded": 2,
+            "ok": true
           }
         ]
       },
       {
         "key": "social",
         "label": "Social",
-        "score": 0,
+        "score": 100,
         "weight": 22,
         "blurb": "Whether they're on the social platforms that matter (Instagram especially).",
         "factors": [
           {
-            "label": "Any social profile linked",
-            "weight": 30,
-            "ok": false,
-            "value": "0 linked",
-            "awarded": 0
+            "label": "Any social profile",
+            "weight": 25,
+            "ok": true,
+            "value": "2 found",
+            "awarded": 25
           },
           {
             "label": "Instagram",
-            "weight": 30,
-            "ok": false,
-            "awarded": 0
+            "weight": 25,
+            "ok": true,
+            "awarded": 25
           },
           {
             "label": "Facebook",
-            "weight": 20,
-            "ok": false,
-            "awarded": 0
+            "weight": 15,
+            "ok": true,
+            "awarded": 15
           },
           {
             "label": "Multiple platforms (2+)",
+            "weight": 15,
+            "ok": true,
+            "awarded": 15
+          },
+          {
+            "label": "Engaged audience (1k+ followers)",
             "weight": 20,
-            "ok": false,
-            "awarded": 0
+            "ok": true,
+            "value": "33 260 followers",
+            "awarded": 20
           }
         ]
       },
@@ -182637,7 +184131,7 @@
         "label": "Marketing",
         "score": 30,
         "weight": 20,
-        "blurb": "Do they run real marketing — tracking pixels, ads, lead capture, booking.",
+        "blurb": "Do they run real marketing like tracking pixels, ads, lead capture, and booking.",
         "factors": [
           {
             "label": "Analytics installed",
@@ -182674,7 +184168,7 @@
       {
         "key": "reputation",
         "label": "Reputation",
-        "score": 96,
+        "score": 46,
         "weight": 14,
         "blurb": "Their Google rating and how many reviews they've earned.",
         "factors": [
@@ -182688,16 +184182,16 @@
           {
             "label": "Review volume",
             "weight": 50,
-            "ok": true,
-            "value": "3265 reviews",
-            "awarded": 50
+            "ok": false,
+            "value": "0 reviews",
+            "awarded": 0
           }
         ]
       },
       {
         "key": "content",
         "label": "Content",
-        "score": 0,
+        "score": 15,
         "weight": 14,
         "blurb": "Do they publish substantial, fresh content (copy, blog, structured data).",
         "factors": [
@@ -182724,9 +184218,9 @@
           {
             "label": "Images present (5+)",
             "weight": 15,
-            "ok": false,
-            "value": "4 images",
-            "awarded": 0
+            "ok": true,
+            "value": "8 images",
+            "awarded": 15
           },
           {
             "label": "Structured data (schema)",
@@ -182742,7 +184236,7 @@
       "httpsActive": true,
       "finalUrl": "https://labaraccabali.com/",
       "redirected": false,
-      "loadTimeMs": 2975,
+      "loadTimeMs": 7914,
       "reachable": true,
       "title": "La Baracca Bali",
       "titleLength": 15,
@@ -182752,7 +184246,7 @@
       "h1Count": 0,
       "h2Count": 0,
       "wordCount": 182,
-      "imageCount": 4,
+      "imageCount": 8,
       "imagesWithAlt": 0,
       "internalLinks": 0,
       "externalLinks": 17,
@@ -182778,19 +184272,71 @@
       "phones": [],
       "whatsapp": "+6282339785155",
       "socials": {
-        "instagram": null,
-        "facebook": null,
+        "instagram": "https://instagram.com/labaraccabali",
+        "facebook": "https://facebook.com/labaraccabali",
         "linkedin": null,
         "twitter": null,
         "tiktok": null,
         "youtube": null
       },
-      "socialCount": 0,
-      "isSocialOnly": false
+      "socialCount": 2,
+      "isSocialOnly": false,
+      "psiPerformance": 55,
+      "psiLcpMs": 12226,
+      "psiCls": 0,
+      "pagesCrawled": 1
     },
-    "pitch": "Best angles to sell: Copywriting + content · Content creation · Analytics setup.",
-    "lastAuditedAt": "2026-06-01T14:11:27.008Z",
-    "status": "NEW",
+    "deepReport": {
+      "ranAt": "2026-06-05T10:16:39.633Z",
+      "sitemapFound": true,
+      "pagesDiscovered": 1,
+      "pagesCrawled": 1,
+      "pagesMissingTitle": 0,
+      "pagesMissingMeta": 1,
+      "totalImages": 0,
+      "pageWeightKb": 123,
+      "scriptCount": 10,
+      "brokenLinks": [],
+      "hasFreshContent": false,
+      "latestContentDate": null,
+      "socials": []
+    },
+    "socials": {
+      "instagram": "https://instagram.com/labaraccabali",
+      "facebook": "https://facebook.com/labaraccabali",
+      "linkedin": null,
+      "twitter": null,
+      "tiktok": null,
+      "youtube": null
+    },
+    "socialsSource": [
+      "search"
+    ],
+    "socialInsights": [
+      {
+        "platform": "Instagram",
+        "url": "https://instagram.com/labaraccabali",
+        "live": true,
+        "title": "La Baracca Bali",
+        "note": "",
+        "handle": "@labaraccabali",
+        "followers": 33260,
+        "following": 431,
+        "posts": 2685,
+        "bio": "📍 Seminyak | Canggu | Uluwatu | Ubud 🍕 Home of Bali’s Best Pizza 🌱 VG & GF Options Available ✨Sister venue to @labaraccalombok"
+      },
+      {
+        "platform": "Facebook",
+        "url": "https://facebook.com/labaraccabali",
+        "live": true,
+        "title": null,
+        "note": "present, public data gated (login wall)",
+        "handle": "@labaraccabali"
+      }
+    ],
+    "pitch": "Best angles to sell: Performance overhaul · Copywriting + content · Content creation.",
+    "lastAuditedAt": "2026-06-05T10:17:09.411Z",
+    "status": "CONTACTED",
     "date": "2026-05-07"
   },
   {
@@ -184155,8 +185701,9 @@
     },
     "pitch": "Best angles to sell: Copywriting + content · Content creation · Analytics setup.",
     "lastAuditedAt": "2026-06-01T14:11:41.369Z",
-    "status": "NEW",
-    "date": "2026-05-07"
+    "status": "REJECTED",
+    "date": "2026-05-07",
+    "contactedAt": "2026-06-05T10:12:12.600Z"
   },
   {
     "id": "1mh2aabyz",
